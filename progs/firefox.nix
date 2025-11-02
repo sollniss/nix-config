@@ -62,12 +62,25 @@
         # specify profile-specific preferences here;
         # check about:config for options
         settings = {
-        "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
-        "browser.startup.homepage" = "https://nixos.org";
-        "browser.newtabpage.pinned" = [{
-            title = "NixOS";
-            url = "https://nixos.org";
-        }];
+          # restore open tabs on startup
+          "browser.startup.page" = "3";
+          # new tab page
+          "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
+          "browser.newtabpage.pinned" = [{
+              title = "NixOS";
+              url = "https://nixos.org";
+          }];
+          # activate vertical sidebar
+          "sidebar.revamp" = true;
+          "sidebar.verticalTabs" = true;
+          # disable translation popup
+          "browser.translations.automaticallyPopup" = false;
+          # disable first time use flags
+          "browser.aboutConfig.showWarning" = false;
+          "browser.engagement.sidebar-button.has-used" = true;
+          "browser.toolbarbuttons.introduced.sidebar-button" = true;
+          "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
+          "trailhead.firstrun.didSeeAboutWelcome" = true;
         };
     };
     };
