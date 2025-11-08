@@ -1,7 +1,42 @@
 # https://discourse.nixos.org/t/declare-firefox-extensions-and-settings/36265/7
-{ config, pkgs, nur, ... }:
+{ lib, config, pkgs, ... }:
 
 let
+  buildFirefoxXpiAddon = lib.makeOverridable (
+    {
+      stdenv ? pkgs.stdenv,
+      fetchurl ? pkgs.fetchurl,
+      pname,
+      version,
+      addonId,
+      url ? "",
+      urls ? [ ], # Alternative for 'url' a list of URLs to try in specified order.
+      sha256,
+      meta,
+      ...
+    }:
+    stdenv.mkDerivation {
+      name = "${pname}-${version}";
+
+      inherit meta;
+
+      src = fetchurl { inherit url urls sha256; };
+
+      preferLocalBuild = true;
+      allowSubstitutes = true;
+
+      passthru = {
+        inherit addonId;
+      };
+
+      buildCommand = ''
+        dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+        mkdir -p "$dst"
+        install -v -m644 "$src" "$dst/${addonId}.xpi"
+      '';
+    }
+  );
+
   lock-false = {
     Value = false;
     Status = "locked";
@@ -20,75 +55,18 @@ in
         # add policies here...
 
         # ---- EXTENSIONS ----
-        #ExtensionSettings = {
-        #  # blocks all extensions except the ones specified below.
-        #  "*".installation_mode = "blocked";
-        #  # uBlock Origin:
-        #  "uBlock0@raymondhill.net" = {
-        #    install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-        #    installation_mode = "force_installed";
-        #  };
-        #  # add extensions here...
-        #};
-
-        ExtensionSettings = let
-          inherit (pkgs.nur.repos.rycee.firefox-addons) buildFirefoxXpiAddon;
-        in [
-          (buildFirefoxXpiAddon rec {
-            pname = "ublock-origin";
-            version = "1.67.0";
-						sha256 = "b83c6ec49f817a8d05d288b53dbc7005cceccf82e9490d8683b3120aab3c133a";
-						url = "https://addons.mozilla.org/firefox/downloads/file/4598854/ublock_origin-${version}.xpi";
-            addonId = "uBlock0@raymondhill.net";
-						privateAllowed = true;
-						settings = {
-							selectedFilterLists = [
-								"user-filters"
-								"ublock-filters"
-								"ublock-badware"
-								"ublock-privacy"
-								"ublock-unbreak"
-								"ublock-quick-fixes"
-								"easylist"
-								"easyprivacy"
-								"urlhaus-1"
-								"plowe-0"
-							];
-						};
-						meta = with lib;
-						{
-							homepage = "https://github.com/gorhill/uBlock#ublock-origin";
-							description = "Finally, an efficient wide-spectrum content blocker. Easy on CPU and memory.";
-							license = licenses.gpl3;
-							mozPermissions = [
-								"alarms"
-								"dns"
-								"menus"
-								"privacy"
-								"storage"
-								"tabs"
-								"unlimitedStorage"
-								"webNavigation"
-								"webRequest"
-								"webRequestBlocking"
-								"<all_urls>"
-								"http://*/*"
-								"https://*/*"
-								"file://*/*"
-								"https://easylist.to/*"
-								"https://*.fanboy.co.nz/*"
-								"https://filterlists.com/*"
-								"https://forums.lanik.us/*"
-								"https://github.com/*"
-								"https://*.github.io/*"
-								"https://github.com/uBlockOrigin/*"
-								"https://ublockorigin.github.io/*"
-								"https://*.reddit.com/r/uBlockOrigin/*"
-							];
-							platforms = platforms.all;
-						};
-          })
-        ];
+        ExtensionSettings = {
+          # blocks all extensions except the ones specified below.
+          "*".installation_mode = "blocked";
+          # uBlock Origin:
+          "uBlock0@raymondhill.net" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = "false";
+            private_browsing = "true";
+          };
+          # add extensions here...
+        };
 
 
         # ---- PREFERENCES ----
@@ -144,6 +122,13 @@ in
           "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
           "trailhead.firstrun.didSeeAboutWelcome" = true;
         };
+
+        #extensions."uBlock@raymondhill.net".settings = {
+        #  selectedFilterLists = [
+        #    "user-filters"
+        #  ];
+        #};
+
       };
     };
   };
