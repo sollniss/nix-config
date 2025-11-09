@@ -2,8 +2,8 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
+    [
+      ./machines/pc.nix
     ];
 
   # Bootloader.
@@ -50,6 +50,12 @@
   services.xserver.xkb = {
     layout = "us";
     variant = "";
+  };
+
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32bit = true;
   };
 
   # Enable CUPS to print documents.
