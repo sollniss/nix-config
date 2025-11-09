@@ -46,16 +46,11 @@
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
     variant = "";
-  };
-
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32bit = true;
   };
 
   # Enable CUPS to print documents.
@@ -85,14 +80,12 @@
     isNormalUser = true;
     description = "sollniss";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      kdePackages.kate
+    #packages = with pkgs; [
     #  thunderbird
-    ];
+    #];
   };
 
-  # Install firefox.
-  #programs.firefox.enable = true;
+  virtualisation.waydroid.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

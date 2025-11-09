@@ -1,5 +1,10 @@
 # https://discourse.nixos.org/t/declare-firefox-extensions-and-settings/36265/7
-{ lib, config, pkgs, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 
 let
   buildFirefoxXpiAddon = lib.makeOverridable (
@@ -49,9 +54,15 @@ in
 {
   programs.firefox = {
     enable = true;
+    # Allow the KeePassXC-Browser extension to communicate, when a user installed it.
+    nativeMessagingHosts = [ pkgs.keepassxc ];
     package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
       extraPolicies = {
         DisableTelemetry = true;
+        DisablePocket = true;
+        DisableFirefoxScreenshots = true;
+        DisableFirefoxStudies = true;
+        PasswordManagerEnabled = false;
         # add policies here...
 
         # ---- EXTENSIONS ----
@@ -65,9 +76,14 @@ in
             updates_disabled = "false";
             private_browsing = "true";
           };
+          "keepassxc-browser@keepassxc.org" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = "false";
+            private_browsing = "true";
+          };
           # add extensions here...
         };
-
 
         # ---- PREFERENCES ----
         # Set preferences shared by all profiles.
@@ -76,8 +92,8 @@ in
             Value = "strict";
             Status = "locked";
           };
-          "extensions.pocket.enabled" = lock-false;
-          "extensions.screenshots.disabled" = lock-true;
+          #"extensions.pocket.enabled" = lock-false;
+          #"extensions.screenshots.disabled" = lock-true;
           # add global preferences here...
         };
       };
@@ -133,4 +149,3 @@ in
     };
   };
 }
-
