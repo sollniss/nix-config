@@ -1,0 +1,3 @@
+{
+  programs = import ./programs;
+}

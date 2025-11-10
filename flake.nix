@@ -7,6 +7,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,12 +22,14 @@
       self,
       nixpkgs,
       home-manager,
+      stylix,
       nur,
       ...
     }:
     {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         modules = [
+          stylix.nixosModules.stylix
           ./configuration.nix
           home-manager.nixosModules.home-manager
           {

@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 
 {
+
   home.username = "sollniss";
   home.homeDirectory = "/home/sollniss";
   home.stateVersion = "25.05";
@@ -107,6 +108,7 @@
         jnoortheen.nix-ide
       ];
       userSettings = {
+        "editor.selectionClipboard" = false;
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nil";
         "[nix]"."editor.tabSize" = 2;
@@ -121,10 +123,16 @@
     # https://github.com/keepassxreboot/keepassxc/blob/44daca921a0e860845368c0d1697cea86ed79be0/src/core/Config.cpp#L52
     settings = {
       General = {
+        ConfigVersion = "2";
+        BackupBeforeSave = true;
+        UpdateCheckMessageShown = true;
         LastOpenedDatabases = "/home/sollniss/sync/keepass/Passwords.kdbx";
+        OpenPreviousDatabasesOnStartup = true;
       };
       Browser = {
         Enabled = true;
+        SearchInAllDatabases = true;
+        BestMatchOnly = true;
         # When using enable = true, KeePassXC’ builtin native messaging manifest for communication with its browser extension is automatically installed.
         # This conflicts with KeePassXC’ builtin installation mechanism.
         # To prevent error messages, either set programs.keepassxc.settings.Browser.UpdateBinaryPath to false, or untick the checkbox
@@ -134,8 +142,23 @@
       };
       GUI = {
         AdvancedSettings = true;
+        CompactMode = true;
+        MinimizeOnStartup = true;
+        MinimizeOnClose = true;
+        ShowExpiredEntriesOnDatabaseUnlockOffsetDays = "30";
+        ShowTrayIcon = true;
+      };
+      PasswordGenerator = {
+        AdvancedMode = true;
+        Length = "32";
+        Punctuation=true;
+        Dashes = true;
+        Math = true;
+        Braces = true;
+        Quotes = true;
       };
       FdoSecrets.Enabled = true;
+      Security.IconDownloadFallback = true;
     };
   };
   xdg.autostart.enable = true;
