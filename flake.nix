@@ -7,10 +7,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    stylix = {
-      url = "github:nix-community/stylix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nur = {
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -22,25 +18,18 @@
       self,
       nixpkgs,
       home-manager,
-      stylix,
       nur,
       ...
-    }:
+    } @ inputs:
     {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         modules = [
-          stylix.nixosModules.stylix
-          ./configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.sollniss = import ./home.nix;
-              backupFileExtension = "backup";
-            };
-          }
+          ./hosts/sollniss/desktop/configuration.nix
         ];
       };
+
+      nixosModules = import ./modules/nixos;
+      homeManagerModules = import ./modules/home-manager;
     };
 }

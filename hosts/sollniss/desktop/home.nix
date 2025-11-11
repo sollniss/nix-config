@@ -1,6 +1,17 @@
-{ config, pkgs, ... }:
-
 {
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
+let
+  homeManagerModules = with inputs.self.homeManagerModules; [
+    #common
+    programs.firefox
+  ];
+in
+{
+  imports = homeManagerModules;
 
   home.username = "sollniss";
   home.homeDirectory = "/home/sollniss";
@@ -11,6 +22,26 @@
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
     };
+  };
+
+  fonts.fontconfig.defaultFonts = {
+    monospace = [
+      "JetBrainsMono"
+    ];
+
+    sansSerif = [
+      "Noto Sans"
+      "Noto Sans CJK JP"
+    ];
+
+    serif = [
+      "Noto Serif"
+      "Noto Serif CJK JP"
+    ];
+
+    emoji = [
+      "Noto Color Emoji"
+    ];
   };
 
   # IME
@@ -74,15 +105,23 @@
   };
 
   home.packages = with pkgs; [
+    # fonts
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+    noto-fonts-color-emoji
+    jetbrains-mono
+
+    # development
     gopls # Go LSP
     nil # Nix LSP
 
     signal-desktop
   ];
 
-  imports = [
-    ./progs/firefox.nix
-  ];
+  #imports = [
+  #  ./progs/firefox.nix
+  #];
 
   programs.bash = {
     enable = true;
@@ -112,6 +151,10 @@
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nil";
         "[nix]"."editor.tabSize" = 2;
+
+        # styling
+        "editor.fontFamily" = "'JetBrains Mono', monospace";
+        "editor.fontLigatures" = true;
       };
     };
   };
@@ -151,7 +194,7 @@
       PasswordGenerator = {
         AdvancedMode = true;
         Length = "32";
-        Punctuation=true;
+        Punctuation = true;
         Dashes = true;
         Math = true;
         Braces = true;
@@ -172,4 +215,26 @@
   #    winetricks
   #  ];
   #};
+
+  programs.firefox = {
+    package = {
+      extraPolicies = {
+        ExtensionSettings = {
+          "*".installation_mode = "blocked";
+          "uBlock0@raymondhill.net" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = "false";
+            private_browsing = "true";
+          };
+          "jid1-BoFifL9Vbdl2zQ@jetpack" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = "false";
+            private_browsing = "true";
+          };
+        };
+      };
+    };
+  };
 }

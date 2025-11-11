@@ -1,10 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
-      ./machines/pc.nix
-    ];
+  imports =[ ./hardware-configuration.nix ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -85,6 +82,13 @@
     #];
   };
 
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    users.sollniss = import ./home.nix;
+    backupFileExtension = "backup";
+  };
+
   virtualisation.waydroid.enable = true;
 
   # Allow unfree packages
@@ -97,74 +101,6 @@
   #  wget
     wezterm
   ];
-
-  stylix = {
-    enable = true;
-    polarity = "dark";
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/tomorrow-night.yaml";
-    
-    override = {
-      base00 = "#1d1f21";
-      base01 = "#282a2e";
-      base02 = "#373b41";
-      base03 = "#969896";
-      base04 = "#b4b7b4";
-      base05 = "#c5c8c6";
-      base06 = "#e0e0e0";
-      base07 = "#ffffff";
-      base08 = "#cc6666";
-      base09 = "#de935f";
-      base0A = "#f0c674";
-      base0B = "#b5bd68";
-      base0C = "#8abeb7";
-      base0D = "#81a2be";
-      base0E = "#b294bb";
-      base0F = "#a3685a";
-      base10 = "#080909";
-      base11 = "#2d3135";
-      base12 = "#e74c3c";
-      base13 = "#f7dc6f";
-      base14 = "#b8d4b3";
-      base15 = "#95d3ce";
-      base16 = "#85c1e9";
-      base17 = "#d7a3ca";
-    };
-
-    cursor = {
-      name = "Hackneyed";
-      package = pkgs.hackneyed;
-      size = 16;
-    };
-
-    fonts = {
-      sizes = {
-        terminal = 11;
-        applications = 10; # noto is bigger than normal fonts, so scale it down a bit.
-      };
-
-      serif = {
-        package = pkgs.noto-fonts-cjk-serif;
-        name = "Noto Serif CJK JP";
-      };
-
-      sansSerif = {
-        package = pkgs.noto-fonts-cjk-sans;
-        name = "Noto Sans CJK JP";
-      };
-
-      monospace = {
-        package = pkgs.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font";
-      };
-      
-      emoji = {
-        package = pkgs.noto-fonts-color-emoji;
-        name = "Noto Color Emoji";
-      };
-    };
-
-    #targets.firefox.profileNames = [ "profile_0" ];
-  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

@@ -109,12 +109,30 @@ in
             }
             {
               Name = "LEO Eng-Ger";
-              Description = "LEOs English-German online dictionary.";
+              Description = "LEOs English-German online dictionary";
               Alias = "leo";
               IconURL = "https://dict.leo.org/img/favicons/ende.ico";
               Method = "GET";
               URLTemplate = "https://dict.leo.org/german-english/{searchTerms}";
               SuggestURLTemplate = "https://dict.leo.org/dictQuery/m-query/conf/ende/query.conf/strlist.json?q={searchTerms}&sort=PLa&shortQuery&noDescription&noQueryURLs";
+            }
+            {
+              Name = "NixOS packages";
+              Description = "Search NixOS packages";
+              Alias = "nix";
+              IconURL = "https://search.nixos.org/favicon.png";
+              Method = "GET";
+              URLTemplate = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+              #SuggestURLTemplate = "";
+            }
+            {
+              Name = "Home Manager";
+              Description = "Home Manager Options Search";
+              Alias = "hm";
+              IconURL = "https://home-manager-options.extranix.com/images/favicon.png";
+              Method = "GET";
+              URLTemplate = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+              #SuggestURLTemplate = "";
             }
           ];
         };
@@ -124,25 +142,26 @@ in
           # blocks all extensions except the ones specified below.
           "*".installation_mode = "blocked";
           # uBlock Origin:
-          "uBlock0@raymondhill.net" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-            installation_mode = "force_installed";
-            updates_disabled = "false";
-            private_browsing = "true";
-          };
-          "jid1-BoFifL9Vbdl2zQ@jetpack" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
-            installation_mode = "force_installed";
-            updates_disabled = "false";
-            private_browsing = "true";
-          };
+          #"uBlock0@raymondhill.net" = {
+          #  install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          #  installation_mode = "force_installed";
+          #  updates_disabled = "false";
+          #  private_browsing = "true";
+          #};
+          # Decentraleyes
+          #"jid1-BoFifL9Vbdl2zQ@jetpack" = {
+          #  install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
+          #  installation_mode = "force_installed";
+          #  updates_disabled = "false";
+          #  private_browsing = "true";
+          #};
+          # KeePassXC-Browser
           "keepassxc-browser@keepassxc.org" = {
             install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
             installation_mode = "force_installed";
             updates_disabled = "false";
             private_browsing = "true";
           };
-          # add extensions here...
         };
 
         # ---- PREFERENCES ----
