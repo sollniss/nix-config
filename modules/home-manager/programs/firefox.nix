@@ -1,4 +1,3 @@
-# https://discourse.nixos.org/t/declare-firefox-extensions-and-settings/36265/7
 {
   lib,
   config,
@@ -56,125 +55,125 @@ in
     enable = true;
     # Allow the KeePassXC-Browser extension to communicate, when a user installed it.
     nativeMessagingHosts = [ pkgs.keepassxc ];
-    package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
-      # https://mozilla.github.io/policy-templates/
-      extraPolicies = {
-        DisableTelemetry = true;
-        DisablePocket = true;
-        DisableFirefoxScreenshots = true;
-        DisableFirefoxStudies = true;
-        GenerativeAI.Enabled = false;
+    #package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+    #  # https://mozilla.github.io/policy-templates/
+    #  extraPolicies = {
+    policies = {
+      DisableTelemetry = true;
+      DisablePocket = true;
+      DisableFirefoxScreenshots = true;
+      DisableFirefoxStudies = true;
+      GenerativeAI.Enabled = false;
 
-        PasswordManagerEnabled = false;
-        HardwareAcceleration = true;
-        TranslateEnabled = false;
+      PasswordManagerEnabled = false;
+      HardwareAcceleration = true;
+      TranslateEnabled = false;
 
-        SearchEngines = {
-          Remove = [
-            "Bing"
-            "Amazon.com"
-            "DuckDuckGo"
-            "eBay"
-            "Ecosia"
-            "Wikipedia (en)"
-            "Perplexity"
-          ];
-          Add = [
-            {
-              Name = "YouTube";
-              Description = "YouTube Videos";
-              Alias = "yt";
-              IconURL = "https://www.youtube.com/favicon.ico";
-              Method = "GET";
-              URLTemplate = "https://www.youtube.com/results?search_query={searchTerms}&search=Search";
-              SuggestURLTemplate = "https://suggestqueries.google.com/complete/search?output=firefox&ds=yt&q={searchTerms}";
-            }
-            {
-              Name = "Wadoku";
-              Description = "和独辞典";
-              Alias = "wa";
-              IconURL = "https://www.wadoku.de/favicon.ico";
-              Method = "GET";
-              URLTemplate = "https://www.wadoku.de/search/{searchTerms}";
-              #SuggestURLTemplate = "https://www.wadoku.de/autosuggest/all/?term={searchTerms}";
-            }
-            {
-              Name = "英辞郎";
-              Description = "英辞郎 on the Web";
-              Alias = "alc";
-              IconURL = "https://eow.alc.co.jp/favicon.ico";
-              Method = "GET";
-              URLTemplate = "https://eow.alc.co.jp/search?q={searchTerms}";
-              #SuggestURLTemplate = "";
-            }
-            {
-              Name = "LEO Eng-Ger";
-              Description = "LEOs English-German online dictionary";
-              Alias = "leo";
-              IconURL = "https://dict.leo.org/img/favicons/ende.ico";
-              Method = "GET";
-              URLTemplate = "https://dict.leo.org/german-english/{searchTerms}";
-              SuggestURLTemplate = "https://dict.leo.org/dictQuery/m-query/conf/ende/query.conf/strlist.json?q={searchTerms}&sort=PLa&shortQuery&noDescription&noQueryURLs";
-            }
-            {
-              Name = "NixOS packages";
-              Description = "Search NixOS packages";
-              Alias = "nix";
-              IconURL = "https://search.nixos.org/favicon.png";
-              Method = "GET";
-              URLTemplate = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
-              #SuggestURLTemplate = "";
-            }
-            {
-              Name = "Home Manager";
-              Description = "Home Manager Options Search";
-              Alias = "hm";
-              IconURL = "https://home-manager-options.extranix.com/images/favicon.png";
-              Method = "GET";
-              URLTemplate = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
-              #SuggestURLTemplate = "";
-            }
-          ];
+      SearchEngines = {
+        Remove = [
+          "Bing"
+          "Amazon.com"
+          "DuckDuckGo"
+          "eBay"
+          "Ecosia"
+          "Wikipedia (en)"
+          "Perplexity"
+        ];
+        Add = [
+          {
+            Name = "YouTube";
+            Description = "YouTube Videos";
+            Alias = "yt";
+            IconURL = "https://www.youtube.com/favicon.ico";
+            Method = "GET";
+            URLTemplate = "https://www.youtube.com/results?search_query={searchTerms}&search=Search";
+            SuggestURLTemplate = "https://suggestqueries.google.com/complete/search?output=firefox&ds=yt&q={searchTerms}";
+          }
+          {
+            Name = "Wadoku";
+            Description = "和独辞典";
+            Alias = "wa";
+            IconURL = "https://www.wadoku.de/favicon.ico";
+            Method = "GET";
+            URLTemplate = "https://www.wadoku.de/search/{searchTerms}";
+            #SuggestURLTemplate = "https://www.wadoku.de/autosuggest/all/?term={searchTerms}";
+          }
+          {
+            Name = "英辞郎";
+            Description = "英辞郎 on the Web";
+            Alias = "alc";
+            IconURL = "https://eow.alc.co.jp/favicon.ico";
+            Method = "GET";
+            URLTemplate = "https://eow.alc.co.jp/search?q={searchTerms}";
+            #SuggestURLTemplate = "";
+          }
+          {
+            Name = "LEO Eng-Ger";
+            Description = "LEOs English-German online dictionary";
+            Alias = "leo";
+            IconURL = "https://dict.leo.org/img/favicons/ende.ico";
+            Method = "GET";
+            URLTemplate = "https://dict.leo.org/german-english/{searchTerms}";
+            SuggestURLTemplate = "https://dict.leo.org/dictQuery/m-query/conf/ende/query.conf/strlist.json?q={searchTerms}&sort=PLa&shortQuery&noDescription&noQueryURLs";
+          }
+          {
+            Name = "NixOS packages";
+            Description = "Search NixOS packages";
+            Alias = "nix";
+            IconURL = "https://search.nixos.org/favicon.png";
+            Method = "GET";
+            URLTemplate = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+            #SuggestURLTemplate = "";
+          }
+          {
+            Name = "Home Manager";
+            Description = "Home Manager Options Search";
+            Alias = "hm";
+            IconURL = "https://home-manager-options.extranix.com/images/favicon.png";
+            Method = "GET";
+            URLTemplate = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+            #SuggestURLTemplate = "";
+          }
+        ];
+      };
+
+      # ---- EXTENSIONS ----
+      ExtensionSettings = {
+        # blocks all extensions except the ones specified below.
+        "*".installation_mode = "blocked";
+        # uBlock Origin:
+        "uBlock0@raymondhill.net" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
         };
-
-        # ---- EXTENSIONS ----
-        ExtensionSettings = {
-          # blocks all extensions except the ones specified below.
-          "*".installation_mode = "blocked";
-          # uBlock Origin:
-          #"uBlock0@raymondhill.net" = {
-          #  install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-          #  installation_mode = "force_installed";
-          #  updates_disabled = "false";
-          #  private_browsing = "true";
-          #};
-          # Decentraleyes
-          #"jid1-BoFifL9Vbdl2zQ@jetpack" = {
-          #  install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
-          #  installation_mode = "force_installed";
-          #  updates_disabled = "false";
-          #  private_browsing = "true";
-          #};
-          # KeePassXC-Browser
-          "keepassxc-browser@keepassxc.org" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
-            installation_mode = "force_installed";
-            updates_disabled = "false";
-            private_browsing = "true";
-          };
+        # Decentraleyes
+        "jid1-BoFifL9Vbdl2zQ@jetpack" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
         };
-
-        # ---- PREFERENCES ----
-        # Set preferences shared by all profiles.
-        Preferences = {
-          "browser.contentblocking.category" = {
-            Value = "strict";
-            Status = "locked";
-          };
-          #"extensions.pocket.enabled" = lock-false;
-          #"extensions.screenshots.disabled" = lock-true;
-          # add global preferences here...
+        # KeePassXC-Browser
+        "keepassxc-browser@keepassxc.org" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
         };
+      };
+
+      # ---- PREFERENCES ----
+      # Set preferences shared by all profiles.
+      Preferences = {
+        "browser.contentblocking.category" = {
+          Value = "strict";
+          Status = "locked";
+        };
+        #"extensions.pocket.enabled" = lock-false;
+        #"extensions.screenshots.disabled" = lock-true;
+        # add global preferences here...
       };
     };
 
