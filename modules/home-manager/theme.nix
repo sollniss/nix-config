@@ -39,21 +39,21 @@
     ];
   };
 
-  #i18n.inputMethod.fcitx5 = {
-  #  addons = with pkgs; [
-  #    fcitx5-mellow-themes
-  #  ];
-  #  settings.addons = {
-  #    classicui.globalSection = {
-  #      Font = "Noto Sans CJK JP 12";
-  #      # MenuFont = "Noto Serif 12";
-  #      # TrayFont = "Noto Serif 12";
-  #      Theme = "Mellow Graphite";
-  #      DarkTheme = "Mellow Graphite dark";
-  #      UseDarkTheme = "True";
-  #    };
-  #  };
-  #};
+  i18n.inputMethod.fcitx5 = {
+    addons = with pkgs; [
+      fcitx5-mellow-themes
+    ];
+    settings.addons = {
+      classicui.globalSection = {
+        # Font = "Noto Sans CJK JP 12";
+        # MenuFont = "Noto Serif 12";
+        # TrayFont = "Noto Serif 12";
+        Theme = "Mellow Graphite dark";
+        DarkTheme = "Mellow Graphite dark";
+        UseDarkTheme = true;
+      };
+    };
+  };
 
   # VSCode styling.
   programs.vscode.profiles.default.userSettings = {
