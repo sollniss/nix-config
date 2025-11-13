@@ -9,6 +9,8 @@
 let
   nixosModules = with inputs.self.nixosModules; [
     common
+
+    desktops.plasma6
   ];
 in
 {
@@ -25,10 +27,6 @@ in
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   networking.hostName = "nixos"; # Define your hostname.
-
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
 
   virtualisation.waydroid.enable = true;
 
