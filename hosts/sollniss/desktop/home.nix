@@ -9,7 +9,9 @@ let
   homeManagerModules = with inputs.self.homeManagerModules; [
     base
     theme
-    #common
+
+    services.syncthing
+
     programs.firefox
     programs.vscode
     programs.keepassxc
@@ -50,6 +52,11 @@ in
       email = "sollniss@web.de";
     };
 
+  };
+
+  programs.thunderbird = {
+    enable = true;
+    profiles."default".isDefault = true;
   };
 
   #programs.lutris = {

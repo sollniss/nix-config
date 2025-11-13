@@ -40,6 +40,9 @@ in {
         layout = "us";
         variant = "";
       };
+
+      excludePackages = [ pkgs.xterm ];
+      desktopManager.xterm.enable = false;
     };
 
     printing.enable = true;
