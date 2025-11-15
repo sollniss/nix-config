@@ -59,13 +59,13 @@ in
     profiles."default".isDefault = true;
   };
 
-  #programs.lutris = {
-  #  enable = true;
-  #  extraPackages = with pkgs; [
-  #    gamemode
-  #    mangohud
-  #    umu-launcher
-  #    winetricks
-  #  ];
-  #};
+  programs.lutris = {
+    enable = true;
+    extraPackages = with pkgs; [
+      gamemode
+      mangohud
+      umu-launcher
+      winetricks
+    ];
+  };
 }

@@ -55,14 +55,12 @@ in
     enable = true;
     # Allow the KeePassXC-Browser extension to communicate, when a user installed it.
     nativeMessagingHosts = [ pkgs.keepassxc ];
-    #package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
-    #  # https://mozilla.github.io/policy-templates/
-    #  extraPolicies = {
     policies = {
-      DisableTelemetry = true;
-      DisablePocket = true;
       DisableFirefoxScreenshots = true;
       DisableFirefoxStudies = true;
+      DisablePocket = true;
+      DisableTelemetry = true;
+      DisplayBookmarksToolbar = false;
       GenerativeAI.Enabled = false;
 
       PasswordManagerEnabled = false;
@@ -119,10 +117,19 @@ in
           {
             Name = "NixOS packages";
             Description = "Search NixOS packages";
-            Alias = "nix";
+            Alias = "nixp";
             IconURL = "https://search.nixos.org/favicon.png";
             Method = "GET";
             URLTemplate = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+            #SuggestURLTemplate = "";
+          }
+          {
+            Name = "NixOS options";
+            Description = "Search NixOS options";
+            Alias = "nixo";
+            IconURL = "https://search.nixos.org/favicon.png";
+            Method = "GET";
+            URLTemplate = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
             #SuggestURLTemplate = "";
           }
           {
@@ -132,6 +139,24 @@ in
             IconURL = "https://home-manager-options.extranix.com/images/favicon.png";
             Method = "GET";
             URLTemplate = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+            #SuggestURLTemplate = "";
+          }
+          {
+            Name = "GitHub (Go)";
+            Description = "GitHub Go code search";
+            Alias = "go";
+            IconURL = "https://github.com/favicon.ico";
+            Method = "GET";
+            URLTemplate = "https://github.com/search?q={searchTerms}+language%3AGo&type=code";
+            #SuggestURLTemplate = "";
+          }
+          {
+            Name = "GitHub (Nix)";
+            Description = "GitHub Nix language files search";
+            Alias = "nix";
+            IconURL = "https://github.com/favicon.ico";
+            Method = "GET";
+            URLTemplate = "https://github.com/search?q={searchTerms}+language%3ANix&type=code";
             #SuggestURLTemplate = "";
           }
         ];
@@ -144,6 +169,13 @@ in
         # uBlock Origin:
         "uBlock0@raymondhill.net" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
+        };
+        # SponsorBlock for YouTube
+        "sponsorBlocker@ajay.app" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
           installation_mode = "force_installed";
           updates_disabled = "false";
           private_browsing = "true";
@@ -161,6 +193,71 @@ in
           installation_mode = "force_installed";
           updates_disabled = "false";
           private_browsing = "true";
+        };
+      };
+
+      "3rdparty".Extensions = {
+        "uBlock0@raymondhill.net".adminSettings = {
+          selectedFilterLists = [
+              "user-filters"
+              "DEU-0"
+              "JPN-1"
+
+              # Built-in
+              "ublock-filters"
+              "ublock-badware"
+              "ublock-privacy"
+              "ublock-abuse"
+              "ublock-quick-fixes"
+              "ublock-unbreak"
+              "ublock-badlists"
+
+              # Ads
+              "easylist"
+              "adguard-generic"
+              "adguard-mobile"
+
+              # Privacy
+              "easyprivacy"
+              "adguard-spyware"
+              "adguard-spyware-url"
+              "block-lan"
+
+              # Multipurpose
+              "plowe-0"
+              "dpollock-0"
+
+              # Cookie notices
+              "fanboy-cookiemonster"
+              "ublock-cookies-easylist"
+              "adguard-cookies"
+              "ublock-cookies-adguard"
+
+              # Social widgets
+              "fanboy-social"
+              "adguard-social"
+              "fanboy-thirdparty_social"
+
+              # Annoyances
+              "easylist-chat"
+              "easylist-newsletters"
+              "easylist-notifications"
+              "easylist-annoyances"
+              "adguard-mobile-app-banners"
+              "adguard-other-annoyances"
+              "adguard-popup-overlays"
+              "adguard-widgets"
+              "ublock-annoyances"
+
+              # URL Shortener tools (replaces clearurls)
+              "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt"
+            
+          ];
+        };
+
+        # https://github.com/keepassxreboot/keepassxc-browser/blob/develop/keepassxc-browser/background/page.js
+        "keepassxc-browser@keepassxc.org".settings = {
+          "passkeys" = true;
         };
       };
 
@@ -196,6 +293,8 @@ in
         settings = {
           # restore open tabs on startup
           "browser.startup.page" = "3";
+          # highlight all search results by default
+          "findbar.highlightAll" = true;
           # new tab page
           "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
@@ -216,14 +315,7 @@ in
           "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
           "trailhead.firstrun.didSeeAboutWelcome" = true;
         };
-
-        #extensions."uBlock@raymondhill.net".settings = {
-        #  selectedFilterLists = [
-        #    "user-filters"
-        #  ];
-        #};
-
       };
-    };
+    };                                                                                                                                                                                                                         
   };
 }

@@ -29,6 +29,7 @@ in
   networking.hostName = "nixos"; # Define your hostname.
 
   virtualisation.waydroid.enable = true;
+  networking.nftables.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -37,6 +38,10 @@ in
     #  wget
     wezterm
   ];
+
+  programs.steam = {
+    enable = true;
+  };
 
   home-manager.users.sollniss = import ./home.nix;
 }
