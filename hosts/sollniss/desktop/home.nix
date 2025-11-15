@@ -24,6 +24,21 @@ in
   home.homeDirectory = "/home/sollniss";
   home.stateVersion = "25.05";
 
+  programs.eza = {
+    enable = true;
+    icons = "always";
+  };
+
+  programs.bat = {
+    enable = true;
+  };
+
+  home.shellAliases = {
+    cat = "bat";
+    ls = "eza";
+    ll = "eza -l";
+  };
+
   services = {
     syncthing.settings = {
       devices = {

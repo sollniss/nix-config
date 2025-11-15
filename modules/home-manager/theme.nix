@@ -3,11 +3,19 @@
   ...
 }:
 {
-  # Make GNOME dark.
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
-    };
+
+  # GTK Setup
+  #gtk = {
+  #  enable = true;
+  #  theme.name = "Breeze-Dark";
+  #  #gtk3 = {
+  #  #  extraConfig.gtk-application-prefer-dark-theme = true;
+  #  #};
+  #};
+
+  # GTK
+  dconf.settings."org/gnome/desktop/interface" = {
+    color-scheme = "prefer-dark";
   };
 
   # Default fonts.
@@ -17,11 +25,13 @@
     noto-fonts-cjk-serif
     noto-fonts-color-emoji
     jetbrains-mono
+    nerd-fonts.symbols-only
   ];
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
       "JetBrainsMono"
+      "Symbols Nerd Font"
     ];
 
     sansSerif = [
@@ -39,25 +49,31 @@
     ];
   };
 
-  #i18n.inputMethod.fcitx5 = {
-  #  addons = with pkgs; [
-  #    fcitx5-mellow-themes
-  #  ];
-  #  settings.addons = {
-  #    classicui.globalSection = {
-  #      # Font = "Noto Sans CJK JP 12";
-  #      # MenuFont = "Noto Serif 12";
-  #      # TrayFont = "Noto Serif 12";
-  #      Theme = "Mellow Graphite dark";
-  #      DarkTheme = "Mellow Graphite dark";
-  #      UseDarkTheme = true;
-  #    };
-  #  };
-  #};
+  # fcitx5
+  i18n.inputMethod.fcitx5 = {
+    #addons = with pkgs; [
+    #  fcitx5-mellow-themes # this theme causes crashes on plasma wayland
+    #];
+    settings.addons = {
+      classicui.globalSection = {
+        # Font = "Noto Sans CJK JP 12";
+        # MenuFont = "Noto Serif 12";
+        # TrayFont = "Noto Serif 12";
+        Theme = "plasma";
+        DarkTheme = "plasma";
+        UseDarkTheme = true;
+      };
+    };
+  };
 
-  # VSCode styling.
-  programs.vscode.profiles.default.userSettings = {
-    "editor.fontFamily" = "'JetBrains Mono', monospace";
+  # VSCode
+  programs.vscode.profiles.default.userSettings = { 
+    "terminal.integrated.gpuAcceleration" = "auto";
+
+    "editor.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
     "editor.fontLigatures" = true;
+
+    "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
+    "terminal.integrated.fontLigatures" = true;
   };
 }

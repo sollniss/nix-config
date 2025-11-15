@@ -14,4 +14,9 @@
     konsole
     krdp
   ];
+
+  #qt = {
+  #  enable = true;
+  #  platformTheme = "kde"; # this seems to crash plasma wayland
+  #};
 }
