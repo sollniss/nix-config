@@ -30,7 +30,7 @@
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
-      "JetBrainsMono"
+      "JetBrains Mono"
       "Symbols Nerd Font"
     ];
 
@@ -47,6 +47,12 @@
     emoji = [
       "Noto Color Emoji"
     ];
+  };
+
+  # shell
+  programs.starship = {
+    enable = true;
+    enableBashIntegration = true;
   };
 
   # fcitx5
