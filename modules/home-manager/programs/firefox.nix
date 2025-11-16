@@ -194,6 +194,13 @@ in
           updates_disabled = "false";
           private_browsing = "true";
         };
+        # 10ten
+        "{59812185-ea92-4cca-8ab7-cfcacee81281}" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/10ten-ja-reader/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
+        };
       };
 
       "3rdparty".Extensions = {

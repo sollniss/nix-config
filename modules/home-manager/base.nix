@@ -42,6 +42,7 @@
 
     vlc
     signal-desktop
+    anki
   ];
 
   programs.bash = {

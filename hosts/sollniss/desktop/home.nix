@@ -37,6 +37,7 @@ in
     cat = "bat";
     ls = "eza";
     ll = "eza -l";
+    nixosbtw = "nix-shell -p fastfetch --run fastfetch";
   };
 
   services = {
@@ -71,8 +72,45 @@ in
 
   programs.thunderbird = {
     enable = true;
-    profiles."default".isDefault = true;
+    profiles.default = {
+      isDefault = true;
+
+      settings = {
+        "mailnews.default_sort_type" = 18;
+        "mailnews.default_sort_order" = 2;
+        "mailnews.default_news_sort_order" = 2;
+        "mailnews.default_news_sort_type" = 18;
+      };
+    };
   };
+
+  accounts.email.accounts = {
+    "sollniss@web.de" = {
+      realName = "sollniss";
+      address = "sollniss@web.de";
+      userName = "sollniss@web.de";
+      primary = true;
+      thunderbird = {
+        enable = true;
+      };
+
+      imap = {
+        host = "imap.web.de";
+        port = 993;
+        tls.enable = true;
+      };
+      smtp = {
+        host = "smtp.web.de";
+        port = 587;
+        tls.enable = true;
+      };
+    };
+  };
+
+  #programs.anki = {
+  #  enable = true;
+  #  #sync.username = "sollniss";
+  #};
 
   programs.lutris = {
     enable = true;
