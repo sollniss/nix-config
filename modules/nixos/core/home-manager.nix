@@ -5,6 +5,8 @@
   ];
 
   home-manager = {
+    sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
+
     extraSpecialArgs = {
       inherit inputs;
     };

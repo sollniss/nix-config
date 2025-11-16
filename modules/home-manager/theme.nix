@@ -18,6 +18,19 @@
     color-scheme = "prefer-dark";
   };
 
+  programs.plasma = {
+    enable = true;
+    workspace = {
+      lookAndFeel = "org.kde.breezedark.desktop";
+      cursor = {
+        theme = "Bibata-Modern-Ice";
+        size = 24;
+      };
+      iconTheme = "Breeze Dark";
+      wallpaper = "${./wallpaper.jpg}";
+    };
+  };
+
   # Default fonts.
   home.packages = with pkgs; [
     noto-fonts
