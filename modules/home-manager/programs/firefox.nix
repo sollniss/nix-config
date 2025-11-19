@@ -302,6 +302,8 @@ in
           "browser.startup.page" = "3";
           # highlight all search results by default
           "findbar.highlightAll" = true;
+          # enable auto scroll
+          "general.autoScroll" = true;
           # new tab page
           "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
