@@ -28,7 +28,7 @@ in
 
   networking.hostName = "nixos"; # Define your hostname.
 
-  virtualisation.waydroid.enable = true;
+  #virtualisation.waydroid.enable = true;
   networking.nftables.enable = true;
 
   # List packages installed in system profile. To search, run:

@@ -38,6 +38,8 @@
       ];
       favorite-apps = [
         "org.gnome.Nautilus.desktop"
+        "org.gnome.TextEditor.desktop"
+        "signal.desktop"
         "thunderbird.desktop"
         "org.keepassxc.KeePassXC.desktop"
         "firefox.desktop"
@@ -75,6 +77,9 @@
     };
     "org/gnome/desktop/peripherals/mouse" = {
       accel-profile = "flat"; # Disable mouse acceleration
+    };
+    "org/gnome/desktop/input-sources" = {
+      per-window = true;
     };
   };
 
@@ -145,4 +150,7 @@
     "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
     "terminal.integrated.fontLigatures" = true;
   };
+
+  # KeePassXC
+  programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
 }
