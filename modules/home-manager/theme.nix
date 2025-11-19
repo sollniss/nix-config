@@ -48,7 +48,9 @@
       ];
     };
     "org/gnome/shell/extensions/dash-to-panel" = {
-      dot-position = " BOTTOM";
+      panel-sizes = ''{"0":40}'';
+
+      dot-position = "BOTTOM";
       dot-style-focused = "SQUARES";
       dot-style-unfocused = "SQUARES";
       dot-color-dominant = true;
@@ -58,7 +60,7 @@
       animate-window-launch = false;
 
       appicon-margin = 0;
-      appicon-padding = 4;
+      appicon-padding = 8;
       appicon-style = "NORMAL";
 
       panel-top-bottom-margins = 0;
@@ -80,6 +82,10 @@
     };
     "org/gnome/desktop/input-sources" = {
       per-window = true;
+    };
+    "org/gnome/desktop/background" = {
+      picture-uri = "${./jakub-rozalski-santa-vs-krampuss.jpg}";
+      picture-uri-dark = "${./jakub-rozalski-santa-vs-krampuss.jpg}";
     };
   };
 
