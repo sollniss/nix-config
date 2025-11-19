@@ -1,4 +1,5 @@
 {
+  lib,
   ...
 }:
 {
@@ -47,4 +48,7 @@
     };
   };
   xdg.autostart.enable = true;
+
+  # Disable gnome keyring service
+  #services.gnome-keyring.enable = lib.mkForce false; # Does not work.
 }

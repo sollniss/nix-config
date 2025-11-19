@@ -10,7 +10,7 @@ let
   nixosModules = with inputs.self.nixosModules; [
     common
 
-    desktops.plasma6
+    desktops.gnome
   ];
 in
 {
