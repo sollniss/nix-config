@@ -10,9 +10,12 @@ let
     base
     theme
 
+    desktops.gnome
+
     services.syncthing
 
     programs.firefox
+    programs.thunderbird
     programs.vscode
     programs.keepassxc
   ];
@@ -40,6 +43,30 @@ in
     nixosbtw = "nix-shell -p fastfetch --run fastfetch";
   };
 
+  # Extra packages.
+  home.packages = with pkgs; [
+    # development
+    gopls # Go LSP
+    nil # Nix LSP
+  ];
+
+  # Extra programs.
+  programs.go = {
+    enable = true;
+    env.GOPATH = "code/go";
+  };
+
+  programs.lutris = {
+    enable = true;
+    extraPackages = with pkgs; [
+      gamemode
+      mangohud
+      umu-launcher
+      winetricks
+    ];
+  };
+
+  # User specific config for base services.
   services = {
     syncthing.settings = {
       devices = {
@@ -59,6 +86,7 @@ in
     };
   };
 
+  # User specific config for base programs.
   programs = {
 
     keepassxc.settings.General.LastOpenedDatabases = "/home/sollniss/sync/keepass/Passwords.kdbx";
@@ -68,19 +96,31 @@ in
       email = "sollniss@web.de";
     };
 
+    firefox.policies.ExtensionSettings = {
+      # 10ten
+      "{59812185-ea92-4cca-8ab7-cfcacee81281}" = {
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/10ten-ja-reader/latest.xpi";
+        installation_mode = "force_installed";
+        updates_disabled = "false";
+        private_browsing = "true";
+      };
+    };
+
   };
 
-  programs.thunderbird = {
-    enable = true;
-    profiles.default = {
-      isDefault = true;
-
-      settings = {
-        "mailnews.default_sort_type" = 18;
-        "mailnews.default_sort_order" = 2;
-        "mailnews.default_news_sort_order" = 2;
-        "mailnews.default_news_sort_type" = 18;
-      };
+  # User specific config.
+  dconf.settings = {
+    "org/gnome/shell" = {
+      favorite-apps = [
+        "org.gnome.Nautilus.desktop"
+        "org.gnome.TextEditor.desktop"
+        "signal.desktop"
+        "thunderbird.desktop"
+        "org.keepassxc.KeePassXC.desktop"
+        "firefox.desktop"
+        "org.wezfurlong.wezterm.desktop"
+        "code.desktop"
+      ];
     };
   };
 
@@ -105,20 +145,5 @@ in
         tls.enable = true;
       };
     };
-  };
-
-  #programs.anki = {
-  #  enable = true;
-  #  #sync.username = "sollniss";
-  #};
-
-  programs.lutris = {
-    enable = true;
-    extraPackages = with pkgs; [
-      gamemode
-      mangohud
-      umu-launcher
-      winetricks
-    ];
   };
 }

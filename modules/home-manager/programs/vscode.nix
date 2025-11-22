@@ -16,6 +16,7 @@
 
         "explorer.confirmDelete" = false;
         "editor.selectionClipboard" = false;
+        "terminal.integrated.gpuAcceleration" = "auto";
       };
     };
   };

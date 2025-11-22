@@ -1,17 +1,10 @@
 {
   pkgs,
+  lib,
+  config,
   ...
 }:
 {
-
-  # GTK Setup
-  #gtk = {
-  #  enable = true;
-  #  theme.name = "Breeze-Dark";
-  #  #gtk3 = {
-  #  #  extraConfig.gtk-application-prefer-dark-theme = true;
-  #  #};
-  #};
 
   home.packages = with pkgs; [
     # Default fonts.
@@ -21,21 +14,29 @@
     noto-fonts-color-emoji
     jetbrains-mono
     nerd-fonts.symbols-only
-
-    # Gnome extensions
-    pkgs.gnome-shell-extensions
-    gnomeExtensions.dash-to-panel
-    gnomeExtensions.kimpanel
   ];
 
-  # Gnome
+  programs.gnome-shell = {
+    extensions = [
+      {
+        id = "status-icons@gnome-shell-extensions.gcampax.github.com";
+        package = pkgs.gnomeExtensions.status-icons;
+      }
+      {
+        id = "dash-to-panel@jderose9.github.com";
+        package = pkgs.gnomeExtensions.dash-to-panel;
+      }
+      {
+        id = "kimpanel@kde.org";
+        package = pkgs.gnomeExtensions.kimpanel;
+      }
+    ];
+  };
+
+  # dconf
+  # Set even if Gnome is not enabled.
   dconf.settings = {
     "org/gnome/shell" = {
-      enabled-extensions = [
-        "status-icons@gnome-shell-extensions.gcampax.github.com"
-        "dash-to-panel@jderose9.github.com"
-        "kimpanel@kde.org"
-      ];
       favorite-apps = [
         "org.gnome.Nautilus.desktop"
         "org.gnome.TextEditor.desktop"
@@ -47,6 +48,23 @@
         "code.desktop"
       ];
     };
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+      clock-format = "24h";
+      clock-show-weekday = true;
+      enable-animations = false;
+      text-scaling-factor = 1;
+      enable-hot-corners = false;
+    };
+    "org/gnome/desktop/peripherals/mouse" = {
+      accel-profile = "flat"; # Disable mouse acceleration
+    };
+    "org/gnome/desktop/input-sources" = {
+      per-window = true;
+    };
+  }
+  # Set only if Gnome is actually enabled for the user.
+  // (lib.attrsets.optionalAttrs config.programs.gnome-shell.enable {
     "org/gnome/shell/extensions/dash-to-panel" = {
       panel-sizes = ''{"0":40}'';
 
@@ -69,38 +87,25 @@
       status-icon-padding = -1;
       tray-padding = -1;
     };
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
-      clock-format = "24h";
-      clock-show-weekday = true;
-      enable-animations = false;
-      text-scaling-factor = 1;
-      enable-hot-corners = false;
-    };
-    "org/gnome/desktop/peripherals/mouse" = {
-      accel-profile = "flat"; # Disable mouse acceleration
-    };
-    "org/gnome/desktop/input-sources" = {
-      per-window = true;
-    };
     "org/gnome/desktop/background" = {
       picture-uri = "${./jakub-rozalski-santa-vs-krampuss.jpg}";
       picture-uri-dark = "${./jakub-rozalski-santa-vs-krampuss.jpg}";
     };
-  };
+  });
 
-  #programs.plasma = {
-  #  enable = true;
-  #  workspace = {
-  #    lookAndFeel = "org.kde.breezedark.desktop";
-  #    cursor = {
-  #      theme = "Bibata-Modern-Ice";
-  #      size = 24;
-  #    };
-  #    iconTheme = "Breeze Dark";
-  #    wallpaper = "${./wallpaper.jpg}";
-  #  };
-  #};
+  # TODO: This seems to crash sometimes.
+  # https://github.com/NixOS/nixpkgs/issues/359129
+  programs.plasma = {
+    workspace = {
+      lookAndFeel = "org.kde.breezedark.desktop";
+      cursor = {
+        theme = "Bibata-Modern-Ice";
+        size = 24;
+      };
+      iconTheme = "Breeze Dark";
+      wallpaper = "${./jakub-rozalski-santa-vs-krampuss.jpg}";
+    };
+  };
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
@@ -147,15 +152,15 @@
   };
 
   # VSCode
-  programs.vscode.profiles.default.userSettings = {
-    "terminal.integrated.gpuAcceleration" = "auto";
+  programs.vscode.profiles.default.userSettings =
+    lib.attrsets.optionalAttrs config.programs.vscode.enable
+      {
+        "editor.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
+        "editor.fontLigatures" = true;
 
-    "editor.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
-    "editor.fontLigatures" = true;
-
-    "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
-    "terminal.integrated.fontLigatures" = true;
-  };
+        "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
+        "terminal.integrated.fontLigatures" = true;
+      };
 
   # KeePassXC
   programs.keepassxc.settings.GUI.ApplicationTheme = "dark";

@@ -1,6 +1,7 @@
 {
   base = import ./base.nix;
   theme = import ./theme.nix;
-  programs = import ./programs;
+  desktops = import ./desktops;
   services = import ./services;
+  programs = import ./programs;
 }

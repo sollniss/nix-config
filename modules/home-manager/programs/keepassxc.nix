@@ -51,4 +51,25 @@
 
   # Disable gnome keyring service
   #services.gnome-keyring.enable = lib.mkForce false; # Does not work.
+
+  programs.firefox = {
+    policies = {
+      ExtensionSettings = {
+        # KeePassXC-Browser
+        "keepassxc-browser@keepassxc.org" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
+          installation_mode = "force_installed";
+          updates_disabled = "false";
+          private_browsing = "true";
+        };
+      };
+
+      "3rdparty".Extensions = {
+        # https://github.com/keepassxreboot/keepassxc-browser/blob/develop/keepassxc-browser/background/page.js
+        "keepassxc-browser@keepassxc.org".settings = {
+          "passkeys" = true;
+        };
+      };
+    };
+  };
 }

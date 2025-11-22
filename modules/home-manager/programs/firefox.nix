@@ -187,84 +187,65 @@ in
           updates_disabled = "false";
           private_browsing = "true";
         };
-        # KeePassXC-Browser
-        "keepassxc-browser@keepassxc.org" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
-          installation_mode = "force_installed";
-          updates_disabled = "false";
-          private_browsing = "true";
-        };
-        # 10ten
-        "{59812185-ea92-4cca-8ab7-cfcacee81281}" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/10ten-ja-reader/latest.xpi";
-          installation_mode = "force_installed";
-          updates_disabled = "false";
-          private_browsing = "true";
-        };
       };
 
       "3rdparty".Extensions = {
         "uBlock0@raymondhill.net".adminSettings = {
           selectedFilterLists = [
-              "user-filters"
-              "DEU-0"
-              "JPN-1"
+            "user-filters"
+            "DEU-0"
+            "JPN-1"
 
-              # Built-in
-              "ublock-filters"
-              "ublock-badware"
-              "ublock-privacy"
-              "ublock-abuse"
-              "ublock-quick-fixes"
-              "ublock-unbreak"
-              "ublock-badlists"
+            # Built-in
+            "ublock-filters"
+            "ublock-badware"
+            "ublock-privacy"
+            "ublock-abuse"
+            "ublock-quick-fixes"
+            "ublock-unbreak"
+            "ublock-badlists"
 
-              # Ads
-              "easylist"
-              "adguard-generic"
-              "adguard-mobile"
+            # Ads
+            "easylist"
+            "adguard-generic"
+            "adguard-mobile"
 
-              # Privacy
-              "easyprivacy"
-              "adguard-spyware"
-              "adguard-spyware-url"
-              "block-lan"
+            # Privacy
+            "easyprivacy"
+            "adguard-spyware"
+            "adguard-spyware-url"
+            "block-lan"
 
-              # Multipurpose
-              "plowe-0"
-              "dpollock-0"
+            # Multipurpose
+            "plowe-0"
+            "dpollock-0"
 
-              # Cookie notices
-              "fanboy-cookiemonster"
-              "ublock-cookies-easylist"
-              "adguard-cookies"
-              "ublock-cookies-adguard"
+            # Cookie notices
+            "fanboy-cookiemonster"
+            "ublock-cookies-easylist"
+            "adguard-cookies"
+            "ublock-cookies-adguard"
 
-              # Social widgets
-              "fanboy-social"
-              "adguard-social"
-              "fanboy-thirdparty_social"
+            # Social widgets
+            "fanboy-social"
+            "adguard-social"
+            "fanboy-thirdparty_social"
 
-              # Annoyances
-              "easylist-chat"
-              "easylist-newsletters"
-              "easylist-notifications"
-              "easylist-annoyances"
-              "adguard-mobile-app-banners"
-              "adguard-other-annoyances"
-              "adguard-popup-overlays"
-              "adguard-widgets"
-              "ublock-annoyances"
+            # Annoyances
+            "easylist-chat"
+            "easylist-newsletters"
+            "easylist-notifications"
+            "easylist-annoyances"
+            "adguard-mobile-app-banners"
+            "adguard-other-annoyances"
+            "adguard-popup-overlays"
+            "adguard-widgets"
+            "ublock-annoyances"
 
-              # URL Shortener tools (replaces clearurls)
-              "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt"
-            
+            # URL Shortener tools (replaces clearurls)
+            "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt"
+
           ];
-        };
-
-        # https://github.com/keepassxreboot/keepassxc-browser/blob/develop/keepassxc-browser/background/page.js
-        "keepassxc-browser@keepassxc.org".settings = {
-          "passkeys" = true;
         };
       };
 
@@ -325,6 +306,6 @@ in
           "trailhead.firstrun.didSeeAboutWelcome" = true;
         };
       };
-    };                                                                                                                                                                                                                         
+    };
   };
 }

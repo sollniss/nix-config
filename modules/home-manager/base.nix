@@ -52,9 +52,4 @@
   programs.git = {
     enable = true;
   };
-
-  programs.go = {
-    enable = true;
-    env.GOPATH = "code/go";
-  };
 }
