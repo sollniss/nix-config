@@ -53,8 +53,7 @@ in
 {
   programs.firefox = {
     enable = true;
-    # Allow the KeePassXC-Browser extension to communicate, when a user installed it.
-    nativeMessagingHosts = [ pkgs.keepassxc ];
+    # Options https://mozilla.github.io/policy-templates/
     policies = {
       DisableFirefoxScreenshots = true;
       DisableFirefoxStudies = true;
@@ -62,6 +61,9 @@ in
       DisableTelemetry = true;
       DisplayBookmarksToolbar = false;
       GenerativeAI.Enabled = false;
+      FirefoxHome = {
+        SponsoredTopSites = false;
+      };
 
       PasswordManagerEnabled = false;
       HardwareAcceleration = true;
