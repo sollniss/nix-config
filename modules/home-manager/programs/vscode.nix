@@ -11,7 +11,7 @@
       ];
       userSettings = {
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "nil";
+        "nix.serverPath" = "nixd";
         "[nix]"."editor.tabSize" = 2;
 
         "explorer.confirmDelete" = false;
