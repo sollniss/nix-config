@@ -23,12 +23,23 @@
       ...
     } @ inputs:
     {
+			# nixos-rebuild build --flake .#nixos
+			# nixos-rebuild build --flake github:sollniss/nix-config#nixos
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [
           ./hosts/sollniss/desktop/configuration.nix
         ];
       };
+
+			# home-manager build --flake .#terminal
+			# home-manager build --flake github:sollniss/nix-config#terminal
+			homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
+				specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/sollniss/terminal/home.nix
+        ];
+			};
 
       nixosModules = import ./modules/nixos;
       homeManagerModules = import ./modules/home-manager;

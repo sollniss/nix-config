@@ -36,10 +36,6 @@
   };
 
   home.packages = with pkgs; [
-    # development
-    gopls # Go LSP
-    nil # Nix LSP
-
     vlc
     signal-desktop
     anki

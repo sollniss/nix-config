@@ -46,7 +46,7 @@ in
     # development
     #gopls # Go LSP
     #nil # Nix LSP
-    nixd
+    #nixd
 
     # minecraft
     prismlauncher
