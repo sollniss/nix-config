@@ -7,7 +7,7 @@ let
   nixosModules = with inputs.self.nixosModules; [
     common
 
-    desktops.gnome
+    desktops.cosmic
   ];
 in
 {

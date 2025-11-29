@@ -8,7 +8,7 @@ let
     base
     theme
 
-    desktops.gnome
+    desktops.cosmic
 
     services.syncthing
 
@@ -35,10 +35,11 @@ in
   };
 
   home.shellAliases = {
+    ".." = "cd ..";
     cat = "bat";
     ls = "eza";
     ll = "eza -l";
-    nixosbtw = "nix-shell -p fastfetch --run fastfetch";
+    sys = "nix-shell -p fastfetch --run fastfetch";
   };
 
   # Extra packages.
@@ -46,7 +47,7 @@ in
     # development
     #gopls # Go LSP
     #nil # Nix LSP
-    #nixd
+    nixd
 
     # minecraft
     prismlauncher
@@ -75,10 +76,6 @@ in
       #nil
       nixd
     ];
-
-    settings = {
-      theme = "dark_plus";
-    };
 
     languages = {
       language-server.biome = {

@@ -23,8 +23,8 @@
       ...
     } @ inputs:
     {
-			# nixos-rebuild build --flake .#nixos
-			# nixos-rebuild build --flake github:sollniss/nix-config#nixos
+			# sudo nixos-rebuild build --flake .#nixos
+			# sudo nixos-rebuild build --flake github:sollniss/nix-config#nixos
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [

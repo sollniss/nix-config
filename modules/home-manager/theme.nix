@@ -16,6 +16,14 @@
     nerd-fonts.symbols-only
   ];
 
+  home.pointerCursor = {
+    name = "phinger-cursors-dark";
+    package = pkgs.phinger-cursors;
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
   programs.gnome-shell = {
     extensions = [
       {
@@ -151,6 +159,9 @@
     };
   };
 
+  # KeePassXC
+  programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
+
   # VSCode
   programs.vscode.profiles.default.userSettings =
     lib.attrsets.optionalAttrs config.programs.vscode.enable
@@ -162,6 +173,11 @@
         "terminal.integrated.fontLigatures" = true;
       };
 
-  # KeePassXC
-  programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
+  # Set code highlighting to Visual Studio Dark+
+
+  # Helix
+  programs.helix.settings.theme = "dark_plus";
+
+  # Bat
+  programs.bat.config.theme = "Visual Studio Dark+";
 }
