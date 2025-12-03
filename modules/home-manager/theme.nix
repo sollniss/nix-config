@@ -44,18 +44,6 @@
   # dconf
   # Set even if Gnome is not enabled.
   dconf.settings = {
-    "org/gnome/shell" = {
-      favorite-apps = [
-        "org.gnome.Nautilus.desktop"
-        "org.gnome.TextEditor.desktop"
-        "signal.desktop"
-        "thunderbird.desktop"
-        "org.keepassxc.KeePassXC.desktop"
-        "firefox.desktop"
-        "org.wezfurlong.wezterm.desktop"
-        "code.desktop"
-      ];
-    };
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       clock-format = "24h";
@@ -134,12 +122,6 @@
     emoji = [
       "Noto Color Emoji"
     ];
-  };
-
-  # shell
-  programs.starship = {
-    enable = true;
-    enableBashIntegration = true;
   };
 
   # fcitx5

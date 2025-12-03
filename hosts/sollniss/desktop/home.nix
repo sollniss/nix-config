@@ -1,5 +1,6 @@
 {
   inputs,
+  lib,
   pkgs,
   ...
 }:
@@ -14,9 +15,13 @@ let
 
     programs.firefox
     programs.thunderbird
-    programs.helix
     programs.vscode
     programs.keepassxc
+
+    # shell
+    programs.shelltools
+    programs.fish
+    programs.helix
   ];
 in
 {
@@ -25,23 +30,6 @@ in
   home.username = "sollniss";
   home.homeDirectory = "/home/sollniss";
   home.stateVersion = "25.05";
-
-  programs.eza = {
-    enable = true;
-    icons = "always";
-  };
-
-  programs.bat = {
-    enable = true;
-  };
-
-  home.shellAliases = {
-    ".." = "cd ..";
-    cat = "bat";
-    ls = "eza";
-    ll = "eza -l";
-    sys = "nix-shell -p fastfetch --run fastfetch";
-  };
 
   # Extra packages.
   home.packages = with pkgs; [
@@ -58,6 +46,29 @@ in
   programs.go = {
     enable = true;
     env.GOPATH = "code/go";
+  };
+
+  programs.wezterm = {
+    enable = true;
+    extraConfig = ''
+      -- This will hold the configuration.
+      local config = wezterm.config_builder()
+
+      -- This is where you actually apply your config choices.
+
+      -- For example, changing the initial geometry for new windows:
+      config.initial_cols = 120
+      config.initial_rows = 28
+
+      -- or, changing the font size and color scheme.
+      config.font_size = 10
+      -- config.color_scheme = 'AdventureTime'
+
+      config.default_prog = { 'fish', '-i' }
+
+      -- Finally, return the configuration to wezterm:
+      return config
+    '';
   };
 
   programs.lutris = {
