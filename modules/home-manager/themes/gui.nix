@@ -154,12 +154,4 @@
         "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
         "terminal.integrated.fontLigatures" = true;
       };
-
-  # Set code highlighting to Visual Studio Dark+
-
-  # Helix
-  programs.helix.settings.theme = "dark_plus";
-
-  # Bat
-  programs.bat.config.theme = "Visual Studio Dark+";
 }

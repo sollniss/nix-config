@@ -19,14 +19,18 @@
       self,
       nixpkgs,
       home-manager,
-      plasma-manager,
       ...
     } @ inputs:
     {
 			# sudo nixos-rebuild build --flake .#nixos
 			# sudo nixos-rebuild build --flake github:sollniss/nix-config#nixos
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
+				specialArgs = { 
+          inherit inputs; 
+          vars = {
+            username = "sollniss";
+          };
+        };
         modules = [
           ./hosts/sollniss/desktop/configuration.nix
         ];
@@ -35,7 +39,12 @@
 			# home-manager build --flake .#terminal
 			# home-manager build --flake github:sollniss/nix-config#terminal
 			homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
-				specialArgs = { inherit inputs; };
+				specialArgs = { 
+          inherit inputs; 
+          vars = {
+            username = "sollniss";
+          };
+        };
         modules = [
           ./hosts/sollniss/terminal/home.nix
         ];

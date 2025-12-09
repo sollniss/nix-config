@@ -1,13 +1,16 @@
 {
   inputs,
+  vars,
   lib,
   pkgs,
   ...
 }:
 let
   homeManagerModules = with inputs.self.homeManagerModules; [
-    base
-    theme
+    base.gui
+    base.shell
+    themes.gui
+    themes.shell
 
     desktops.cosmic
 
@@ -27,14 +30,15 @@ in
 {
   imports = homeManagerModules;
 
-  home.username = "sollniss";
-  home.homeDirectory = "/home/sollniss";
+  home.username = vars.username;
+  home.homeDirectory = "/home/${vars.username}";
   home.stateVersion = "25.05";
 
   # Extra packages.
   home.packages = with pkgs; [
     # development
-    #gopls # Go LSP
+    gopls # Go LSP
+    gcc 
     #nil # Nix LSP
     nixd
 
@@ -45,7 +49,7 @@ in
   # Extra programs.
   programs.go = {
     enable = true;
-    env.GOPATH = "code/go";
+    env.GOPATH = "/home/${vars.username}/code/go";
   };
 
   programs.wezterm = {
@@ -93,15 +97,15 @@ in
         };
       };
       folders = {
-        "/home/sollniss/sync/keepass" = {
+        "/home/${vars.username}/sync/keepass" = {
           id = "crijs-3d7pa";
           devices = [ "phone" ];
         };
-        "/home/sollniss/sync/photos" = {
+        "/home/${vars.username}/sync/photos" = {
           id = "0zloo-2xerr";
           devices = [ "phone" ];
         };
-        "/home/sollniss/sync/memos" = {
+        "/home/${vars.username}/sync/memos" = {
           id = "p7pmi-8794o";
           devices = [ "phone" ];
         };
@@ -112,7 +116,7 @@ in
   # User specific config for base programs.
   programs = {
 
-    keepassxc.settings.General.LastOpenedDatabases = "/home/sollniss/sync/keepass/Passwords.kdbx";
+    keepassxc.settings.General.LastOpenedDatabases = "/home/${vars.username}/sync/keepass/Passwords.kdbx";
 
     git.settings.user = {
       name = "sollniss";
@@ -132,6 +136,7 @@ in
   };
 
   # User specific config.
+  # Gnome default apps.
   dconf.settings = {
     "org/gnome/shell" = {
       favorite-apps = [

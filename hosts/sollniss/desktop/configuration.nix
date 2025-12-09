@@ -1,11 +1,14 @@
 {
   inputs,
+  vars,
   pkgs,
   ...
 }:
 let
   nixosModules = with inputs.self.nixosModules; [
-    common
+    core
+    common.gui
+    common.shell
 
     desktops.cosmic
   ];
@@ -36,9 +39,11 @@ in
     bash
   ];
 
-  programs.steam = {
-    enable = true;
+  users.users.${vars.username} = {
+    isNormalUser = true;
+    description = vars.username;
+    extraGroups = [ "networkmanager" "wheel" ];
   };
 
-  home-manager.users.sollniss = import ./home.nix;
+  home-manager.users.${vars.username} = import ./home.nix;
 }

@@ -1,6 +1,6 @@
 {
   core = import ./core;
-  common = import ./common.nix;
+  common = import ./common;
 
   desktops = import ./desktops;
 }

@@ -8,6 +8,7 @@
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         jnoortheen.nix-ide
+        golang.go
       ];
       userSettings = {
         "nix.enableLanguageServer" = true;
