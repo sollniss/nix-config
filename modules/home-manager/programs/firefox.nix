@@ -55,7 +55,7 @@ in
     enable = true;
     # Options https://mozilla.github.io/policy-templates/
     policies = {
-      DisableFirefoxScreenshots = true;
+      DisableFirefoxScreenshots = false;
       DisableFirefoxStudies = true;
       DisablePocket = true;
       DisableTelemetry = true;

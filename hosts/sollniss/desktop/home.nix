@@ -54,25 +54,26 @@ in
 
   programs.wezterm = {
     enable = true;
-    extraConfig = ''
-      -- This will hold the configuration.
-      local config = wezterm.config_builder()
+    extraConfig = lib.mkMerge [
+      (lib.mkBefore ''
+        local config = wezterm.config_builder()
+      '')
+      (lib.mkAfter ''
+        -- This is where you actually apply your config choices.
 
-      -- This is where you actually apply your config choices.
+        -- For example, changing the initial geometry for new windows:
+        config.initial_cols = 120
+        config.initial_rows = 28
 
-      -- For example, changing the initial geometry for new windows:
-      config.initial_cols = 120
-      config.initial_rows = 28
+        -- or, changing the font size and color scheme.
+        config.font_size = 12
 
-      -- or, changing the font size and color scheme.
-      config.font_size = 10
-      -- config.color_scheme = 'AdventureTime'
+        config.default_prog = { 'fish', '-i' }
 
-      config.default_prog = { 'fish', '-i' }
-
-      -- Finally, return the configuration to wezterm:
-      return config
-    '';
+        -- Finally, return the configuration to wezterm:
+        return config
+        '')
+    ];
   };
 
   programs.lutris = {
@@ -156,7 +157,7 @@ in
     "sollniss@web.de" = {
       realName = "sollniss";
       address = "sollniss@web.de";
-      userName = "sollniss@web.de";
+      userName = "sollniss";
       primary = true;
       thunderbird = {
         enable = true;
@@ -170,7 +171,10 @@ in
       smtp = {
         host = "smtp.web.de";
         port = 587;
-        tls.enable = true;
+        tls = {
+          enable = true;
+          useStartTls = true;
+        };
       };
     };
   };

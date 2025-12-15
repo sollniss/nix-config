@@ -154,4 +154,9 @@
         "terminal.integrated.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font', monospace";
         "terminal.integrated.fontLigatures" = true;
       };
+
+  # WezTerm
+  programs.wezterm.extraConfig = ''
+    config.color_scheme = 'Dark+'
+  '';
 }
