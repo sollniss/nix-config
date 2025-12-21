@@ -3,9 +3,7 @@
   config,
   pkgs,
   ...
-}:
-
-let
+}: let
   buildFirefoxXpiAddon = lib.makeOverridable (
     {
       stdenv ? pkgs.stdenv,
@@ -14,31 +12,31 @@ let
       version,
       addonId,
       url ? "",
-      urls ? [ ], # Alternative for 'url' a list of URLs to try in specified order.
+      urls ? [], # Alternative for 'url' a list of URLs to try in specified order.
       sha256,
       meta,
       ...
     }:
-    stdenv.mkDerivation {
-      name = "${pname}-${version}";
+      stdenv.mkDerivation {
+        name = "${pname}-${version}";
 
-      inherit meta;
+        inherit meta;
 
-      src = fetchurl { inherit url urls sha256; };
+        src = fetchurl {inherit url urls sha256;};
 
-      preferLocalBuild = true;
-      allowSubstitutes = true;
+        preferLocalBuild = true;
+        allowSubstitutes = true;
 
-      passthru = {
-        inherit addonId;
-      };
+        passthru = {
+          inherit addonId;
+        };
 
-      buildCommand = ''
-        dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-        mkdir -p "$dst"
-        install -v -m644 "$src" "$dst/${addonId}.xpi"
-      '';
-    }
+        buildCommand = ''
+          dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+          mkdir -p "$dst"
+          install -v -m644 "$src" "$dst/${addonId}.xpi"
+        '';
+      }
   );
 
   lock-false = {
@@ -49,8 +47,7 @@ let
     Value = true;
     Status = "locked";
   };
-in
-{
+in {
   programs.firefox = {
     enable = true;
     # Options https://mozilla.github.io/policy-templates/
@@ -246,7 +243,6 @@ in
 
             # URL Shortener tools (replaces clearurls)
             "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt"
-
           ];
         };
       };

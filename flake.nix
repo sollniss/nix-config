@@ -12,45 +12,49 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      home-manager,
-      ...
-    } @ inputs:
-    {
-			# sudo nixos-rebuild build --flake .#nixos
-			# sudo nixos-rebuild build --flake github:sollniss/nix-config#nixos
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-				specialArgs = { 
-          inherit inputs; 
-          vars = {
-            username = "sollniss";
-          };
+  outputs = {
+    self,
+    nixpkgs,
+    home-manager,
+    catppuccin,
+    ...
+  } @ inputs: {
+    # sudo nixos-rebuild switch --flake .#nixos
+    # sudo nixos-rebuild switch --flake github:sollniss/nix-config#nixos
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit inputs;
+        vars = {
+          username = "sollniss";
         };
-        modules = [
-          ./hosts/sollniss/desktop/configuration.nix
-        ];
       };
-
-			# home-manager build --flake .#terminal
-			# home-manager build --flake github:sollniss/nix-config#terminal
-			homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
-				specialArgs = { 
-          inherit inputs; 
-          vars = {
-            username = "sollniss";
-          };
-        };
-        modules = [
-          ./hosts/sollniss/terminal/home.nix
-        ];
-			};
-
-      nixosModules = import ./modules/nixos;
-      homeManagerModules = import ./modules/home-manager;
+      modules = [
+        ./hosts/sollniss/desktop/configuration.nix
+        catppuccin.nixosModules.catppuccin
+      ];
     };
+
+    # home-manager switch --flake .#terminal
+    # home-manager switch --flake github:sollniss/nix-config#terminal
+    homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
+      specialArgs = {
+        inherit inputs;
+        vars = {
+          username = "sollniss";
+        };
+      };
+      modules = [
+        ./hosts/sollniss/terminal/home.nix
+      ];
+    };
+
+    nixosModules = import ./modules/nixos;
+    homeManagerModules = import ./modules/home-manager;
+  };
 }

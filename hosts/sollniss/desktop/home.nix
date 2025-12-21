@@ -4,13 +4,12 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   homeManagerModules = with inputs.self.homeManagerModules; [
     base.gui
     base.shell
     themes.gui
-    themes.shell
+    themes.catppuccin
 
     desktops.cosmic
 
@@ -26,8 +25,7 @@ let
     programs.fish
     programs.helix
   ];
-in
-{
+in {
   imports = homeManagerModules;
 
   home.username = vars.username;
@@ -38,9 +36,10 @@ in
   home.packages = with pkgs; [
     # development
     gopls # Go LSP
-    gcc 
+    gcc
     #nil # Nix LSP
     nixd
+    alejandra
 
     # minecraft
     prismlauncher
@@ -72,7 +71,7 @@ in
 
         -- Finally, return the configuration to wezterm:
         return config
-        '')
+      '')
     ];
   };
 
@@ -100,15 +99,15 @@ in
       folders = {
         "/home/${vars.username}/sync/keepass" = {
           id = "crijs-3d7pa";
-          devices = [ "phone" ];
+          devices = ["phone"];
         };
         "/home/${vars.username}/sync/photos" = {
           id = "0zloo-2xerr";
-          devices = [ "phone" ];
+          devices = ["phone"];
         };
         "/home/${vars.username}/sync/memos" = {
           id = "p7pmi-8794o";
-          devices = [ "phone" ];
+          devices = ["phone"];
         };
       };
     };
@@ -116,7 +115,6 @@ in
 
   # User specific config for base programs.
   programs = {
-
     keepassxc.settings.General.LastOpenedDatabases = "/home/${vars.username}/sync/keepass/Passwords.kdbx";
 
     git.settings.user = {
@@ -132,24 +130,6 @@ in
         updates_disabled = "false";
         private_browsing = "true";
       };
-    };
-
-  };
-
-  # User specific config.
-  # Gnome default apps.
-  dconf.settings = {
-    "org/gnome/shell" = {
-      favorite-apps = [
-        "org.gnome.Nautilus.desktop"
-        "org.gnome.TextEditor.desktop"
-        "signal.desktop"
-        "thunderbird.desktop"
-        "org.keepassxc.KeePassXC.desktop"
-        "firefox.desktop"
-        "org.wezfurlong.wezterm.desktop"
-        "code.desktop"
-      ];
     };
   };
 

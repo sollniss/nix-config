@@ -3,8 +3,7 @@
   vars,
   pkgs,
   ...
-}:
-let
+}: let
   nixosModules = with inputs.self.nixosModules; [
     core
     common.gui
@@ -12,12 +11,12 @@ let
 
     desktops.cosmic
   ];
-in
-{
-  imports = [
-    ./hardware-configuration.nix
-  ]
-  ++ nixosModules;
+in {
+  imports =
+    [
+      ./hardware-configuration.nix
+    ]
+    ++ nixosModules;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -42,8 +41,14 @@ in
   users.users.${vars.username} = {
     isNormalUser = true;
     description = vars.username;
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = ["networkmanager" "wheel"];
   };
 
-  home-manager.users.${vars.username} = import ./home.nix;
+  #home-manager.users.${vars.username} = import ./home.nix;
+  home-manager.users.${vars.username} = {
+    imports = [
+      ./home.nix
+      inputs.catppuccin.homeModules.catppuccin
+    ];
+  };
 }

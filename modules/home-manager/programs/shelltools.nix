@@ -1,4 +1,6 @@
 {
+  osConfig,
+  pkgs,
   ...
 }:
 {
@@ -47,6 +49,12 @@
     enableFishIntegration = true;
 
     defaultCommand = "fd --type f";
+  };
+
+  programs.btop = {
+    enable = true;
+    # Enable GPU support.
+    package = (if osConfig.hardware.nvidia.modesetting.enable then pkgs.btop-cuda else pkgs.btop );
   };
 
   home.shellAliases = {

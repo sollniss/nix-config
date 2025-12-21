@@ -1,4 +1,6 @@
 {
   gui = import ./gui.nix;
-  shell = import ./shell.nix;
+
+  darkplus = import ./darkplus;
+  catppuccin = import ./catppuccin;
 }
