@@ -15,10 +15,12 @@
       gotools
       golangci-lint
       golangci-lint-langserver
+      delve
 
       # Nix
       #nil
       nixd
+      alejandra
     ];
 
     languages = {
@@ -41,6 +43,9 @@
         {
           name = "nix";
           language-servers = [ "nixd" "gpt" ];
+          formatter = {
+            command = "alejandra";
+          };
           auto-format = true;
         }
       ];

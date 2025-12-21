@@ -39,7 +39,6 @@ in {
     gcc
     #nil # Nix LSP
     nixd
-    alejandra
 
     # minecraft
     prismlauncher
