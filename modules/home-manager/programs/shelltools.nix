@@ -1,6 +1,7 @@
 {
   osConfig,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -54,7 +55,7 @@
   programs.btop = {
     enable = true;
     # Enable GPU support.
-    package = (if osConfig.hardware.nvidia.modesetting.enable then pkgs.btop-cuda else pkgs.btop );
+    package = lib.mkIf osConfig.hardware.nvidia.modesetting.enable pkgs.btop-cuda;
   };
 
   home.shellAliases = {
