@@ -31,25 +31,30 @@
     };
   };
 
-  fonts.fontconfig.defaultFonts = {
-    monospace = [
-      "JetBrains Mono"
-      "Symbols Nerd Font"
-    ];
+  fonts.fontconfig = {
+    hinting.enable = true;
+    antialias = true;
 
-    sansSerif = [
-      "Noto Sans"
-      "Noto Sans CJK JP"
-    ];
+    defaultFonts = {
+      monospace = [
+        "JetBrains Mono"
+        "Symbols Nerd Font"
+      ];
 
-    serif = [
-      "Noto Serif"
-      "Noto Serif CJK JP"
-    ];
+      sansSerif = [
+        "Noto Sans"
+        "Noto Sans CJK JP"
+      ];
 
-    emoji = [
-      "Noto Color Emoji"
-    ];
+      serif = [
+        "Noto Serif"
+        "Noto Serif CJK JP"
+      ];
+
+      emoji = [
+        "Noto Color Emoji"
+      ];
+    };
   };
 
   # VSCode

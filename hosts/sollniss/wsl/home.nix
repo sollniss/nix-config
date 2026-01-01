@@ -40,8 +40,8 @@ in {
     enable = true;
     installRemoteServer = true;
 
-    extensions = [ "nix" "make" ];
-    #mutableUserSettings = false;
+    extensions = ["nix" "make"];
+    mutableUserSettings = false;
     userSettings = {
       hour_format = "hour24";
       format_on_save = "on";
@@ -71,8 +71,9 @@ in {
       };
       languages = {
         Nix = {
-          language_servers = [ "nixd" ];
+          language_servers = ["nixd"];
           tab_size = 2;
+          format_on_save = "on";
           formatter = {
             external = {
               command = "alejandra";
@@ -81,7 +82,7 @@ in {
           };
         };
         Go = {
-          language_servers = [ "gopls" ];
+          language_servers = ["gopls"];
           tab_size = 4;
           format_on_save = "on";
           formatter = {

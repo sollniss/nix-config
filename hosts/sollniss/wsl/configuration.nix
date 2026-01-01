@@ -16,8 +16,35 @@ in
   imports = nixosModules;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  wsl.enable = true;
-  wsl.defaultUser = vars.username;
+  wsl = {
+    enable = true;
+    defaultUser = vars.username;
+    startMenuLaunchers = true;
+    interop = {
+      includePath = false;
+      register = true;
+    };
+  };
+
+  services = {
+    xserver.enable = lib.mkForce false;
+    openssh.enable = lib.mkForce false;
+
+    # resolv.conf is managed by wsl
+    resolved.enable = lib.mkForce false;
+  };
+
+  networking = {
+    # we don't really need this since windows manages this for us
+    firewall.enable = lib.mkForce false;
+  };
+
+  # allow opening files and links in Windows from WSL
+  environment.variables.BROWSER = lib.mkForce "wsl-open";
+  environment.systemPackages = with pkgs; [
+    wsl-open
+  ];
+
 
   programs.git = {
     enable = true;

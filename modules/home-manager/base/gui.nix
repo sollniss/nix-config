@@ -36,4 +36,6 @@
     signal-desktop
     anki
   ];
+
+  environment.variables.ANKI_WAYLAND = "1";
 }

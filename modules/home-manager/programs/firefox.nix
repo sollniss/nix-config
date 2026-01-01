@@ -306,4 +306,6 @@ in {
       };
     };
   };
+
+  environment.variables.MOZ_ENABLE_WAYLAND = "1";
 }

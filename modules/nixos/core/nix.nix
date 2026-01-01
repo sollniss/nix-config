@@ -1,6 +1,16 @@
-{ inputs, pkgs, lib, ... }:
 {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {
+  nix.settings = {
+    auto-optimise-store = true;
+    experimental-features = ["nix-command" "flakes"];
+    accept-flake-config = false;
+    sandbox = true;
+    use-xdg-base-directories = true;
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
