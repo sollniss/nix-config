@@ -37,5 +37,5 @@
     anki
   ];
 
-  environment.variables.ANKI_WAYLAND = "1";
+  home.sessionVariables.ANKI_WAYLAND = "1";
 }

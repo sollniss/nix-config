@@ -18,6 +18,7 @@
     programs.firefox
     programs.thunderbird
     programs.vscode
+    programs.zed
     programs.keepassxc
 
     # shell
@@ -35,10 +36,10 @@ in {
   # Extra packages.
   home.packages = with pkgs; [
     # development
-    gopls # Go LSP
-    gcc
+    #gopls # Go LSP
+    #gcc
     #nil # Nix LSP
-    nixd
+    #nixd
 
     # minecraft
     prismlauncher

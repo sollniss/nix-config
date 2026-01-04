@@ -32,8 +32,8 @@
   };
 
   fonts.fontconfig = {
-    hinting.enable = true;
-    antialias = true;
+    #hinting.enable = true;
+    #antialias = true;
 
     defaultFonts = {
       monospace = [
