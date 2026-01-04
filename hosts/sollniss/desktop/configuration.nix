@@ -25,16 +25,21 @@ in {
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "nixos"; # Define your hostname.
-
-  #virtualisation.waydroid.enable = true;
-  networking.nftables.enable = true;
+  networking = {
+    hostName = "nixos";
+    nameservers = [ "2620:fe::fe" "9.9.9.9" ]; # Quad9 IPv6 and IPv4
+    networkmanager = {
+      # Either of these two should be enough to force the nameservers.
+      # Set both just to be extra sure.
+      dns = "none";
+      insertNameservers = [ "2620:fe::fe" "9.9.9.9" ];
+    };
+    # nftables.enable = true; # required only for waydroid
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    #  wget
     bash
   ];
 

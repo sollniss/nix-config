@@ -281,17 +281,19 @@ in {
           "browser.startup.page" = "3";
           # highlight all search results by default
           "findbar.highlightAll" = true;
+          # hide bookmark toolbar
+          "browser.toolbars.bookmarks.visibility" = "never";
           # enable auto scroll
           "general.autoScroll" = true;
           # new tab page
           "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-          "browser.newtabpage.pinned" = [
-            {
-              title = "NixOS";
-              url = "https://nixos.org";
-            }
-          ];
+          #"browser.newtabpage.pinned" = [
+          #  {
+          #    title = "NixOS";
+          #    url = "https://nixos.org";
+          #  }
+          #];
           # activate vertical sidebar
           "sidebar.revamp" = true;
           "sidebar.verticalTabs" = true;
