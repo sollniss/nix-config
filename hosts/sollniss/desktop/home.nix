@@ -16,11 +16,13 @@
 
     services.syncthing
 
+    #programs.anki
     programs.firefox
+    programs.keepassxc
     programs.thunderbird
     programs.vscode
     programs.zed
-    programs.keepassxc
+    programs.wezterm
 
     # shell
     programs.shelltools
@@ -55,30 +57,6 @@ in {
     };
   };
 
-  programs.wezterm = {
-    enable = true;
-    extraConfig = lib.mkMerge [
-      (lib.mkBefore ''
-        local config = wezterm.config_builder()
-      '')
-      (lib.mkAfter ''
-        -- This is where you actually apply your config choices.
-
-        -- For example, changing the initial geometry for new windows:
-        config.initial_cols = 120
-        config.initial_rows = 28
-
-        -- or, changing the font size and color scheme.
-        config.font_size = 12
-
-        config.default_prog = { 'fish', '-i' }
-
-        -- Finally, return the configuration to wezterm:
-        return config
-      '')
-    ];
-  };
-
   programs.lutris = {
     enable = true;
     extraPackages = with pkgs; [
@@ -101,15 +79,15 @@ in {
         };
       };
       folders = {
-        "/home/${vars.username}/sync/keepass" = {
+        "${config.home.homeDirectory}/sync/keepass" = {
           id = "crijs-3d7pa";
           devices = ["phone"];
         };
-        "/home/${vars.username}/sync/photos" = {
+        "${config.home.homeDirectory}/sync/photos" = {
           id = "0zloo-2xerr";
           devices = ["phone"];
         };
-        "/home/${vars.username}/sync/memos" = {
+        "${config.home.homeDirectory}/sync/memos" = {
           id = "p7pmi-8794o";
           devices = ["phone"];
         };
@@ -119,7 +97,7 @@ in {
 
   # User specific config for base programs.
   programs = {
-    keepassxc.settings.General.LastOpenedDatabases = "/home/${vars.username}/sync/keepass/Passwords.kdbx";
+    keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
 
     git.settings.user = {
       name = "sollniss";

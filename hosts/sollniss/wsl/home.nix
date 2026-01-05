@@ -2,6 +2,7 @@
   inputs,
   vars,
   pkgs,
+  config,
   ...
 }: let
   homeManagerModules = with inputs.self.homeManagerModules; [
@@ -43,7 +44,10 @@ in {
   # Extra programs.
   programs.go = {
     enable = true;
-    env.GOPATH = "/home/${vars.username}/code/go";
+    env = {
+      GOPATH = "${config.home.homeDirectory}/go";
+      GOBIN = "${config.home.homeDirectory}/go/bin";
+    };
   };
 
   programs.git = {
