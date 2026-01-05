@@ -1,8 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-{
+{pkgs, ...}: {
   programs.helix = {
     enable = true;
     extraPackages = with pkgs; [
@@ -16,6 +12,7 @@
       golangci-lint
       golangci-lint-langserver
       delve
+      gcc # required by golangci-lint
 
       # Nix
       #nil
@@ -26,23 +23,23 @@
     languages = {
       language-server.biome = {
         command = "biome";
-        args = [ "lsp-proxy" ];
+        args = ["lsp-proxy"];
       };
 
       language-server.gpt = {
         command = "helix-gpt";
-        args = [ "--handler" "copilot" ];
+        args = ["--handler" "copilot"];
       };
 
       language = [
         {
           name = "go";
-          language-servers = [ "gopls" "golangci-lint-lsp" "gpt" ];
+          language-servers = ["gopls" "golangci-lint-lsp" "gpt"];
           auto-format = true;
         }
         {
           name = "nix";
-          language-servers = [ "nixd" "gpt" ];
+          language-servers = ["nixd" "gpt"];
           formatter = {
             command = "alejandra";
           };

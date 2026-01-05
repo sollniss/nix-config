@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   config = lib.mkMerge [
     {
       catppuccin = {
@@ -10,26 +6,15 @@
         cursors.enable = true;
 
         # Below apps are broken. Use custom setting.
-        fcitx5.enable = false;
         firefox.enable = false;
         wezterm.enable = false;
+
+        # following programs can use terminal colors,
+        # no need to style them separately
+        eza.enable = false;
+        starship.enable = false;
       };
     }
-
-    # fcitx5
-    (lib.mkIf (config.i18n.inputMethod.enable && config.i18n.inputMethod.type == "fcitx5") {
-      xdg.dataFile = {
-        "fcitx5/themes/catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}" = {
-          source = "${config.catppuccin.sources.fcitx5}/share/fcitx5/themes/catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}";
-          recursive = true;
-        };
-      };
-      i18n.inputMethod.fcitx5 = {
-        settings.addons.classicui.globalSection = {
-          Theme = "catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}";
-        };
-      };
-    })
 
     # Firefox
     {
