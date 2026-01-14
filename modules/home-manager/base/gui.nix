@@ -16,11 +16,11 @@
         };
         "Groups/0" = {
           Name = "Default";
-          "Default Layout" = "us";
+          "Default Layout" = "us-altgr-intl";
           DefaultIM = "mozc";
         };
         "Groups/0/Items/0" = {
-          Name = "keyboard-us";
+          Name = "keyboard-us-altgr-intl";
           Layout = "";
         };
         "Groups/0/Items/1" = {
@@ -34,7 +34,7 @@
   home.packages = with pkgs; [
     vlc
     signal-desktop
-    anki
+    #anki
   ];
 
   home.sessionVariables.ANKI_WAYLAND = "1";

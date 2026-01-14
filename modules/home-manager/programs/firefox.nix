@@ -304,6 +304,12 @@ in {
           "browser.toolbarbuttons.introduced.sidebar-button" = true;
           "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
           "trailhead.firstrun.didSeeAboutWelcome" = true;
+
+          # https://wiki.archlinux.org/title/Firefox/Privacy#Disable/enforce_'Trusted_Recursive_Resolver'
+          "network.dns.echconfig.enabled" = true;
+          "network.dns.http3_echconfig.enabled" = true;
+          "network.trr.mode" = 2;
+          "network.trr.uri" = "https://dns.quad9.net/dns-query";
         };
       };
     };

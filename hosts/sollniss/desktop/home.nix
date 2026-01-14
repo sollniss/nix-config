@@ -30,7 +30,30 @@
     programs.helix
   ];
 in {
-  imports = homeManagerModules;
+  imports =
+    homeManagerModules
+    ++ [
+      ../../../modules/home-manager/programs/ankiCustom
+    ];
+
+  #programs.anki = {
+  #  enable = true;
+  #  sync = {
+  #    url = "https://default.com";
+  #    networkTimeout = 13;
+  #    syncMedia = true;
+  #  };
+  #};
+  programs.ankiCustom = {
+    enable = true;
+    profiles.sollniss.sync = {
+      username = "sollniss@web.de";
+    };
+    profiles.mzh.sync = {
+      username = "mzh";
+    };
+    profiles.sollniss.lastOpened = true;
+  };
 
   home.username = vars.username;
   home.homeDirectory = "/home/${vars.username}";
@@ -43,6 +66,7 @@ in {
     #gcc
     #nil # Nix LSP
     #nixd
+    #google-chrome
 
     # minecraft
     prismlauncher

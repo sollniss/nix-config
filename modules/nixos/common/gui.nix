@@ -1,6 +1,6 @@
-{ 
+{
   inputs,
-  pkgs, 
+  pkgs,
   ...
 }: let
   nixosModules = with inputs.self.nixosModules; [
@@ -15,10 +15,10 @@ in {
 
       xkb = {
         layout = "us";
-        variant = "";
+        variant = "altgr-intl";
       };
 
-      excludePackages = [ pkgs.xterm ];
+      excludePackages = [pkgs.xterm];
       desktopManager.xterm.enable = false;
     };
 

@@ -13,6 +13,7 @@
       # Nix
       nixd
       alejandra
+      #nixfmt
     ];
     #installRemoteServer = true;
 
@@ -28,7 +29,6 @@
       };
       lsp = {
         gopls = {
-          gofumpt = true;
           initialization_options = {
             gofumpt = true;
           };
@@ -53,6 +53,7 @@
           formatter = {
             external = {
               command = "alejandra";
+              #command = "nixfmt";
               #arguments = ["--quiet" "--"];
             };
           };

@@ -1,11 +1,7 @@
-{
-  lib,
-  ...
-}:
-{
+{lib, ...}: {
   time = {
     timeZone = "Asia/Tokyo";
-    hardwareClockInLocalTime = true;
+    #hardwareClockInLocalTime = true;
   };
 
   i18n = {
