@@ -1,53 +1,4 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
-  buildFirefoxXpiAddon = lib.makeOverridable (
-    {
-      stdenv ? pkgs.stdenv,
-      fetchurl ? pkgs.fetchurl,
-      pname,
-      version,
-      addonId,
-      url ? "",
-      urls ? [], # Alternative for 'url' a list of URLs to try in specified order.
-      sha256,
-      meta,
-      ...
-    }:
-      stdenv.mkDerivation {
-        name = "${pname}-${version}";
-
-        inherit meta;
-
-        src = fetchurl {inherit url urls sha256;};
-
-        preferLocalBuild = true;
-        allowSubstitutes = true;
-
-        passthru = {
-          inherit addonId;
-        };
-
-        buildCommand = ''
-          dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-          mkdir -p "$dst"
-          install -v -m644 "$src" "$dst/${addonId}.xpi"
-        '';
-      }
-  );
-
-  lock-false = {
-    Value = false;
-    Status = "locked";
-  };
-  lock-true = {
-    Value = true;
-    Status = "locked";
-  };
-in {
+{...}: {
   programs.firefox = {
     enable = true;
     # Options https://mozilla.github.io/policy-templates/
@@ -143,7 +94,7 @@ in {
           {
             Name = "GitHub (Go)";
             Description = "GitHub Go code search";
-            Alias = "go";
+            Alias = "goc";
             IconURL = "https://github.com/favicon.ico";
             Method = "GET";
             URLTemplate = "https://github.com/search?q={searchTerms}+language%3AGo&type=code";
@@ -152,7 +103,7 @@ in {
           {
             Name = "GitHub (Nix)";
             Description = "GitHub Nix language files search";
-            Alias = "nix";
+            Alias = "nixc";
             IconURL = "https://github.com/favicon.ico";
             Method = "GET";
             URLTemplate = "https://github.com/search?q={searchTerms}+language%3ANix&type=code";

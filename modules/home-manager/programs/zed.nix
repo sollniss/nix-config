@@ -20,13 +20,21 @@
     extensions = ["nix" "make" "golangci-lint" "gosum"];
     #mutableUserSettings = false;
     userSettings = {
-      format_on_save = "on";
+      terminal = {
+        shell = {
+          with_arguments = {
+            program = "fish";
+            args = ["-i"];
+          };
+        };
+      };
       ui_font_family = "Noto Sans";
       buffer_font_family = "JetBrains Mono";
       telemetry = {
         diagnostics = false;
         metrics = false;
       };
+      format_on_save = "on";
       lsp = {
         gopls = {
           initialization_options = {
