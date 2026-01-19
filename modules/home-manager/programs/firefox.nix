@@ -228,6 +228,8 @@
         # specify profile-specific preferences here;
         # check about:config for options
         settings = {
+          # disable link preview on long-click
+          "browser.ml.linkPreview.enabled" = false;
           # restore open tabs on startup
           "browser.startup.page" = "3";
           # highlight all search results by default
