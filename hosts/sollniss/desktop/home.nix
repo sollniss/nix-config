@@ -26,6 +26,8 @@
     programs.shelltools
     programs.fish
     programs.helix
+
+    dev.go
   ];
 in {
   imports =
@@ -67,15 +69,6 @@ in {
     # minecraft
     #prismlauncher
   ];
-
-  # Extra programs.
-  programs.go = {
-    enable = true;
-    env = {
-      GOPATH = "${config.home.homeDirectory}/go";
-      GOBIN = "${config.home.homeDirectory}/go/bin";
-    };
-  };
 
   #programs.lutris = {
   #  enable = true;
