@@ -1,13 +1,12 @@
 {
   inputs,
-  vars,
   pkgs,
   config,
   ...
 }: let
   homeManagerModules = with inputs.self.homeManagerModules; [
+    base.terminal
     base.gui
-    base.shell
     themes.gui
     themes.catppuccin
 
@@ -54,8 +53,6 @@ in {
     profiles.sollniss.lastOpened = true;
   };
 
-  home.username = vars.username;
-  home.homeDirectory = "/home/${vars.username}";
   home.stateVersion = "25.05";
 
   # Extra packages.
@@ -68,7 +65,7 @@ in {
     #google-chrome
 
     # minecraft
-    prismlauncher
+    #prismlauncher
   ];
 
   # Extra programs.
@@ -80,15 +77,15 @@ in {
     };
   };
 
-  programs.lutris = {
-    enable = true;
-    extraPackages = with pkgs; [
-      gamemode
-      mangohud
-      umu-launcher
-      winetricks
-    ];
-  };
+  #programs.lutris = {
+  #  enable = true;
+  #  extraPackages = with pkgs; [
+  #    gamemode
+  #    mangohud
+  #    umu-launcher
+  #    winetricks
+  #  ];
+  #};
 
   # User specific config for base services.
   services = {

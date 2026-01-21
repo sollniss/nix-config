@@ -1,5 +1,4 @@
 {pkgs, ...}: {
-  # IME
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
@@ -30,12 +29,4 @@
       };
     };
   };
-
-  home.packages = with pkgs; [
-    vlc
-    signal-desktop
-    #anki
-  ];
-
-  home.sessionVariables.ANKI_WAYLAND = "1";
 }

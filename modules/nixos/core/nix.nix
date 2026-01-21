@@ -1,9 +1,4 @@
-{
-  inputs,
-  pkgs,
-  lib,
-  ...
-}: {
+{...}: {
   nix.settings = {
     # makes everything opening super slow on cosmic
     # also, zed doesn't open with it enabled for some reason.

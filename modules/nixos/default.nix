@@ -1,6 +1,6 @@
 {
   core = import ./core;
-  common = import ./common;
-
+  base = import ./base;
   desktops = import ./desktops;
+  wsl = import ./wsl.nix;
 }

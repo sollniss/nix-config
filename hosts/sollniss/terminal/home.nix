@@ -2,27 +2,19 @@
   inputs,
   pkgs,
   ...
-}:
-let
-	# Terminal-only config, so no UI stuff needed.
+}: let
+  # Terminal-only config, so no UI stuff needed.
   homeManagerModules = with inputs.self.homeManagerModules; [
-    #base
-    theme
+    base.terminal
+    themes.catppuccin
     programs.shelltools
     programs.helix
     programs.fish
   ];
-in
-{
+in {
   imports = homeManagerModules;
 
-  home.username = "sollniss";
-  home.homeDirectory = "/home/sollniss";
   home.stateVersion = "25.05";
-
-  programs.bash = {
-    enable = true;
-  };
 
   # Extra packages.
   home.packages = with pkgs; [
@@ -40,7 +32,7 @@ in
 
   programs.git = {
     enable = true;
-		settings.user = {
+    settings.user = {
       name = "sollniss";
       email = "sollniss@web.de";
     };

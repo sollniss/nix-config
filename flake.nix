@@ -32,6 +32,7 @@
         inherit inputs;
         vars = {
           username = "sollniss";
+          hostname = "nixos";
         };
       };
       modules = [
@@ -45,6 +46,7 @@
         inherit inputs;
         vars = {
           username = "sollniss";
+          hostname = "nixos-wsl";
         };
       };
       modules = [

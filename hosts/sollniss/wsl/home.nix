@@ -6,7 +6,7 @@
   ...
 }: let
   homeManagerModules = with inputs.self.homeManagerModules; [
-    base.shell
+    base.terminal
     themes.catppuccin
 
     programs.shelltools
@@ -16,14 +16,7 @@
 in {
   imports = homeManagerModules;
 
-  programs.home-manager.enable = true;
-  home.username = vars.username;
-  home.homeDirectory = "/home/${vars.username}";
   home.stateVersion = "25.05";
-
-  programs.bash = {
-    enable = true;
-  };
 
   # Extra packages.
   home.packages = with pkgs; [
