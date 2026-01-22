@@ -1,14 +1,14 @@
 {
   osConfig,
+  config,
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   programs.starship = {
     enable = true;
-    enableBashIntegration = true;
-    enableFishIntegration = true;
+    enableBashIntegration = config.programs.bash.enable;
+    enableFishIntegration = config.programs.fish.enable;
   };
 
   # ls alternative
@@ -30,8 +30,8 @@
   # cd alternative
   programs.zoxide = {
     enable = true;
-    enableBashIntegration = true;
-    enableFishIntegration = true;
+    enableBashIntegration = config.programs.bash.enable;
+    enableFishIntegration = config.programs.fish.enable;
     options = [
       "--cmd cd" # alias to cd
     ];
@@ -40,14 +40,14 @@
   # tree alternative
   programs.broot = {
     enable = true;
-    enableBashIntegration = true;
-    enableFishIntegration = true;
+    enableBashIntegration = config.programs.bash.enable;
+    enableFishIntegration = config.programs.fish.enable;
   };
 
   programs.fzf = {
     enable = true;
-    enableBashIntegration = true;
-    enableFishIntegration = true;
+    enableBashIntegration = config.programs.bash.enable;
+    enableFishIntegration = config.programs.fish.enable;
 
     defaultCommand = "fd --type f";
   };

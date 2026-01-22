@@ -1,6 +1,6 @@
 {config, ...}: {
   programs.zed-editor = {
-    extraPackages = config.dev.go.neededPackages;
+    extraPackages = config.dev.nix.neededPackages;
     extensions = ["nix"];
     userSettings = {
       languages = {

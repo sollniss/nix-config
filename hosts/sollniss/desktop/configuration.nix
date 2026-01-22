@@ -26,15 +26,6 @@ in {
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    bash
-
-    #qmk
-    #via
-  ];
-
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 

@@ -1,14 +1,8 @@
-{
-  lib,
-  inputs,
-  ...
-}: {
+{inputs, ...}: {
   imports = [
     inputs.catppuccin.homeModules.catppuccin
   ];
 
-  #config = lib.mkMerge [
-  #{
   catppuccin = {
     enable = true;
     cursors.enable = true;
@@ -22,10 +16,8 @@
     eza.enable = false;
     starship.enable = false;
   };
-  #}
 
   # Firefox
-  #{
   programs.firefox.policies.ExtensionSettings = {
     "{76aabc99-c1a8-4c1e-832b-d4f2941d5a7a}" = {
       install_url = "https://addons.mozilla.org/firefox/downloads/latest/catppuccin-mocha-mauve-git/latest.xpi";
@@ -37,15 +29,10 @@
   #}
 
   # WezTerm
-  #{
   programs.wezterm.extraConfig = ''
     config.color_scheme = "Catppuccin Mocha"
   '';
-  #}
 
   # KeePassXC
-  #{
   programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
-  #}
-  #];
 }

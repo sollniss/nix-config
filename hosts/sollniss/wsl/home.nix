@@ -12,6 +12,9 @@
     programs.shelltools
     programs.fish
     programs.helix
+
+    dev.go
+    dev.nix
   ];
 in {
   imports = homeManagerModules;
@@ -19,32 +22,14 @@ in {
   home.stateVersion = "25.05";
 
   # Extra packages.
-  home.packages = with pkgs; [
-    # development
-    gopls # Go LSP
-    gofumpt
-    gcc
-    delve
-    #nil # Nix LSP
-    nixd
-    alejandra
-  ];
+  #home.packages = with pkgs; [
+  #];
 
   programs.zed-editor = {
     installRemoteServer = true;
   };
 
-  # Extra programs.
-  programs.go = {
-    enable = true;
-    env = {
-      GOPATH = "${config.home.homeDirectory}/go";
-      GOBIN = "${config.home.homeDirectory}/go/bin";
-    };
-  };
-
   programs.git = {
-    enable = true;
     settings.user = {
       name = "sollniss";
       email = "sollniss@web.de";

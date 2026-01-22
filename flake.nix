@@ -50,11 +50,6 @@
         };
       };
       modules = [
-        nixos-wsl.nixosModules.default
-        {
-          system.stateVersion = "25.05";
-          wsl.enable = true;
-        }
         ./hosts/sollniss/wsl/configuration.nix
         catppuccin.nixosModules.catppuccin
       ];

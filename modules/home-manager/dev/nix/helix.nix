@@ -1,11 +1,6 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   programs.helix = {
-    extraPackages = config.dev.go.neededPackages;
-
+    extraPackages = config.dev.nix.neededPackages;
     languages.language = [
       {
         name = "nix";
