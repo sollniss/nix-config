@@ -1,23 +1,10 @@
 {pkgs, ...}: {
   programs.zed-editor = {
     enable = true;
-    extraPackages = with pkgs; [
-      # Go
-      gopls
-      gotools
-      golangci-lint
-      gofumpt
-      delve
-      gcc # required by golangci-lint
-
-      # Nix
-      nixd
-      alejandra
-      #nixfmt
-    ];
+    #extraPackages = with pkgs; [];
     #installRemoteServer = true;
 
-    extensions = ["nix" "make" "golangci-lint" "gosum"];
+    extensions = ["make"];
     #mutableUserSettings = false;
     userSettings = {
       terminal = {
@@ -35,48 +22,8 @@
         metrics = false;
       };
       format_on_save = "on";
-      lsp = {
-        gopls = {
-          initialization_options = {
-            gofumpt = true;
-          };
-        };
-        golangci-lint = {
-          initialization_options = {
-            command = [
-              "golangci-lint"
-              "run"
-              "--output.json.path=stdout"
-              "--issues-exit-code=1"
-              "--show-stats=false"
-            ];
-          };
-        };
-      };
-      languages = {
-        Nix = {
-          language_servers = ["nixd"];
-          tab_size = 2;
-          format_on_save = "on";
-          formatter = {
-            external = {
-              command = "alejandra";
-              #command = "nixfmt";
-              #arguments = ["--quiet" "--"];
-            };
-          };
-        };
-        Go = {
-          language_servers = ["gopls" "golangci-lint"];
-          tab_size = 4;
-          format_on_save = "on";
-          formatter = {
-            external = {
-              command = "gofumpt";
-            };
-          };
-        };
-      };
+      #lsp = {};
+      #languages = {};
     };
   };
 }

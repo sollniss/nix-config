@@ -1,26 +1,42 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  # Append one or more language servers to every configured language.
+  #
+  # - Only touches entries in `languages.language`.
+  # - Preserves any existing per-language `language-servers`.
+  # - Deduplicates while maintaining order (existing servers first).
+  appendLanguageServersToAllLanguages =
+    serversToAppend:
+    languages:
+    let
+      ensureForLanguage =
+        lang:
+        let
+          existing = lang.language-servers or [ ];
+        in
+        lang
+        // {
+          language-servers = lib.lists.unique (existing ++ serversToAppend);
+        };
+    in
+    languages
+    // {
+      language = map ensureForLanguage (languages.language or [ ]);
+    };
+in {
   programs.helix = {
     enable = true;
     extraPackages = with pkgs; [
       # Common stuff
       bash-language-server
       helix-gpt
-
-      # Go
-      gopls
-      gotools
-      golangci-lint
-      golangci-lint-langserver
-      delve
-      gcc # required by golangci-lint
-
-      # Nix
-      #nil
-      nixd
-      alejandra
     ];
 
-    languages = {
+    languages = appendLanguageServersToAllLanguages [ "gpt" ] {
       language-server.biome = {
         command = "biome";
         args = ["lsp-proxy"];
@@ -31,21 +47,7 @@
         args = ["--handler" "copilot"];
       };
 
-      language = [
-        {
-          name = "go";
-          language-servers = ["gopls" "golangci-lint-lsp" "gpt"];
-          auto-format = true;
-        }
-        {
-          name = "nix";
-          language-servers = ["nixd" "gpt"];
-          formatter = {
-            command = "alejandra";
-          };
-          auto-format = true;
-        }
-      ];
+      #language = [];
     };
   };
 }

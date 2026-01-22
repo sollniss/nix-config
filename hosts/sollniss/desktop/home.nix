@@ -28,6 +28,7 @@
     programs.helix
 
     dev.go
+    dev.nix
   ];
 in {
   imports =
@@ -59,11 +60,6 @@ in {
 
   # Extra packages.
   home.packages = with pkgs; [
-    # development
-    #gopls # Go LSP
-    #gcc
-    #nil # Nix LSP
-    #nixd
     #google-chrome
 
     # minecraft
