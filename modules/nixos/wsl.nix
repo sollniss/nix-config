@@ -19,6 +19,8 @@
     };
   };
 
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
   services = {
     xserver.enable = lib.mkForce false;
     openssh.enable = lib.mkForce false;

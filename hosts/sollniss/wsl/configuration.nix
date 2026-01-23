@@ -31,7 +31,6 @@ in {
   home-manager.users.${vars.username} = {
     imports = [
       ./home.nix
-      inputs.catppuccin.homeModules.catppuccin
     ];
   };
 }

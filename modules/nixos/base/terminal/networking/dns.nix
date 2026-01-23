@@ -1,6 +1,6 @@
 {...}: let
   dnsServers = [
-    # Quad9
+    # Quad9 (https://on.quad9.net/)
     "2620:fe::fe"
     "2620:fe::9"
     "9.9.9.9"
@@ -14,7 +14,6 @@
   ];
 in {
   networking = {
-    hostName = "nixos";
     nameservers = dnsServers;
     networkmanager = {
       # Either of these two should be enough to force the nameservers.

@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   programs.firefox = {
     enable = true;
     # Options https://mozilla.github.io/policy-templates/
@@ -234,9 +234,11 @@
           "browser.startup.page" = "3";
           # highlight all search results by default
           "findbar.highlightAll" = true;
+          # dev console on the right
+          "devtools.toolbox.host" = "right";
           # hide bookmark toolbar
           "browser.toolbars.bookmarks.visibility" = "never";
-          # enable auto scroll
+          # enable auto scroll with middle click
           "general.autoScroll" = true;
           # new tab page
           "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
@@ -247,22 +249,52 @@
           #    url = "https://nixos.org";
           #  }
           #];
-          # activate vertical sidebar
+          "browser.download.lastDir" = "${config.home.homeDirectory}/Downloads";
+          # vertical sidebar
           "sidebar.revamp" = true;
           "sidebar.verticalTabs" = true;
+          # split tabs
+          "browser.tabs.splitView.enabled" = true;
+
+          # sync bookmarks, history and open tabs only
+          "services.sync.declinedEngines" = "addons,passwords,prefs,addresses,creditcards";
+          "services.sync.engine.bookmarks" = true; # default
+          "services.sync.engine.history" = true; # default
+          "services.sync.engine.tabs" = true; # default
+          "services.sync.engine.addons" = false;
+          "services.sync.engine.addresses" = false; # default
+          "services.sync.engine.passwords" = false;
+          "services.sync.engine.prefs" = false;
+          "services.sync.engine.prefs.modified" = false;
+          "services.sync.engine.creditcards" = false; # default
 
           # disable first time use flags
           "browser.aboutConfig.showWarning" = false;
-          "browser.engagement.sidebar-button.has-used" = true;
           "browser.toolbarbuttons.introduced.sidebar-button" = true;
           "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
           "trailhead.firstrun.didSeeAboutWelcome" = true;
+          "browser.download.panel.shown" = true;
+          "browser.eme.ui.firstContentShown" = true;
+          "browser.engagement.ctrlTab.has-used" = true;
+          "browser.engagement.downloads-button.has-used" = true;
+          "browser.engagement.library-button.has-used" = true;
+          "browser.engagement.sidebar-button.has-used" = true;
+          "devtools.everOpened" = true;
+          "devtools.inspector.simple-highlighters.message-dismissed" = true;
+
+          # Hardening
 
           # https://wiki.archlinux.org/title/Firefox/Privacy#Disable/enforce_'Trusted_Recursive_Resolver'
           "network.dns.echconfig.enabled" = true;
           "network.dns.http3_echconfig.enabled" = true;
           "network.trr.mode" = 2;
           "network.trr.uri" = "https://dns.quad9.net/dns-query";
+
+          # Use Punycode in Internationalized Domain Names to eliminate possible spoofing
+          "network.IDN_show_punycode" = true;
+
+          "privacy.fingerprintingProtection" = true;
+          "privacy.trackingprotection.enabled" = true;
         };
       };
     };
