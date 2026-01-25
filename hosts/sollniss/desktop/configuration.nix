@@ -6,8 +6,7 @@
 }: let
   nixosModules = with inputs.self.nixosModules; [
     core
-    base.terminal
-    base.gui
+    base
 
     desktops.cosmic
   ];
@@ -28,14 +27,14 @@ in {
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 
-  users.users.${config.meta.profile.username} = {
+  users.users.${config.prefs.profile.username} = {
     isNormalUser = true;
-    description = config.meta.profile.username;
+    description = config.prefs.profile.username;
     extraGroups = ["networkmanager" "wheel"];
   };
 
-  #home-manager.users.${config.meta.profile.username} = import ./home.nix;
-  home-manager.users.${config.meta.profile.username} = {
+  #home-manager.users.${config.prefs.profile.username} = import ./home.nix;
+  home-manager.users.${config.prefs.profile.username} = {
     imports = [
       ./home.nix
     ];

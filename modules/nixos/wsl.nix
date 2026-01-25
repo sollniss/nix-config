@@ -11,7 +11,7 @@
 
   wsl = {
     enable = true;
-    defaultUser = config.meta.profile.username;
+    defaultUser = config.prefs.profile.username;
     startMenuLaunchers = true;
     interop = {
       includePath = false;

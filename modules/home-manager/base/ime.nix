@@ -1,6 +1,10 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   i18n.inputMethod = {
-    enable = true;
+    enable = config.prefs.profile.graphical.enable;
     type = "fcitx5";
     fcitx5 = {
       waylandFrontend = true;

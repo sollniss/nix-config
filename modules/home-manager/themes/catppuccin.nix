@@ -1,11 +1,15 @@
-{inputs, ...}: {
+{
+  inputs,
+  config,
+  ...
+}: {
   imports = [
     inputs.catppuccin.homeModules.catppuccin
   ];
 
   catppuccin = {
     enable = true;
-    cursors.enable = true;
+    cursors.enable = config.prefs.profile.graphical.enable;
 
     # Below apps are broken. Use custom setting.
     firefox.enable = false;

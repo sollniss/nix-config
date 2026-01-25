@@ -336,7 +336,8 @@ in {
         {
           assertion = let
             lastOpenedProfiles = lib.filterAttrs (_: prof: prof.lastOpened) cfg.profiles;
-          in lib.length (lib.attrNames lastOpenedProfiles) <= 1;
+          in
+            lib.length (lib.attrNames lastOpenedProfiles) <= 1;
           message = ''
             Only one profile can be marked as last opened in `programs.ankiCustom.profiles`.
           '';

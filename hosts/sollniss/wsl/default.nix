@@ -3,7 +3,7 @@
     ./configuration.nix
   ];
 
-  meta.profile = {
+  prefs.profile = {
     username = "sollniss";
     hostname = "nixos-wsl";
     graphical.enable = false;

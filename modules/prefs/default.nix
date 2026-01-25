@@ -1,7 +1,7 @@
 {lib, ...}: let
   inherit (lib) mkEnableOption mkOption types;
 in {
-  options.meta.profile = {
+  options.prefs.profile = {
     username = mkOption {
       type = types.str;
       description = "Primary username for this configuration (used across NixOS/Home Manager).";

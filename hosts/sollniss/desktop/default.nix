@@ -1,9 +1,10 @@
-{...}: {
+{inputs, ...}: {
   imports = [
+    inputs.self.prefs
     ./configuration.nix
   ];
 
-  meta.profile = {
+  prefs.profile = {
     username = "sollniss";
     hostname = "nixos";
     graphical.enable = true;

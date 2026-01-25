@@ -5,10 +5,8 @@
   ...
 }: let
   homeManagerModules = with inputs.self.homeManagerModules; [
-    base.terminal
-    base.gui
-    themes.gui
-    themes.catppuccin
+    base
+    themes
 
     desktops.cosmic
 

@@ -18,9 +18,7 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
-    nixos-wsl,
     home-manager,
     catppuccin,
     ...
@@ -32,7 +30,7 @@
         inherit inputs;
       };
       modules = [
-        ./modules/meta
+        #./modules/prefs
         ./hosts/sollniss/desktop
         catppuccin.nixosModules.catppuccin
       ];
@@ -43,7 +41,6 @@
         inherit inputs;
       };
       modules = [
-        ./modules/meta
         ./hosts/sollniss/wsl
         catppuccin.nixosModules.catppuccin
       ];
@@ -56,11 +53,12 @@
         inherit inputs;
       };
       modules = [
-        ./modules/meta
+        #./modules/prefs
         ./hosts/sollniss/terminal
       ];
     };
 
+    prefs = ./modules/prefs;
     nixosModules = import ./modules/nixos;
     homeManagerModules = import ./modules/home-manager;
   };
