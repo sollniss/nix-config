@@ -30,13 +30,10 @@
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       specialArgs = {
         inherit inputs;
-        vars = {
-          username = "sollniss";
-          hostname = "nixos";
-        };
       };
       modules = [
-        ./hosts/sollniss/desktop/configuration.nix
+        ./modules/meta
+        ./hosts/sollniss/desktop
         catppuccin.nixosModules.catppuccin
       ];
     };
@@ -44,13 +41,10 @@
     nixosConfigurations.nixos-wsl = nixpkgs.lib.nixosSystem {
       specialArgs = {
         inherit inputs;
-        vars = {
-          username = "sollniss";
-          hostname = "nixos-wsl";
-        };
       };
       modules = [
-        ./hosts/sollniss/wsl/configuration.nix
+        ./modules/meta
+        ./hosts/sollniss/wsl
         catppuccin.nixosModules.catppuccin
       ];
     };
@@ -60,12 +54,10 @@
     homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
       specialArgs = {
         inherit inputs;
-        vars = {
-          username = "sollniss";
-        };
       };
       modules = [
-        ./hosts/sollniss/terminal/home.nix
+        ./modules/meta
+        ./hosts/sollniss/terminal
       ];
     };
 

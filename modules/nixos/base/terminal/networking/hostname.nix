@@ -1,5 +1,5 @@
-{vars, ...}: {
+{config, ...}: {
   networking = {
-    hostName = vars.hostname;
+    hostName = config.meta.profile.hostname;
   };
 }

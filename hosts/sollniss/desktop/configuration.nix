@@ -1,6 +1,5 @@
 {
   inputs,
-  vars,
   pkgs,
   config,
   ...
@@ -29,14 +28,14 @@ in {
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 
-  users.users.${vars.username} = {
+  users.users.${config.meta.profile.username} = {
     isNormalUser = true;
-    description = vars.username;
+    description = config.meta.profile.username;
     extraGroups = ["networkmanager" "wheel"];
   };
 
-  #home-manager.users.${vars.username} = import ./home.nix;
-  home-manager.users.${vars.username} = {
+  #home-manager.users.${config.meta.profile.username} = import ./home.nix;
+  home-manager.users.${config.meta.profile.username} = {
     imports = [
       ./home.nix
     ];

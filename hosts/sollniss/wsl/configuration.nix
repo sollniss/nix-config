@@ -3,6 +3,7 @@
 {
   inputs,
   vars,
+  config,
   ...
 }: let
   nixosModules = with inputs.self.nixosModules; [
@@ -25,10 +26,10 @@ in {
   #  enable = true;
   #  clean.enable = true;
   #  clean.extraArgs = "--keep-since 4d --keep 3";
-  #  flake = "/home/${vars.username}/nix-config"; # Sets NH_OS_FLAKE variable
+  #  flake = "/home/${config.meta.profile.username}/nix-config"; # Sets NH_OS_FLAKE variable
   #};
 
-  home-manager.users.${vars.username} = {
+  home-manager.users.${config.meta.profile.username} = {
     imports = [
       ./home.nix
     ];

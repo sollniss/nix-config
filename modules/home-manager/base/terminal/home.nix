@@ -1,6 +1,6 @@
-{vars, ...}: {
+{config, ...}: {
   home = {
-    username = vars.username;
-    homeDirectory = "/home/${vars.username}";
+    username = config.meta.profile.username;
+    homeDirectory = "/home/${config.meta.profile.username}";
   };
 }

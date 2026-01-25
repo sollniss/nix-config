@@ -1,6 +1,6 @@
 {
   inputs,
-  vars,
+  config,
   lib,
   pkgs,
   ...
@@ -11,7 +11,7 @@
 
   wsl = {
     enable = true;
-    defaultUser = vars.username;
+    defaultUser = config.meta.profile.username;
     startMenuLaunchers = true;
     interop = {
       includePath = false;
