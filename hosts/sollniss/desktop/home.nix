@@ -16,7 +16,7 @@
     programs.firefox
     programs.keepassxc
     programs.thunderbird
-    programs.vscode
+    #programs.vscode
     programs.zed
     programs.wezterm
 
