@@ -3,7 +3,8 @@
   lib,
   config,
   ...
-}: {
+}:
+{
   config = lib.mkIf config.prefs.profile.graphical.enable {
     home.packages = with pkgs; [
       # Default fonts.

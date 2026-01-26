@@ -4,13 +4,15 @@
   inputs,
   config,
   ...
-}: let
+}:
+let
   nixosModules = with inputs.self.nixosModules; [
     core
     base
     wsl
   ];
-in {
+in
+{
   #imports = [
   #  #./hardware-configuration.nix
   #] ++ nixosModules;

@@ -2,7 +2,8 @@
   inputs,
   config,
   ...
-}: {
+}:
+{
   imports = [
     inputs.catppuccin.homeModules.catppuccin
   ];

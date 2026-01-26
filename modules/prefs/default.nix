@@ -1,6 +1,8 @@
-{lib, ...}: let
+{ lib, ... }:
+let
   inherit (lib) mkEnableOption mkOption types;
-in {
+in
+{
   options.prefs.profile = {
     username = mkOption {
       type = types.str;

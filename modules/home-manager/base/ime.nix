@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   i18n.inputMethod = {
     enable = config.prefs.profile.graphical.enable;
     type = "fcitx5";

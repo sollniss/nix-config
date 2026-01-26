@@ -3,7 +3,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   config = {
     home = lib.mkIf config.prefs.profile.graphical.enable {
       packages = with pkgs; [

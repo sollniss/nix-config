@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   time = {
     timeZone = "Asia/Tokyo";
   };

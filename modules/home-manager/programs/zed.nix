@@ -1,17 +1,21 @@
-{pkgs, ...}: {
+{ ... }:
+{
   programs.zed-editor = {
     enable = true;
     #extraPackages = with pkgs; [];
     #installRemoteServer = true;
 
-    extensions = ["make"];
+    extensions = [
+      "make"
+      "toml"
+    ];
     #mutableUserSettings = false;
     userSettings = {
       terminal = {
         shell = {
           with_arguments = {
             program = "fish";
-            args = ["-i"];
+            args = [ "-i" ];
           };
         };
       };

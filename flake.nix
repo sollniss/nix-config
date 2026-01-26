@@ -17,49 +17,70 @@
     };
   };
 
-  outputs = {
-    nixpkgs,
-    home-manager,
-    catppuccin,
-    ...
-  } @ inputs: {
-    # sudo nixos-rebuild switch --flake .#nixos
-    # sudo nixos-rebuild switch --flake github:sollniss/nix-config#nixos
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      specialArgs = {
-        inherit inputs;
-      };
-      modules = [
-        #./modules/prefs
-        ./hosts/sollniss/desktop
-        catppuccin.nixosModules.catppuccin
-      ];
-    };
+  outputs =
+    {
+      nixpkgs,
+      home-manager,
+      catppuccin,
+      ...
+    }@inputs:
+    {
+      formatter.x86_64-linux =
+        with nixpkgs.legacyPackages.x86_64-linux;
+        treefmt.withConfig {
+          runtimeInputs = [
+            nixfmt
+          ];
 
-    nixosConfigurations.nixos-wsl = nixpkgs.lib.nixosSystem {
-      specialArgs = {
-        inherit inputs;
-      };
-      modules = [
-        ./hosts/sollniss/wsl
-        catppuccin.nixosModules.catppuccin
-      ];
-    };
+          settings = {
+            on-unmatched = "info";
+            tree-root-file = "flake.nix";
 
-    # home-manager switch --flake .#terminal
-    # home-manager switch --flake github:sollniss/nix-config#terminal
-    homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
-      specialArgs = {
-        inherit inputs;
+            formatter = {
+              nixfmt = {
+                command = "nixfmt";
+                includes = [ "*.nix" ];
+              };
+            };
+          };
+        };
+      # sudo nixos-rebuild switch --flake .#nixos
+      # sudo nixos-rebuild switch --flake github:sollniss/nix-config#nixos
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          #./modules/prefs
+          ./hosts/sollniss/desktop
+          catppuccin.nixosModules.catppuccin
+        ];
       };
-      modules = [
-        #./modules/prefs
-        ./hosts/sollniss/terminal
-      ];
-    };
 
-    prefs = ./modules/prefs;
-    nixosModules = import ./modules/nixos;
-    homeManagerModules = import ./modules/home-manager;
-  };
+      nixosConfigurations.nixos-wsl = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/sollniss/wsl
+          catppuccin.nixosModules.catppuccin
+        ];
+      };
+
+      # home-manager switch --flake .#terminal
+      # home-manager switch --flake github:sollniss/nix-config#terminal
+      homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          #./modules/prefs
+          ./hosts/sollniss/terminal
+        ];
+      };
+
+      prefs = ./modules/prefs;
+      nixosModules = import ./modules/nixos;
+      homeManagerModules = import ./modules/home-manager;
+    };
 }

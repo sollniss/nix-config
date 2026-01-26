@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   programs.firefox = {
     enable = true;
     # Options https://mozilla.github.io/policy-templates/

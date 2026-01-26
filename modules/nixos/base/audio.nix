@@ -1,6 +1,8 @@
-{config, ...}: let
+{ config, ... }:
+let
   enable = config.prefs.profile.graphical.enable;
-in {
+in
+{
   services = {
     pulseaudio.enable = false;
     pipewire = {

@@ -1,4 +1,5 @@
-{...}: let
+{ ... }:
+let
   dnsServers = [
     # Quad9 (https://on.quad9.net/)
     "2620:fe::fe"
@@ -12,7 +13,8 @@
     #"1.1.1.1"
     #"1.0.0.1"
   ];
-in {
+in
+{
   networking = {
     nameservers = dnsServers;
     networkmanager = {

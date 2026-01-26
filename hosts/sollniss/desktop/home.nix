@@ -3,7 +3,8 @@
   pkgs,
   config,
   ...
-}: let
+}:
+let
   homeManagerModules = with inputs.self.homeManagerModules; [
     base
     themes
@@ -28,12 +29,11 @@
     dev.go
     dev.nix
   ];
-in {
-  imports =
-    homeManagerModules
-    ++ [
-      ../../../modules/home-manager/programs/ankiCustom
-    ];
+in
+{
+  imports = homeManagerModules ++ [
+    ../../../modules/home-manager/programs/ankiCustom
+  ];
 
   #programs.anki = {
   #  enable = true;
@@ -51,7 +51,7 @@ in {
     profiles.mzh.sync = {
       username = "mzh";
     };
-    profiles.sollniss.lastOpened = true;
+    profiles.sollniss.default = true;
   };
 
   home.stateVersion = "25.05";
@@ -88,15 +88,15 @@ in {
       folders = {
         "${config.home.homeDirectory}/sync/keepass" = {
           id = "crijs-3d7pa";
-          devices = ["phone"];
+          devices = [ "phone" ];
         };
         "${config.home.homeDirectory}/sync/photos" = {
           id = "0zloo-2xerr";
-          devices = ["phone"];
+          devices = [ "phone" ];
         };
         "${config.home.homeDirectory}/sync/memos" = {
           id = "p7pmi-8794o";
-          devices = ["phone"];
+          devices = [ "phone" ];
         };
       };
     };

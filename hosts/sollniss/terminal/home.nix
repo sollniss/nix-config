@@ -2,7 +2,8 @@
   inputs,
   pkgs,
   ...
-}: let
+}:
+let
   # Terminal-only config, so no UI stuff needed.
   homeManagerModules = with inputs.self.homeManagerModules; [
     base.terminal
@@ -11,7 +12,8 @@
     programs.helix
     programs.fish
   ];
-in {
+in
+{
   imports = homeManagerModules;
 
   home.stateVersion = "25.05";

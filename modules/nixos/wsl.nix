@@ -4,7 +4,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     inputs.nixos-wsl.nixosModules.default
   ];

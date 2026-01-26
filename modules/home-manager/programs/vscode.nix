@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.vscode = {
     enable = true;
     profiles.default = {
@@ -9,7 +10,7 @@
       userSettings = {
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nixd";
-        "nix.serverSettings"."nixd"."formatting"."command" = ["${pkgs.alejandra}/bin/alejandra"];
+        "nix.serverSettings"."nixd"."formatting"."command" = [ "${pkgs.alejandra}/bin/alejandra" ];
         "[nix]"."editor.tabSize" = 2;
 
         "explorer.confirmDelete" = false;

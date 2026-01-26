@@ -1,7 +1,11 @@
-{config, ...}: {
+{ config, ... }:
+{
   programs.zed-editor = {
     extraPackages = config.dev.go.neededPackages;
-    extensions = ["golangci-lint" "gosum"];
+    extensions = [
+      "golangci-lint"
+      "gosum"
+    ];
     userSettings = {
       lsp = {
         gopls = {
@@ -23,7 +27,10 @@
       };
       languages = {
         Go = {
-          language_servers = ["gopls" "golangci-lint"];
+          language_servers = [
+            "gopls"
+            "golangci-lint"
+          ];
           tab_size = 4;
           format_on_save = "on";
           formatter = {

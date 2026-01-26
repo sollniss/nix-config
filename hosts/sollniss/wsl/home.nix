@@ -1,4 +1,5 @@
-{inputs, ...}: let
+{ inputs, ... }:
+let
   homeManagerModules = with inputs.self.homeManagerModules; [
     base
     themes
@@ -10,7 +11,8 @@
     dev.go
     dev.nix
   ];
-in {
+in
+{
   imports = homeManagerModules;
 
   home.stateVersion = "25.05";

@@ -3,15 +3,15 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   # Append one or more language servers to every configured language.
   #
   # - Only touches entries in `languages.language`.
   # - Preserves any existing per-language `language-servers`.
   # - Deduplicates while maintaining order (existing servers first).
   appendLanguageServersToAllLanguages =
-    serversToAppend:
-    languages:
+    serversToAppend: languages:
     let
       ensureForLanguage =
         lang:
@@ -27,7 +27,8 @@
     // {
       language = map ensureForLanguage (languages.language or [ ]);
     };
-in {
+in
+{
   programs.helix = {
     enable = true;
     extraPackages = with pkgs; [
@@ -39,12 +40,15 @@ in {
     languages = appendLanguageServersToAllLanguages [ "gpt" ] {
       language-server.biome = {
         command = "biome";
-        args = ["lsp-proxy"];
+        args = [ "lsp-proxy" ];
       };
 
       language-server.gpt = {
         command = "helix-gpt";
-        args = ["--handler" "copilot"];
+        args = [
+          "--handler"
+          "copilot"
+        ];
       };
 
       #language = [];

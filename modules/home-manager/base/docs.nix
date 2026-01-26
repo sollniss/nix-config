@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   manual = {
     html.enable = false;
     json.enable = false;

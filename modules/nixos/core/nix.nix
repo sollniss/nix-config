@@ -1,9 +1,13 @@
-{...}: {
+{ ... }:
+{
   nix.settings = {
     # makes everything opening super slow on cosmic
     # also, zed doesn't open with it enabled for some reason.
     #auto-optimise-store = true;
-    experimental-features = ["nix-command" "flakes"];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     accept-flake-config = false;
     sandbox = true;
     use-xdg-base-directories = true;

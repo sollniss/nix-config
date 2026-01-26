@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   documentation = {
     enable = lib.mkForce false;
     dev.enable = lib.mkForce false;

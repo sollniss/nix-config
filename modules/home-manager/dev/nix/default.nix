@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./helix.nix
     ./zed.nix
@@ -13,8 +14,8 @@
     readOnly = true;
     default = with pkgs; [
       nixd
-      alejandra
-      #nixfmt
+      #alejandra
+      nixfmt
     ];
   };
 }

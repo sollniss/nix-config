@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   services = {
     xserver = {
       enable = false;
@@ -8,7 +9,7 @@
         variant = "altgr-intl";
       };
 
-      excludePackages = [pkgs.xterm];
+      excludePackages = [ pkgs.xterm ];
       desktopManager.xterm.enable = false;
     };
   };

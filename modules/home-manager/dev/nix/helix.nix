@@ -1,12 +1,13 @@
-{config, ...}: {
+{ config, ... }:
+{
   programs.helix = {
     extraPackages = config.dev.nix.neededPackages;
     languages.language = [
       {
         name = "nix";
-        language-servers = ["nixd"];
+        language-servers = [ "nixd" ];
         formatter = {
-          command = "alejandra";
+          command = "nixfmt";
         };
         auto-format = true;
       }

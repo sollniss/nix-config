@@ -3,19 +3,20 @@
   pkgs,
   config,
   ...
-}: let
+}:
+let
   nixosModules = with inputs.self.nixosModules; [
     core
     base
 
     desktops.cosmic
   ];
-in {
-  imports =
-    [
-      ./hardware-configuration.nix
-    ]
-    ++ nixosModules;
+in
+{
+  imports = [
+    ./hardware-configuration.nix
+  ]
+  ++ nixosModules;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -30,7 +31,10 @@ in {
   users.users.${config.prefs.profile.username} = {
     isNormalUser = true;
     description = config.prefs.profile.username;
-    extraGroups = ["networkmanager" "wheel"];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
   };
 
   #home-manager.users.${config.prefs.profile.username} = import ./home.nix;

@@ -2,7 +2,8 @@
   inputs,
   osConfig,
   ...
-}: {
+}:
+{
   imports = [
     inputs.self.prefs
   ];

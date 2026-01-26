@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   programs.fish = {
     enable = true;
 
@@ -8,7 +9,7 @@
 
     functions = {
       nixdiff = {
-        argumentNames = ["arg"];
+        argumentNames = [ "arg" ];
         body = ''
           if test -z "$arg"
               set arg 0
@@ -42,7 +43,7 @@
         '';
       };
       extract = {
-        argumentNames = ["file"];
+        argumentNames = [ "file" ];
         body = ''
           if not test -f "$file"
               echo "'$file' is not a valid file"
@@ -89,7 +90,7 @@
   programs.zed-editor.userSettings.terminal.shell = {
     with_arguments = {
       program = "fish";
-      args = ["-i"];
+      args = [ "-i" ];
     };
   };
 }

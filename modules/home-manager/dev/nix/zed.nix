@@ -1,18 +1,19 @@
-{config, ...}: {
+{ config, ... }:
+{
   programs.zed-editor = {
     extraPackages = config.dev.nix.neededPackages;
-    extensions = ["nix"];
+    extensions = [ "nix" ];
     userSettings = {
       languages = {
         Nix = {
-          language_servers = ["nixd"];
+          language_servers = [ "nixd" ];
           tab_size = 2;
           format_on_save = "on";
           formatter = {
             external = {
-              command = "alejandra";
+              #command = "alejandra";
               #arguments = ["--quiet" "--"];
-              #command = "nixfmt";
+              command = "nixfmt";
             };
           };
         };
