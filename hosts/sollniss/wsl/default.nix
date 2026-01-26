@@ -1,5 +1,6 @@
-{...}: {
+{inputs, ...}: {
   imports = [
+    inputs.self.prefs
     ./configuration.nix
   ];
 

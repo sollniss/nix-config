@@ -42,6 +42,10 @@
     enable = true;
     enableBashIntegration = config.programs.bash.enable;
     enableFishIntegration = config.programs.fish.enable;
+
+    settings = {
+      icon_theme = "nerdfont";
+    };
   };
 
   programs.fzf = {
@@ -63,6 +67,6 @@
     cat = "bat";
     ls = "eza";
     ll = "eza -l";
-    tree = "broot";
+    tree = "br -c :pt"; # https://dystroy.org/broot/tricks/#replace-tree
   };
 }

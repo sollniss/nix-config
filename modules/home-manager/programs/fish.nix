@@ -81,4 +81,15 @@
       sys = "nix run nixpkgs#fastfetch";
     };
   };
+
+  programs.wezterm.extraConfig = ''
+    config.default_prog = { 'fish', '-i' }
+  '';
+
+  programs.zed-editor.userSettings.terminal.shell = {
+    with_arguments = {
+      program = "fish";
+      args = ["-i"];
+    };
+  };
 }

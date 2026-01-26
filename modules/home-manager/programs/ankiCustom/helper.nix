@@ -117,40 +117,41 @@ let
       profile_manager.set_answer_key(ease, key)
 
     # Profile specific options
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: pCfg: ''
-    profile_manager.create("${name}")
-    profile_manager.openProfile("${name}")
+    ${lib.concatMapAttrsStringSep "\n" (name: pCfg: ''
+      profile_manager.create("${name}")
+      profile_manager.openProfile("${name}")
 
-    # Without this, the collection DB won't get automatically optimized.
-    profile_manager.profile["lastOptimize"] = None
+      # Without this, the collection DB won't get automatically optimized.
+      profile_manager.profile["lastOptimize"] = None
 
-    auto_sync: bool | None = ${pyOptionalBool pCfg.sync.autoSync}
-    if auto_sync is not None:
-      profile_manager.profile["autoSync"] = auto_sync
+      auto_sync: bool | None = ${pyOptionalBool pCfg.sync.autoSync}
+      if auto_sync is not None:
+        profile_manager.profile["autoSync"] = auto_sync
 
-    sync_media: bool | None = ${pyOptionalBool pCfg.sync.syncMedia}
-    if sync_media is not None:
-      profile_manager.profile["syncMedia"] = sync_media
+      sync_media: bool | None = ${pyOptionalBool pCfg.sync.syncMedia}
+      if sync_media is not None:
+        profile_manager.profile["syncMedia"] = sync_media
 
-    media_sync_minutes_str: str = "${toString pCfg.sync.autoSyncMediaMinutes}"
-    if media_sync_minutes_str:
-      profile_manager.set_periodic_sync_media_minutes(int(media_sync_minutes_str))
+      media_sync_minutes_str: str = "${toString pCfg.sync.autoSyncMediaMinutes}"
+      if media_sync_minutes_str:
+        profile_manager.set_periodic_sync_media_minutes(int(media_sync_minutes_str))
 
-    network_timeout_str: str = "${toString pCfg.sync.networkTimeout}"
-    if network_timeout_str:
-      profile_manager.set_network_timeout(int(network_timeout_str))
+      network_timeout_str: str = "${toString pCfg.sync.networkTimeout}"
+      if network_timeout_str:
+        profile_manager.set_network_timeout(int(network_timeout_str))
 
-    profile_manager.save()
-    '') cfg.profiles)}
+      profile_manager.save()
+    '') cfg.profiles}
 
-    last_opened_profile: str | None = ${
+    default_profile: str | None = ${
       let
-        lastOpenedProfiles = lib.filterAttrs (_: prof: prof.lastOpened) cfg.profiles;
-        lastOpenedName = if lastOpenedProfiles == {} then null else lib.head (lib.attrNames lastOpenedProfiles);
-      in if lastOpenedName == null then "None" else "'${lastOpenedName}'"
+        defaultProfiles = lib.filterAttrs (_: prof: prof.default) cfg.profiles;
+        defaultName = if defaultProfiles == { } then null else lib.head (lib.attrNames defaultProfiles);
+      in
+      if defaultName == null then "None" else "'${defaultName}'"
     }
-    if last_opened_profile is not None:
-      profile_manager.set_last_loaded_profile_name(last_opened_profile)
+    if default_profile is not None:
+      profile_manager.set_last_loaded_profile_name(default_profile)
 
     profile_manager.save()
   '';
@@ -181,32 +182,30 @@ in
       import aqt
       from pathlib import Path
 
-      profile_sync_map = {
-        ${lib.concatStringsSep ",\n      " (lib.mapAttrsToList (name: pCfg: ''
-        "${name}": {
-          "username": ${if pCfg.sync.username == null then "None" else "'${pCfg.sync.username}'"},
-          "username_file": ${if pCfg.sync.usernameFile == null then "None" else "Path('${pCfg.sync.usernameFile}')"},
-          "key_file": ${if pCfg.sync.keyFile == null then "None" else "Path('${pCfg.sync.keyFile}')"},
-          "url": ${if pCfg.sync.url == null then "None" else "'${pCfg.sync.url}'"},
-        }
-        '') cfg.profiles)}
-      }
-
       def set_server() -> None:
-        name = aqt.mw.pm.name
-        conf = profile_sync_map.get(name)
+        username: str | None
+        username_file: Path | None
+        key_file: Path | None
+        custom_sync_url: str | None
 
-        if not conf:
-          return
+        ${lib.concatMapAttrsStringSep "\n  " (name: pCfg: ''
+          if aqt.mw.pm.name == "${name}":
+              username = ${if pCfg.sync.username == null then "None" else "'${pCfg.sync.username}'"}
+              username_file = ${
+                if pCfg.sync.usernameFile == null then "None" else "Path('${pCfg.sync.usernameFile}')"
+              }
+              key_file = ${if pCfg.sync.keyFile == null then "None" else "Path('${pCfg.sync.keyFile}')"}
+              custom_sync_url = ${if pCfg.sync.url == null then "None" else "'${pCfg.sync.url}'"}
 
-        if conf["url"]:
-          aqt.mw.pm.set_custom_sync_url(conf["url"])
-        if conf["username"]:
-          aqt.mw.pm.set_sync_username(conf["username"])
-        elif conf["username_file"] and conf["username_file"].exists():
-            aqt.mw.pm.set_sync_username(conf["username_file"].read_text().strip())
-        if conf["key_file"] and conf["key_file"].exists():
-            aqt.mw.pm.set_sync_key(conf["key_file"].read_text().strip())
+              if custom_sync_url:
+                aqt.mw.pm.set_custom_sync_url(custom_sync_url)
+              if username:
+                aqt.mw.pm.set_sync_username(username)
+              elif username_file and username_file.exists():
+                aqt.mw.pm.set_sync_username(username_file.read_text().strip())
+              if key_file and key_file.exists():
+                aqt.mw.pm.set_sync_key(key_file.read_text().strip())
+        '') cfg.profiles}
 
       aqt.gui_hooks.profile_did_open.append(set_server)
     '';

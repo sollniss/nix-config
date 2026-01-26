@@ -3,103 +3,50 @@
   config,
   pkgs,
   ...
-}: let
-  helper = import ./helper.nix {inherit lib config pkgs;};
+}:
+let
+  helper = import ./helper.nix { inherit lib config pkgs; };
 
   ankiBaseDir =
-    if pkgs.stdenv.hostPlatform.isDarwin
-    then "Library/Application Support/Anki2"
-    else "${config.xdg.dataHome}/Anki2";
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "Library/Application Support/Anki2"
+    else
+      "${config.xdg.dataHome}/Anki2";
   cfg = config.programs.ankiCustom;
+in
+{
+  meta.maintainers = [ lib.maintainers.junestepp ];
 
-  # https://github.com/ankitects/anki/blob/main/qt/aqt/profiles.py#L654-L655
-  profileOpts = {
-    lastOpened = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Marks the profile as the most recently opened and open it on startup.";
-    };
-    sync = {
-      username = lib.mkOption {
-        type = with lib.types; nullOr str;
-        default = null;
-        example = "lovelearning@email.com";
-        description = "Sync account username.";
-      };
-
-      usernameFile = lib.mkOption {
-        type = with lib.types; nullOr path;
-        default = null;
-        description = "Path to a file containing the sync account username.";
-      };
-
-      keyFile = lib.mkOption {
-        type = with lib.types; nullOr path;
-        default = null;
-        description = ''
-          Path to a file containing the sync account sync key. This is different from
-          the account password.
-
-          To get the sync key, follow these steps:
-
-          - Enable this Home Manager module: `programs.anki.enable = true`
-          - Open Anki.
-          - Navigate to the sync settings page. (Tools > Preferences > Syncing)
-          - Log in to your AnkiWeb account.
-          - Select "Yes" to the prompt about saving preferences and syncing.
-          - A Home Manager warning prompt will show. Select "Show details...".
-          - Get your sync key from the message: "syncKey changed from \`None\` to \`<YOUR SYNC KEY WILL BE HERE>\`"
-        '';
-      };
-
-      url = lib.mkOption {
-        type = with lib.types; nullOr str;
-        default = null;
-        example = "http://example.com/anki-sync/";
-        description = ''
-          Custom sync server URL. See <https://docs.ankiweb.net/sync-server.html>.
-        '';
-      };
-
-      autoSync = lib.mkOption {
-        type = with lib.types; nullOr bool;
-        default = null;
-        example = true;
-        description = "Automatically sync on profile open/close.";
-      };
-
-      syncMedia = lib.mkOption {
-        type = with lib.types; nullOr bool;
-        default = null;
-        example = true;
-        description = "Synchronize audio and images too.";
-      };
-
-      autoSyncMediaMinutes = lib.mkOption {
-        type = with lib.types; nullOr ints.unsigned;
-        default = null;
-        example = 15;
-        description = ''
-          Automatically sync media every X minutes. Set this to 0 to disable
-          periodic media syncing.
-        '';
-      };
-
-      networkTimeout = lib.mkOption {
-        type = with lib.types; nullOr ints.unsigned;
-        default = null;
-        example = 60;
-        description = "Network timeout in seconds (clamped between 30 and 99999).";
-      };
-    };
-  };
-in {
-  meta.maintainers = [lib.maintainers.junestepp];
+  imports =
+    (map
+      (
+        x:
+        lib.mkRenamedOptionModule
+          [ "programs" "ankiCustom" "sync" x ]
+          [ "programs" "ankiCustom" "profiles" "User 1" "sync" x ]
+      )
+      [
+        "username"
+        "usernameFile"
+        "keyFile"
+        "url"
+        "autoSync"
+        "syncMedia"
+        "autoSyncMediaMinutes"
+        "networkTimeout"
+      ]
+    )
+    ++ [
+      (lib.mkRenamedOptionModule
+        [ "programs" "ankiCustom" "sync" "passwordFile" ]
+        [ "programs" "ankiCustom" "profiles" "User 1" "sync" "keyFile" ]
+      )
+    ];
 
   options.programs.ankiCustom = {
     enable = lib.mkEnableOption "Anki";
 
-    package = lib.mkPackageOption pkgs "anki" {};
+    package = lib.mkPackageOption pkgs "anki" { };
 
     language = lib.mkOption {
       type = lib.types.nonEmptyStr;
@@ -113,7 +60,8 @@ in {
     };
 
     videoDriver = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         nullOr (enum [
           "opengl"
           "angle"
@@ -128,7 +76,8 @@ in {
     };
 
     theme = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         nullOr (enum [
           "followSystem"
           "light"
@@ -140,7 +89,8 @@ in {
     };
 
     style = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         nullOr (enum [
           "anki"
           "native"
@@ -164,7 +114,8 @@ in {
       description = "Hide top bar during review.";
     };
     hideTopBarMode = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         nullOr (enum [
           "fullscreen"
           "always"
@@ -181,7 +132,8 @@ in {
       description = "Hide bottom bar during review.";
     };
     hideBottomBarMode = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         nullOr (enum [
           "fullscreen"
           "always"
@@ -219,7 +171,8 @@ in {
     };
 
     answerKeys = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         listOf (submodule {
           options = {
             ease = lib.mkOption {
@@ -241,7 +194,7 @@ in {
             };
           };
         });
-      default = [];
+      default = [ ];
       example = [
         {
           ease = 1;
@@ -269,7 +222,7 @@ in {
 
     addons = lib.mkOption {
       type = with lib.types; listOf package;
-      default = [];
+      default = [ ];
       example = lib.literalExpression ''
         [
           # When the add-on is already available in nixpkgs
@@ -303,89 +256,137 @@ in {
       description = "List of Anki add-on packages to install.";
     };
 
-    sync = lib.mkOption {
-      type = lib.types.submodule {
-        imports = [
-          (lib.mkRenamedOptionModule ["passwordFile"] ["keyFile"])
-        ];
-        options = profileOpts.sync;
-      };
-      default = {};
-    };
-
     profiles = lib.mkOption {
       description = "Attribute set of Anki profiles and their settings.";
       default = {
-        "User 1" = {};
+        "User 1" = { };
       };
       defaultText = lib.literalExpression ''
         {
           "User 1" = {};
         }
       '';
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = profileOpts;
-        config.sync = lib.mapAttrs (optName: _: lib.mkDefault cfg.sync.${optName}) profileOpts.sync;
-      });
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            default = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Open this profile on startup.";
+            };
+            sync = {
+              username = lib.mkOption {
+                type = with lib.types; nullOr str;
+                default = null;
+                example = "lovelearning@email.com";
+                description = "Sync account username.";
+              };
+
+              usernameFile = lib.mkOption {
+                type = with lib.types; nullOr path;
+                default = null;
+                description = "Path to a file containing the sync account username.";
+              };
+
+              keyFile = lib.mkOption {
+                type = with lib.types; nullOr path;
+                default = null;
+                description = ''
+                  Path to a file containing the sync account sync key. This is different from
+                  the account password.
+
+                  To get the sync key, follow these steps:
+
+                  - Enable this Home Manager module: `programs.anki.enable = true`
+                  - Open Anki.
+                  - Navigate to the sync settings page. (Tools > Preferences > Syncing)
+                  - Log in to your AnkiWeb account.
+                  - Select "Yes" to the prompt about saving preferences and syncing.
+                  - A Home Manager warning prompt will show. Select "Show details...".
+                  - Get your sync key from the message: "syncKey changed from \`None\` to \`<YOUR SYNC KEY WILL BE HERE>\`"
+                '';
+              };
+
+              url = lib.mkOption {
+                type = with lib.types; nullOr str;
+                default = null;
+                example = "http://example.com/anki-sync/";
+                description = ''
+                  Custom sync server URL. See <https://docs.ankiweb.net/sync-server.html>.
+                '';
+              };
+
+              autoSync = lib.mkOption {
+                type = with lib.types; nullOr bool;
+                default = null;
+                example = true;
+                description = "Automatically sync on profile open/close.";
+              };
+
+              syncMedia = lib.mkOption {
+                type = with lib.types; nullOr bool;
+                default = null;
+                example = true;
+                description = "Synchronize audio and images too.";
+              };
+
+              autoSyncMediaMinutes = lib.mkOption {
+                type = with lib.types; nullOr ints.unsigned;
+                default = null;
+                example = 15;
+                description = ''
+                  Automatically sync media every X minutes. Set this to 0 to disable
+                  periodic media syncing.
+                '';
+              };
+
+              networkTimeout = lib.mkOption {
+                type = with lib.types; nullOr ints.unsigned;
+                default = null;
+                example = 60;
+                description = "Network timeout in seconds (clamped between 30 and 99999).";
+              };
+            };
+          };
+        }
+      );
     };
   };
 
   config = lib.mkIf cfg.enable {
-    assertions =
-      [
-        {
-          assertion = let
-            lastOpenedProfiles = lib.filterAttrs (_: prof: prof.lastOpened) cfg.profiles;
+    assertions = [
+      {
+        assertion =
+          let
+            defaultProfiles = lib.filterAttrs (_: prof: prof.default) cfg.profiles;
           in
-            lib.length (lib.attrNames lastOpenedProfiles) <= 1;
-          message = ''
-            Only one profile can be marked as last opened in `programs.ankiCustom.profiles`.
-          '';
-        }
-        {
-          assertion = cfg.package ? withAddons;
-          message = ''
-            The value of `programs.anki.package` doesn't support declaratively managing
-            add-ons. Make sure you are using `pkgs.anki`.
-          '';
-        }
-      ]
-      ++ lib.mapAttrsToList (
-        name: prof: let
-          profileConflict = prof.sync.username != null && prof.sync.usernameFile != null;
-
-          # Determine where each value originates
-          usernameFromGlobal = cfg.sync.username != null && prof.sync.username == cfg.sync.username;
-          usernameFileFromGlobal = cfg.sync.usernameFile != null && prof.sync.usernameFile == cfg.sync.usernameFile;
-
-          message =
-            if usernameFromGlobal && usernameFileFromGlobal
-            then ''
-              The `programs.ankiCustom.sync` `username` option is mutually exclusive with
-              the `usernameFile` option.
-            ''
-            else if usernameFromGlobal
-            then ''
-              `programs.ankiCustom.sync.username` conflicts with
-              `programs.ankiCustom.profiles."${name}".sync.usernameFile`.
-              These options are mutually exclusive.
-            ''
-            else if usernameFileFromGlobal
-            then ''
-              `programs.ankiCustom.profiles."${name}".sync.username` conflicts with
-              `programs.ankiCustom.sync.usernameFile`.
-              These options are mutually exclusive.
-            ''
-            else ''
-              The `programs.ankiCustom.profiles."${name}".sync` `username` option is mutually exclusive with
-              the `usernameFile` option.
-            '';
-        in {
-          assertion = !profileConflict;
-          message = message;
-        }
-      )
-      cfg.profiles;
+          lib.length (lib.attrNames defaultProfiles) <= 1;
+        message = ''
+          Only one profile in `programs.ankiCustom.profiles` can be marked as default.
+        '';
+      }
+      {
+        assertion = cfg.package ? withAddons;
+        message = ''
+          The value of `programs.anki.package` doesn't support declaratively managing
+          add-ons. Make sure you are using `pkgs.anki`.
+        '';
+      }
+    ]
+    ++ lib.mapAttrsToList (
+      name: prof:
+      let
+        profileConflict = prof.sync.username != null && prof.sync.usernameFile != null;
+        message = ''
+          The `programs.ankiCustom.profiles."${name}".sync` `username` option is mutually exclusive with
+          the `usernameFile` option.
+        '';
+      in
+      {
+        assertion = !profileConflict;
+        message = message;
+      }
+    ) cfg.profiles;
 
     home.packages = [
       (cfg.package.withAddons (

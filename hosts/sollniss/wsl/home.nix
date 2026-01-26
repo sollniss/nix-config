@@ -1,13 +1,7 @@
-{
-  inputs,
-  vars,
-  pkgs,
-  config,
-  ...
-}: let
+{inputs, ...}: let
   homeManagerModules = with inputs.self.homeManagerModules; [
-    base.terminal
-    themes.catppuccin
+    base
+    themes
 
     programs.shelltools
     programs.fish

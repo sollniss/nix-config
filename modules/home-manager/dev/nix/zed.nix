@@ -11,8 +11,8 @@
           formatter = {
             external = {
               command = "alejandra";
-              #command = "nixfmt";
               #arguments = ["--quiet" "--"];
+              #command = "nixfmt";
             };
           };
         };

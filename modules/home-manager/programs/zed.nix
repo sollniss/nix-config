@@ -26,4 +26,8 @@
       #languages = {};
     };
   };
+
+  home.shellAliases = {
+    zed = "zeditor";
+  };
 }

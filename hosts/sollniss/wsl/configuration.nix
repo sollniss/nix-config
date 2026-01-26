@@ -2,7 +2,6 @@
 # https://github.com/nix-community/NixOS-WSL
 {
   inputs,
-  vars,
   config,
   ...
 }: let

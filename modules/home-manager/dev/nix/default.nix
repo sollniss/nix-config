@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -15,6 +14,7 @@
     default = with pkgs; [
       nixd
       alejandra
+      #nixfmt
     ];
   };
 }

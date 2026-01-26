@@ -10,7 +10,6 @@
         config.initial_rows = 28
         config.font_size = 12
         config.front_end = "WebGpu"
-        config.default_prog = { 'fish', '-i' }
         return config
       '')
     ];
