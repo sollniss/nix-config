@@ -1,7 +1,7 @@
 { config, ... }:
 {
   home = {
-    username = config.prefs.profile.username;
-    homeDirectory = "/home/${config.prefs.profile.username}";
+    username = config.prefs.user.name;
+    homeDirectory = "/home/${config.prefs.user.name}";
   };
 }

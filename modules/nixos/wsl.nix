@@ -12,7 +12,7 @@
 
   wsl = {
     enable = true;
-    defaultUser = config.prefs.profile.username;
+    defaultUser = config.prefs.user.name;
     startMenuLaunchers = true;
     interop = {
       includePath = false;

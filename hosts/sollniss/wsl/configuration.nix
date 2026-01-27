@@ -23,14 +23,7 @@ in
     enable = true;
   };
 
-  #programs.nh = {
-  #  enable = true;
-  #  clean.enable = true;
-  #  clean.extraArgs = "--keep-since 4d --keep 3";
-  #  flake = "/home/${config.prefs.profile.username}/nix-config"; # Sets NH_OS_FLAKE variable
-  #};
-
-  home-manager.users.${config.prefs.profile.username} = {
+  home-manager.users.${config.prefs.user.name} = {
     imports = [
       ./home.nix
     ];

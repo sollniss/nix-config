@@ -28,17 +28,16 @@ in
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 
-  users.users.${config.prefs.profile.username} = {
+  users.users.${config.prefs.user.name} = {
     isNormalUser = true;
-    description = config.prefs.profile.username;
+    description = config.prefs.user.name;
     extraGroups = [
       "networkmanager"
       "wheel"
     ];
   };
 
-  #home-manager.users.${config.prefs.profile.username} = import ./home.nix;
-  home-manager.users.${config.prefs.profile.username} = {
+  home-manager.users.${config.prefs.user.name} = {
     imports = [
       ./home.nix
     ];

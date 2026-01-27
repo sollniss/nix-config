@@ -53,7 +53,7 @@
         modules = [
           #./modules/prefs
           ./hosts/sollniss/desktop
-          catppuccin.nixosModules.catppuccin
+          #catppuccin.nixosModules.catppuccin
         ];
       };
 
@@ -63,7 +63,7 @@
         };
         modules = [
           ./hosts/sollniss/wsl
-          catppuccin.nixosModules.catppuccin
+          #catppuccin.nixosModules.catppuccin
         ];
       };
 
@@ -74,7 +74,6 @@
           inherit inputs;
         };
         modules = [
-          #./modules/prefs
           ./hosts/sollniss/terminal
         ];
       };

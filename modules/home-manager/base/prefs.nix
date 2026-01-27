@@ -1,13 +1,14 @@
 {
   inputs,
-  osConfig,
+  osConfig ? null,
+  lib,
   ...
 }:
 {
   imports = [
     inputs.self.prefs
   ];
-  config = {
+  config = lib.mkIf (osConfig != null && osConfig ? prefs) {
     prefs = osConfig.prefs;
   };
 }

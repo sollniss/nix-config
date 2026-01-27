@@ -5,9 +5,9 @@
     ./configuration.nix
   ];
 
-  prefs.profile = {
-    username = "sollniss";
-    hostname = "nixos-wsl";
-    graphical.enable = false;
+  prefs = {
+    user.name = "sollniss";
+    nixos.hostname = "nixos-wsl";
+    profile.graphical.enable = false;
   };
 }

@@ -5,9 +5,9 @@
     ./configuration.nix
   ];
 
-  prefs.profile = {
-    username = "sollniss";
-    hostname = "nixos";
-    graphical.enable = true;
+  prefs = {
+    user.name = "sollniss";
+    nixos.hostname = "nixos";
+    profile.graphical.enable = true;
   };
 }

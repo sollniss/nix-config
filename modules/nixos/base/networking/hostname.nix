@@ -1,6 +1,6 @@
 { config, ... }:
 {
   networking = {
-    hostName = config.prefs.profile.hostname;
+    hostName = config.prefs.nixos.hostname;
   };
 }

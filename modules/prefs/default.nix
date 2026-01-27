@@ -1,21 +1,25 @@
-{ lib, ... }:
+{
+  lib,
+  ...
+}:
 let
   inherit (lib) mkEnableOption mkOption types;
 in
 {
-  options.prefs.profile = {
-    username = mkOption {
+  options.prefs = {
+    user.name = mkOption {
       type = types.str;
-      description = "Primary username for this configuration (used across NixOS/Home Manager).";
+      description = "Primary username for this configuration.";
     };
 
-    hostname = mkOption {
-      type = types.str;
-      description = "Primary hostname for this configuration (used across NixOS modules).";
+    nixos.hostname = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Primary hostname for this configuration.";
     };
 
-    graphical = {
-      enable = mkEnableOption "Graphical profile capability flag (do not use directly yet).";
+    profile = {
+      graphical.enable = mkEnableOption "Graphical profile capability flag.";
     };
   };
 }

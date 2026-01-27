@@ -6,8 +6,8 @@
 let
   # Terminal-only config, so no UI stuff needed.
   homeManagerModules = with inputs.self.homeManagerModules; [
-    base.terminal
-    themes.catppuccin
+    base
+    themes
     programs.shelltools
     programs.helix
     programs.fish
