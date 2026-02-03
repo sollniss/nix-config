@@ -11,14 +11,6 @@
     ];
     #mutableUserSettings = false;
     userSettings = {
-      terminal = {
-        shell = {
-          with_arguments = {
-            program = "fish";
-            args = [ "-i" ];
-          };
-        };
-      };
       ui_font_family = "Noto Sans";
       buffer_font_family = "JetBrains Mono";
       telemetry = {

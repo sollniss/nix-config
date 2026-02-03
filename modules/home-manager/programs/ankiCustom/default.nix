@@ -257,15 +257,13 @@ in
     };
 
     profiles = lib.mkOption {
-      description = "Attribute set of Anki profiles and their settings.";
+      description = ''
+        Anki profiles and their settings.
+        Profiles are primarily intended to be one per person, and are not recommended for splitting up your own content.
+      '';
       default = {
         "User 1" = { };
       };
-      defaultText = lib.literalExpression ''
-        {
-          "User 1" = {};
-        }
-      '';
       type = lib.types.attrsOf (
         lib.types.submodule {
           options = {
@@ -373,20 +371,33 @@ in
         '';
       }
     ]
-    ++ lib.mapAttrsToList (
-      name: prof:
-      let
-        profileConflict = prof.sync.username != null && prof.sync.usernameFile != null;
-        message = ''
-          The `programs.ankiCustom.profiles."${name}".sync` `username` option is mutually exclusive with
-          the `usernameFile` option.
-        '';
-      in
-      {
-        assertion = !profileConflict;
-        message = message;
-      }
-    ) cfg.profiles;
+    ++ lib.concatLists (
+      lib.mapAttrsToList (
+        name: profile:
+        let
+          # Profile name must be a valid filename.
+          profileNameInvalidChars = lib.concatLists (
+            lib.filter (val: lib.isList val) (lib.split ''([.:?\"<>|\*\\\/])'' name)
+          );
+        in
+        [
+          {
+            assertion = profileNameInvalidChars == [ ];
+            message = ''
+              `programs.anki.profiles.${lib.strings.escapeNixString name}` has invalid
+              character(s) in its name: ${lib.concatStrings profileNameInvalidChars}
+            '';
+          }
+          {
+            assertion = !(profile.sync.username != null && profile.sync.usernameFile != null);
+            message = ''
+              The `programs.anki.profiles.${lib.strings.escapeNixString name}.sync`
+              `username` option is mutually exclusive with the `usernameFile` option.
+            '';
+          }
+        ]
+      ) cfg.profiles
+    );
 
     home.packages = [
       (cfg.package.withAddons (

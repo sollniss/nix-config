@@ -145,10 +145,9 @@ let
 
     default_profile: str | None = ${
       let
-        defaultProfiles = lib.filterAttrs (_: prof: prof.default) cfg.profiles;
-        defaultName = if defaultProfiles == { } then null else lib.head (lib.attrNames defaultProfiles);
+        defaultProfiles = lib.attrNames (lib.filterAttrs (_: prof: prof.default) cfg.profiles);
       in
-      if defaultName == null then "None" else "'${defaultName}'"
+      if defaultProfiles == [ ] then "None" else ''"${lib.head defaultProfiles}"''
     }
     if default_profile is not None:
       profile_manager.set_last_loaded_profile_name(default_profile)
@@ -183,19 +182,18 @@ in
       from pathlib import Path
 
       def set_server() -> None:
-        username: str | None
-        username_file: Path | None
-        key_file: Path | None
-        custom_sync_url: str | None
-
         ${lib.concatMapAttrsStringSep "\n  " (name: pCfg: ''
           if aqt.mw.pm.name == "${name}":
-              username = ${if pCfg.sync.username == null then "None" else "'${pCfg.sync.username}'"}
-              username_file = ${
+              username: str | None = ${
+                if pCfg.sync.username == null then "None" else "'${pCfg.sync.username}'"
+              }
+              username_file: Path | None = ${
                 if pCfg.sync.usernameFile == null then "None" else "Path('${pCfg.sync.usernameFile}')"
               }
-              key_file = ${if pCfg.sync.keyFile == null then "None" else "Path('${pCfg.sync.keyFile}')"}
-              custom_sync_url = ${if pCfg.sync.url == null then "None" else "'${pCfg.sync.url}'"}
+              key_file: Path | None = ${
+                if pCfg.sync.keyFile == null then "None" else "Path('${pCfg.sync.keyFile}')"
+              }
+              custom_sync_url: str | None = ${if pCfg.sync.url == null then "None" else "'${pCfg.sync.url}'"}
 
               if custom_sync_url:
                 aqt.mw.pm.set_custom_sync_url(custom_sync_url)
@@ -216,10 +214,12 @@ in
     pname = "home-manager";
     version = "1.0";
     src = pkgs.writeTextDir "__init__.py" ''
-      import aqt
-      from aqt.qt import QWidget, QMessageBox
-      from anki.hooks import wrap
+      from unittest.mock import patch
       from typing import Any
+
+      import aqt
+      from anki.hooks import wrap
+      from aqt.qt import QWidget, QMessageBox
 
       def make_config_differences_str(initial_config: dict[str, Any],
                                       new_config: dict[str, Any]) -> str:
@@ -262,18 +262,14 @@ in
 
         aqt.mw.pm.save = on_preferences_save
 
-      def state_will_change(new_state: aqt.main.MainWindowState,
-                            old_state: aqt.main.MainWindowState):
-        if new_state != "profileManager":
-          return
-
+      def show_profile_changes_warning() -> None:
         QMessageBox.warning(
           aqt.mw,
           "NixOS Info",
-          ("Profiles cannot be added while settings are managed with "
-           "Home Manager.")
+          ("Profiles cannot be changed here while settings are managed with "
+            "Home Manager.")
         )
-
+        return None
 
       # Ensure Anki doesn't try to save to the read-only DB settings file.
       aqt.mw.pm.save = lambda: None
@@ -281,8 +277,10 @@ in
       # Tell the user when they try to change settings that won't be persisted.
       aqt.gui_hooks.dialog_manager_did_open_dialog.append(dialog_did_open)
 
-      # Show warning when users try to switch or customize profiles.
-      aqt.gui_hooks.state_will_change.append(state_will_change)
+      # Warn the user when they try to change profiles imperatively.
+      patch.object(aqt.mw, "onAddProfile", show_profile_changes_warning).start()
+      patch.object(aqt.mw, "onRenameProfile", show_profile_changes_warning).start()
+      patch.object(aqt.mw, "onRemProfile", show_profile_changes_warning).start()
     '';
   };
 }

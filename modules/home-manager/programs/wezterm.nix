@@ -11,6 +11,7 @@
         config.initial_rows = 28
         config.font_size = 12
         config.front_end = "WebGpu"
+        config.window_close_confirmation = 'NeverPrompt'
         return config
       '')
     ];
