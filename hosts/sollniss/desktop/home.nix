@@ -57,12 +57,13 @@ in
   home.stateVersion = "25.05";
 
   # Extra packages.
-  #home.packages = with pkgs; [
-  #google-chrome
+  home.packages = with pkgs; [
+    inkscape
+    #google-chrome
 
-  # minecraft
-  #prismlauncher
-  #];
+    # minecraft
+    #prismlauncher
+  ];
 
   #programs.lutris = {
   #  enable = true;

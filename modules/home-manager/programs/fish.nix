@@ -78,8 +78,12 @@
     };
 
     shellAbbrs = {
-      #sys = "nix-shell -p fastfetch --run fastfetch";
-      sys = "nix run nixpkgs#fastfetch";
+      #nixosbtw = "nix-shell -p fastfetch --run fastfetch";
+      nixosbtw = "nix run nixpkgs#fastfetch";
+      sys = ''
+        nix-shell -p "inxi.override { withRecommends = true; }" \
+          --run "inxi -F"
+      '';
     };
   };
 

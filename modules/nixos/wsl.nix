@@ -32,6 +32,7 @@
 
   networking = {
     # Managed by Windows
+    networking.useDHCP = lib.mkForce false;
     firewall.enable = lib.mkForce false;
     # Wait online service can cause issues in WSL
     networkmanager.enable = lib.mkForce false;
