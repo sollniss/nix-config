@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -54,4 +53,7 @@ in
       #language = [];
     };
   };
+
+  programs.git.settings.core.editor = "hx";
+  programs.jujutsu.settings.ui.editor = "hx";
 }

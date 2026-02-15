@@ -26,6 +26,7 @@ let
     programs.fish
     programs.helix
 
+    programs.devtools
     dev.go
     dev.nix
   ];
@@ -59,6 +60,8 @@ in
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
+    gg-jj
+
     #google-chrome
 
     # minecraft
@@ -108,6 +111,11 @@ in
     keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
 
     git.settings.user = {
+      name = "sollniss";
+      email = "sollniss@web.de";
+    };
+
+    jujutsu.settings.user = {
       name = "sollniss";
       email = "sollniss@web.de";
     };

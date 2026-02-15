@@ -10,5 +10,6 @@
   zed = import ./zed.nix;
 
   # preset
+  devtools = import ./devtools.nix;
   shelltools = import ./shelltools.nix;
 }

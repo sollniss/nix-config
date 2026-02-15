@@ -10,6 +10,8 @@ let
     base
 
     desktops.cosmic
+
+    programs.protonvpn
   ];
 in
 {

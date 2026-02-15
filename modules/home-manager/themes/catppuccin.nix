@@ -1,6 +1,7 @@
 {
   inputs,
   config,
+  pkgs,
   ...
 }:
 {
@@ -12,17 +13,16 @@
     enable = true;
     cursors.enable = config.prefs.profile.graphical.enable;
 
-    # Below apps are broken. Use custom setting.
-    firefox.enable = false;
-    wezterm.enable = false;
+    thunderbird.profile = "default";
 
-    # following programs can use terminal colors,
-    # no need to style them separately
+    # The following programs can use terminal colors,
+    # no need to style them separately.
     eza.enable = false;
     starship.enable = false;
   };
 
-  # Firefox
+  # Firefox: use theme instead of "Firefox Color" extension.
+  catppuccin.firefox.enable = false;
   programs.firefox.policies.ExtensionSettings = {
     "{76aabc99-c1a8-4c1e-832b-d4f2941d5a7a}" = {
       install_url = "https://addons.mozilla.org/firefox/downloads/latest/catppuccin-mocha-mauve-git/latest.xpi";
@@ -33,11 +33,34 @@
   };
   #}
 
-  # WezTerm
+  # WezTerm: use builtin theme.
+  catppuccin.wezterm.enable = false;
   programs.wezterm.extraConfig = ''
     config.color_scheme = "Catppuccin Mocha"
   '';
 
-  # KeePassXC
+  # GTK: use inofficial catppuccin theme.
+  # https://github.com/Fausto-Korpsvart/Catppuccin-GTK-Theme
+  gtk = {
+    enable = config.prefs.profile.graphical.enable;
+    theme = {
+      package = pkgs.magnetic-catppuccin-gtk.override {
+        accent = [ config.catppuccin.accent ];
+        #tweaks = [ "black" ];
+        shade = "dark"; # mocha
+      };
+      name = "Catppuccin-GTK-Mauve-Dark";
+    };
+  };
+
+  # qt (not sure if this actually works)
+  catppuccin.kvantum.apply = config.prefs.profile.graphical.enable;
+  qt = {
+    enable = config.prefs.profile.graphical.enable;
+    platformTheme.name = "kvantum";
+    style.name = "kvantum";
+  };
+
+  # KeePassXC: qt5, but doesn't apply theme. Force dark mode at least.
   programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
 }
