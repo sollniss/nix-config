@@ -10,6 +10,7 @@
     fcitx5 = {
       waylandFrontend = true;
 
+      fcitx5-with-addons = pkgs.qt6Packages.fcitx5-with-addons.override { withConfigtool = false; };
       addons = with pkgs; [
         fcitx5-mozc # Japanese input method
       ];

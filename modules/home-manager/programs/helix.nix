@@ -33,21 +33,13 @@ in
     extraPackages = with pkgs; [
       # Common stuff
       bash-language-server
-      helix-gpt
     ];
 
-    languages = appendLanguageServersToAllLanguages [ "gpt" ] {
+    #languages = appendLanguageServersToAllLanguages [ "global-lsp" ] {
+    languages = {
       language-server.biome = {
         command = "biome";
         args = [ "lsp-proxy" ];
-      };
-
-      language-server.gpt = {
-        command = "helix-gpt";
-        args = [
-          "--handler"
-          "copilot"
-        ];
       };
 
       #language = [];

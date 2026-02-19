@@ -11,6 +11,9 @@
 
   catppuccin = {
     enable = true;
+    flavor = "mocha";
+    accent = "mauve";
+
     cursors.enable = config.prefs.profile.graphical.enable;
 
     thunderbird.profile = "default";
