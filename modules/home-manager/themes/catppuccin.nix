@@ -64,6 +64,6 @@
     style.name = "kvantum";
   };
 
-  # KeePassXC: qt5, but doesn't apply theme. Force dark mode at least.
-  programs.keepassxc.settings.GUI.ApplicationTheme = "dark";
+  # KeePassXC: force system theme.
+  programs.keepassxc.settings.GUI.ApplicationTheme = "classic";
 }
