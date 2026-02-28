@@ -36,7 +36,7 @@ in
     enable = true;
     settings.user = {
       name = "sollniss";
-      email = "sollniss@web.de";
+      email = "sollniss" + "@" + "web.de";
     };
   };
 }

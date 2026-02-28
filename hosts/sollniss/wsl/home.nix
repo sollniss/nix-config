@@ -28,7 +28,7 @@ in
   programs.git = {
     settings.user = {
       name = "sollniss";
-      email = "sollniss@web.de";
+      email = "sollniss" + "@" + "web.de";
     };
   };
 }

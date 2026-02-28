@@ -33,7 +33,7 @@ let
 in
 {
   imports = homeManagerModules ++ [
-    ../../../modules/home-manager/programs/ankiCustom
+    #../../../modules/home-manager/programs/ankiCustom
   ];
 
   #programs.anki = {
@@ -44,13 +44,15 @@ in
   #    syncMedia = true;
   #  };
   #};
-  programs.ankiCustom = {
+  programs.anki = {
     enable = true;
     profiles.sollniss.sync = {
-      username = "sollniss@web.de";
+      username = "sollniss" + "@" + "web.de";
+      keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
     };
     profiles.mzh.sync = {
-      username = "mzh";
+      username = "m." + "kodama0410" + "@" + "gmail" + ".com";
+      keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
     };
     profiles.sollniss.default = true;
   };
@@ -112,12 +114,12 @@ in
 
     git.settings.user = {
       name = "sollniss";
-      email = "sollniss@web.de";
+      email = "sollniss" + "@" + "web.de";
     };
 
     jujutsu.settings.user = {
       name = "sollniss";
-      email = "sollniss@web.de";
+      email = "sollniss" + "@" + "web.de";
     };
 
     firefox.policies.ExtensionSettings = {
@@ -134,7 +136,7 @@ in
   accounts.email.accounts = {
     "sollniss@web.de" = {
       realName = "sollniss";
-      address = "sollniss@web.de";
+      address = "sollniss" + "@" + "web.de";
       userName = "sollniss";
       primary = true;
       thunderbird = {

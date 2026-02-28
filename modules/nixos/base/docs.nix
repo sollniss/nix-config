@@ -9,7 +9,7 @@
 
     man = {
       enable = lib.mkForce false;
-      generateCaches = lib.mkForce false;
+      cache.enable = lib.mkForce false;
       man-db.enable = lib.mkForce false;
       mandoc.enable = lib.mkForce false;
     };
