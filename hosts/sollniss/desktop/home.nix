@@ -62,6 +62,7 @@ in
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
+    digikam
     gg-jj
 
     #google-chrome
