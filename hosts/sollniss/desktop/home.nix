@@ -13,6 +13,7 @@ let
 
     services.syncthing
 
+    programs.anki
     programs.firefox
     programs.keepassxc
     programs.thunderbird
@@ -45,7 +46,6 @@ in
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
-    digikam
     gg-jj
 
     #google-chrome
@@ -92,31 +92,18 @@ in
     };
   };
 
-  programs.anki = {
-    enable = true;
-    profiles.sollniss.sync = {
-      username = "sollniss" + "@" + "web.de";
-      keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
-    };
-    profiles.mzh.sync = {
-      username = "m." + "kodama0410" + "@" + "gmail" + ".com";
-      keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
-    };
-    profiles.sollniss.default = true;
-  };
-
   # User specific config for base programs.
   programs = {
-    keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
-
-    git.settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
-    };
-
-    jujutsu.settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
+    anki = {
+      profiles.sollniss.sync = {
+        username = "sollniss" + "@" + "web.de";
+        keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
+      };
+      profiles.mzh.sync = {
+        username = "m." + "kodama0410" + "@" + "gmail" + ".com";
+        keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
+      };
+      profiles.sollniss.default = true;
     };
 
     firefox.policies.ExtensionSettings = {
@@ -128,6 +115,18 @@ in
         private_browsing = "true";
       };
     };
+
+    git.settings.user = {
+      name = "sollniss";
+      email = "sollniss" + "@" + "web.de";
+    };
+
+    jujutsu.settings.user = {
+      name = "sollniss";
+      email = "sollniss" + "@" + "web.de";
+    };
+
+    keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
   };
 
   accounts.email.accounts = {

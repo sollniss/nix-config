@@ -8,12 +8,10 @@
   config = {
     home = lib.mkIf config.prefs.profile.graphical.enable {
       packages = with pkgs; [
-        vlc
+        vlc # audio, video
+        qimgv # images
         signal-desktop
-        #anki
       ];
-
-      sessionVariables.ANKI_WAYLAND = "1";
     };
 
     programs = {
