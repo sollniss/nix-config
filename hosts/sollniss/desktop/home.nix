@@ -13,7 +13,6 @@ let
 
     services.syncthing
 
-    #programs.anki
     programs.firefox
     programs.keepassxc
     programs.thunderbird
@@ -33,31 +32,15 @@ let
 in
 {
   imports = homeManagerModules ++ [
-    #../../../modules/home-manager/programs/ankiCustom
+    #../../../modules/home-manager/programs/something
   ];
 
-  #programs.anki = {
-  #  enable = true;
-  #  sync = {
-  #    url = "https://default.com";
-  #    networkTimeout = 13;
-  #    syncMedia = true;
-  #  };
-  #};
-  programs.anki = {
-    enable = true;
-    profiles.sollniss.sync = {
-      username = "sollniss" + "@" + "web.de";
-      keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
-    };
-    profiles.mzh.sync = {
-      username = "m." + "kodama0410" + "@" + "gmail" + ".com";
-      keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
-    };
-    profiles.sollniss.default = true;
-  };
-
   home.stateVersion = "25.05";
+
+  home.sessionVariables = {
+    EDITOR = "hx";
+    VISUAL = "zeditor";
+  };
 
   # Extra packages.
   home.packages = with pkgs; [
@@ -109,6 +92,19 @@ in
     };
   };
 
+  programs.anki = {
+    enable = true;
+    profiles.sollniss.sync = {
+      username = "sollniss" + "@" + "web.de";
+      keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
+    };
+    profiles.mzh.sync = {
+      username = "m." + "kodama0410" + "@" + "gmail" + ".com";
+      keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
+    };
+    profiles.sollniss.default = true;
+  };
+
   # User specific config for base programs.
   programs = {
     keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
@@ -151,10 +147,10 @@ in
       };
       smtp = {
         host = "smtp.web.de";
-        port = 587;
+        port = 465;
+        authentication = "digest_md5";
         tls = {
           enable = true;
-          useStartTls = true;
         };
       };
     };
