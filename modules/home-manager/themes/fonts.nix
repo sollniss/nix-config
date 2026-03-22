@@ -24,8 +24,9 @@
       defaultFonts = {
         monospace = [
           "JetBrains Mono"
+          "Noto Sans Mono CJK JP"
+          "Noto Sans Mono"
           "Symbols Nerd Font Mono"
-          "Noto Sans CJK JP"
         ];
 
         sansSerif = [

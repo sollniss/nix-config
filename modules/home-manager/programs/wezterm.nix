@@ -12,6 +12,7 @@
         config.font_size = 12
         config.front_end = "WebGpu"
         config.window_close_confirmation = 'NeverPrompt'
+        config.use_ime = true
         return config
       '')
     ];
