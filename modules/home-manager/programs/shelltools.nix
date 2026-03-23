@@ -16,6 +16,11 @@
   programs.eza = {
     enable = true;
     icons = "always";
+    extraOptions = [
+      "--group-directories-first"
+      "--no-permissions"
+      "--octal-permissions"
+    ];
   };
 
   # cat alternative
