@@ -70,6 +70,7 @@
       # home-manager switch --flake .#terminal
       # home-manager switch --flake github:sollniss/nix-config#terminal
       homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
         specialArgs = {
           inherit inputs;
         };

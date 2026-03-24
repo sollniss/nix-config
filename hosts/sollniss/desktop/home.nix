@@ -46,7 +46,6 @@ in
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
-    gg-jj
 
     #google-chrome
 
@@ -147,7 +146,7 @@ in
       smtp = {
         host = "smtp.web.de";
         port = 465;
-        authentication = "digest_md5";
+        authentication = "plain";
         tls = {
           enable = true;
         };

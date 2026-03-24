@@ -65,7 +65,9 @@
   programs.btop = {
     enable = true;
     # Enable GPU support.
-    package = lib.mkIf osConfig.hardware.nvidia.modesetting.enable pkgs.btop-cuda;
+    package = lib.mkIf (
+      osConfig != null && lib.attrByPath [ "hardware" "nvidia" "modesetting" "enable" ] false osConfig
+    ) pkgs.btop-cuda;
   };
 
   home.shellAliases = {

@@ -23,6 +23,7 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   services = {
+    printing.enable = lib.mkForce false;
     xserver.enable = lib.mkForce false;
     openssh.enable = lib.mkForce false;
 
@@ -32,7 +33,7 @@
 
   networking = {
     # Managed by Windows
-    networking.useDHCP = lib.mkForce false;
+    useDHCP = lib.mkForce false;
     firewall.enable = lib.mkForce false;
     # Wait online service can cause issues in WSL
     networkmanager.enable = lib.mkForce false;

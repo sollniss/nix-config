@@ -23,6 +23,14 @@ in
     enable = true;
   };
 
+  users.users.${config.prefs.user.name} = {
+    isNormalUser = true;
+    description = config.prefs.user.name;
+    extraGroups = [
+      "wheel"
+    ];
+  };
+
   home-manager.users.${config.prefs.user.name} = {
     imports = [
       ./home.nix
