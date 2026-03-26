@@ -8,7 +8,7 @@
   environment.systemPackages = with pkgs; [
     #wireguard-tools
     #proton-vpn-cli
-    protonvpn-gui
+    proton-vpn
   ];
 
   #services.gnome.gnome-keyring.enable = true;
