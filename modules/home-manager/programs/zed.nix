@@ -8,6 +8,7 @@
     extensions = [
       "make"
       "toml"
+      "log"
     ];
     #mutableUserSettings = false;
     userSettings = {

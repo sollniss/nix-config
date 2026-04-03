@@ -5,6 +5,7 @@
     extensions = [
       "golangci-lint"
       "gosum"
+      "templ"
     ];
     userSettings = {
       lsp = {
