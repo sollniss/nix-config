@@ -113,6 +113,7 @@
       };
       name = "Catppuccin-GTK-Mauve-Dark";
     };
+    gtk4.theme = null;
   };
 
   # qt (not sure if this actually works)
