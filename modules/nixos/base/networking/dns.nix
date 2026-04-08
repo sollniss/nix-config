@@ -1,27 +1,25 @@
-{ ... }:
+{ config, lib, ... }:
 let
-  dnsServers = [
-    # Quad9 (https://on.quad9.net/)
+  network = config.prefs.network;
+  hostname = config.prefs.nixos.hostname;
+  hasEntry = network.hosts ? ${hostname} && network.hosts.${hostname}.dns != [ ];
+
+  fallbackDns = [
+    # Quad9
     "2620:fe::fe"
     "2620:fe::9"
     "9.9.9.9"
     "149.112.112.112"
-
-    # Cloudflare
-    #"2606:4700:4700::1111"
-    #"2606:4700:4700::1001"
-    #"1.1.1.1"
-    #"1.0.0.1"
   ];
+
+  dnsServers = if hasEntry then network.hosts.${hostname}.dns else fallbackDns;
 in
 {
   networking = {
     nameservers = dnsServers;
-    networkmanager = {
-      # Either of these two should be enough to force the nameservers.
-      # Set both just to be extra sure.
-      dns = "none";
-      insertNameservers = dnsServers;
-    };
+    # Prevent other network managers from overriding the dns settings.
+    dhcpcd.extraConfig = "nohook resolv.conf";
+    networkmanager.dns = lib.mkIf config.networking.networkmanager.enable "none";
   };
+  services.resolved.enable = false;
 }

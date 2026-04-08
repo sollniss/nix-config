@@ -1,6 +1,5 @@
 {
   inputs,
-  pkgs,
   config,
   ...
 }:
@@ -15,10 +14,7 @@ let
   ];
 in
 {
-  imports = [
-    ./hardware-configuration.nix
-  ]
-  ++ nixosModules;
+  imports = nixosModules;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -38,6 +34,8 @@ in
       "wheel"
     ];
   };
+
+  services.printing.enable = true;
 
   home-manager.users.${config.prefs.user.name} = {
     imports = [

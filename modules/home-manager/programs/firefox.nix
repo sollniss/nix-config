@@ -1,4 +1,16 @@
-{ config, ... }:
+{
+  config,
+  osConfig ? null,
+  ...
+}:
+let
+  nameservers = if osConfig != null then osConfig.networking.nameservers else [ ];
+  isLocalDns =
+    nameservers != [ ]
+    &&
+      builtins.match "(10|127|172\\.(1[6-9]|2[0-9]|3[01])|192\\.168)\\..*" (builtins.head nameservers)
+      != null;
+in
 {
   programs.firefox = {
     enable = true;
@@ -288,7 +300,7 @@
           # https://wiki.archlinux.org/title/Firefox/Privacy#Disable/enforce_'Trusted_Recursive_Resolver'
           "network.dns.echconfig.enabled" = true;
           "network.dns.http3_echconfig.enabled" = true;
-          "network.trr.mode" = 2;
+          "network.trr.mode" = if isLocalDns then 0 else 2;
           "network.trr.uri" = "https://dns.quad9.net/dns-query";
 
           # Use Punycode in Internationalized Domain Names to eliminate possible spoofing
