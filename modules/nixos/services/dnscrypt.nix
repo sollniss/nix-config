@@ -9,13 +9,19 @@ let
   vpn = network.subnets.vpn;
 
   # Derive listen addresses: loopback + host LAN IP + VPN gateway (if VPN is hosted).
-  listenAddrs = [
+  listenAddrs4 = [
     "127.0.0.1"
     self.ip
   ]
   ++ lib.optional config.prefs.hosted.vpn.enable vpn.gateway;
 
-  listenSockets = map (addr: "${addr}:53") listenAddrs;
+  listenAddrs6 = [
+    "::1"
+  ]
+  ++ lib.optional (config.prefs.hosted.vpn.enable && vpn ? gateway6) vpn.gateway6;
+
+  listenSockets =
+    (map (addr: "${addr}:53") listenAddrs4) ++ (map (addr: "[${addr}]:53") listenAddrs6);
 
   # Derive IPv4 allowed subnets.
   subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
@@ -45,14 +51,14 @@ in
         # Protocol selection
         dnscrypt_servers = false;
         doh_servers = true;
-        odoh_servers = false;
+        odoh_servers = false; # As of Aptil 2026 there exists literally only a single ODoH relay ...
         ipv6_servers = true;
         http3 = true;
 
         # Server requirements
         require_dnssec = true;
         require_nolog = true;
-        require_nofilter = false;
+        require_nofilter = false; # Quad9 servers filter malware by default.
 
         # Privacy hardening
         tls_disable_session_tickets = true;
@@ -95,7 +101,7 @@ in
         log_files_max_age = 7;
         log_files_max_backups = 1;
 
-        # ODoH servers
+        # Use Quad9 DoH servers only
         server_names = [
           "doh-ip4-port443-filter-pri"
           "doh-ip4-port443-filter-alt"
@@ -104,8 +110,6 @@ in
           "doh-ip6-port443-filter-alt"
           "doh-ip6-port443-filter-alt2"
         ];
-
-        # Use ODoH servers and relays only.
         sources = {
           quad9-resolvers-doh = {
             urls = [

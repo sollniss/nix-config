@@ -15,6 +15,11 @@ in
       settings = {
         PermitRootLogin = "prohibit-password";
         PasswordAuthentication = false;
+        # DANGER: Changing this to listen only on local addresses causes lockout.
+        # I've tried to force sshd binding the addresses after the interface comes online,
+        # but that didn't work.
+        # Might recheck this in the future, not really a fan of listening to all addresses
+        # (even with the firewall settings).
         ListenAddress = "0.0.0.0";
       };
     };
