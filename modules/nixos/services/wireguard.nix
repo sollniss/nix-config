@@ -5,7 +5,7 @@
   ...
 }:
 let
-  port = 51947;
+  port = 443; # Pretend to be QUIC to bypass strict firewalls.
   iface = "wg0";
   keyPath = "/etc/wireguard/private.key";
   network = config.prefs.network;
