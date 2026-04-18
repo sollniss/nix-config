@@ -12,6 +12,9 @@
         UpdateCheckMessageShown = true;
         OpenPreviousDatabasesOnStartup = true;
       };
+      Security = {
+        LockDatabaseIdleSeconds = 3600;
+      };
       Browser = {
         Enabled = true;
         SearchInAllDatabases = true;
