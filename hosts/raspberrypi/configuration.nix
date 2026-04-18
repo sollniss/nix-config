@@ -25,10 +25,15 @@ in
     server = "dynv6.com";
     passwordFile = "/etc/ddclient/password";
     domains = [
-      "76bnh564543.dynv6.net"
+      "c423m89n.76bnh564543.dynv6.net"
     ];
     usev4 = "";
     usev6 = "ifv6, ifv6=${config.prefs.nixos.interface}";
+
+  };
+  systemd.services.ddclient = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
   };
 
   # We run our own DNS with dnscrypt-proxy.

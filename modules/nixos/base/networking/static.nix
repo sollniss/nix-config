@@ -21,6 +21,7 @@ in
         routes = [
           { Gateway = subnet.gateway; }
         ];
+        ipv6AcceptRAConfig.UseDomains = false;
         linkConfig.RequiredForOnline = "routable";
       };
     }

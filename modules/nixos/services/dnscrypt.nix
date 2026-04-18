@@ -27,7 +27,7 @@ let
   subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
   ipv4Allowed = [ "127.0.0.0/8" ] ++ subnetCidrs;
 
-  # IPv6 subnets are not modeled in network.nix; keep standard defaults.
+  # Use standard defaults for IPv6.
   ipv6Allowed = [
     "::1/128"
     "fe80::/10"
