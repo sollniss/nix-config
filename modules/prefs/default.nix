@@ -1,6 +1,5 @@
 {
   lib,
-  hostPlatforms ? { },
   config,
   ...
 }:
@@ -29,12 +28,6 @@ in
 
     profile = {
       graphical.enable = mkEnableOption "Graphical profile capability flag.";
-    };
-
-    buildFor = mkOption {
-      type = types.listOf (types.enum (builtins.attrNames hostPlatforms));
-      default = [ ];
-      description = "List of hostnames to enable binfmt emulation for. Their platforms are looked up from hostPlatforms.";
     };
 
     network = mkOption {

@@ -10,6 +10,5 @@
     user.name = "sollniss";
     nixos.hostname = "nixos";
     profile.graphical.enable = true;
-    buildFor = [ "raspberrypi" ];
   };
 }

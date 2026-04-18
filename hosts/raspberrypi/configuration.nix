@@ -42,11 +42,6 @@ in
     "162.159.200.123" # time.cloudflare.com
   ];
 
-  # Trust nixos host to build for us.
-  nix.settings.trusted-public-keys = [
-    network.hosts.nixos.signingKey
-  ];
-
   # Disable sudo, we can only get root by ssh.
   security.sudo.enable = false;
   users.users.root = {

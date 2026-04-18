@@ -25,13 +25,6 @@
       catppuccin,
       ...
     }@inputs:
-    let
-      hostPlatforms = {
-        nixos = "x86_64-linux";
-        nixos-wsl = "x86_64-linux";
-        raspberrypi = "aarch64-linux";
-      };
-    in
     {
       formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (
         system:
@@ -58,7 +51,7 @@
       # sudo nixos-rebuild switch --flake github:sollniss/nix-config#nixos
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = {
-          inherit inputs hostPlatforms;
+          inherit inputs;
         };
         modules = [
           #./modules/prefs
@@ -69,7 +62,7 @@
 
       nixosConfigurations.nixos-wsl = nixpkgs.lib.nixosSystem {
         specialArgs = {
-          inherit inputs hostPlatforms;
+          inherit inputs;
         };
         modules = [
           ./hosts/sollniss/wsl
@@ -88,7 +81,7 @@
       # sudo eject /dev/sda
       nixosConfigurations.raspberrypi = nixpkgs.lib.nixosSystem {
         specialArgs = {
-          inherit inputs hostPlatforms;
+          inherit inputs;
         };
         modules = [
           ./hosts/raspberrypi

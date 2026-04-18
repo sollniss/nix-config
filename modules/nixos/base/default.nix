@@ -4,6 +4,7 @@
 
     ./audio.nix
     ./docs.nix
+    ./fonts.nix
     ./i18n.nix
     ./programs.nix
     ./remote-builder.nix

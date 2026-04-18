@@ -11,6 +11,9 @@ let
   network = config.prefs.network;
   vpn = network.subnets.vpn;
 
+  hostname = config.prefs.nixos.hostname;
+  self = network.hosts.${hostname};
+
   hasIPv6 = vpn ? gateway6;
 
   # Derive WireGuard peers from the VPN subnet.
@@ -64,6 +67,13 @@ in
         };
         wireguardPeers = vpnPeers;
       };
+
+      # Accept Router Advertisements even when IPv6 forwarding is enabled
+      # (e.g. by WireGuard's IPMasquerade). Without this, networkd sets
+      # accept_ra=1 which the kernel ignores when forwarding is active,
+      # causing the host to lose its SLAAC addresses. With this explicit
+      # setting, networkd uses accept_ra=2 when it detects forwarding.
+      networks."10-${self.subnet}".networkConfig.IPv6AcceptRA = true;
 
       networks."50-${iface}" = {
         matchConfig.Name = iface;

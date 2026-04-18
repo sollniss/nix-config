@@ -27,6 +27,7 @@
       # sudo nix-store --generate-binary-cache-key nixos-desktop /etc/nix/signing-key.private /etc/nix/signing-key.public
       signingKey = "nixos-desktop:Zc1ZNwDzEr/fBkktS9yrdDCDavc/koH16xOawRnAEMo=";
       sshPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd";
+      platform = "x86_64-linux";
     };
     raspberrypi = {
       ip = "192.168.0.101";
@@ -35,6 +36,8 @@
         "127.0.0.1"
         "::1"
       ];
+      platform = "aarch64-linux";
+      builder = "nixos";
     };
     phone-d = {
       ip = "10.100.0.2";
