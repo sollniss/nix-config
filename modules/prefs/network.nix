@@ -14,6 +14,9 @@
       cidr = "10.100.0.0/24";
       prefixLength = 24;
       gateway = "10.100.0.1";
+      cidr6 = "fd10:100::/64";
+      prefixLength6 = 64;
+      gateway6 = "fd10:100::1";
     };
   };
 
@@ -41,11 +44,13 @@
     };
     phone-d = {
       ip = "10.100.0.2";
+      ip6 = "fd10:100::2";
       subnet = "vpn";
       wgPubKey = "dVxRwJMIRkR5UmHnGT4V7rpEst2MfqJQ+qrY7LyNA1U=";
     };
     phone-m = {
       ip = "10.100.0.3";
+      ip6 = "fd10:100::3";
       subnet = "vpn";
       wgPubKey = "rjtoRyh52G6smFCSWr7U6IdJEUuvEXtBdDFsgxwNnCU=";
     };
