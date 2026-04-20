@@ -1,6 +1,7 @@
 {
   inputs,
   config,
+  pkgs,
   ...
 }:
 let
@@ -25,6 +26,14 @@ in
 
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
+
+  #environment.systemPackages = with pkgs; [
+  #  lutris
+  #  gamemode
+  #  wineWow64Packages.stable
+  #  winetricks
+  #  wineWow64Packages.waylandFull
+  #];
 
   users.users.${config.prefs.user.name} = {
     isNormalUser = true;
