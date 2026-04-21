@@ -13,5 +13,6 @@
     hosted.ssh.enable = true;
     hosted.vpn.enable = true;
     hosted.dns.enable = true;
+    hosted.calendar.enable = true;
   };
 }
