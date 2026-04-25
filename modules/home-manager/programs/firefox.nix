@@ -14,6 +14,7 @@ in
 {
   programs.firefox = {
     enable = true;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
     # Options https://mozilla.github.io/policy-templates/
     policies = {
       DisableFirefoxScreenshots = false;
@@ -229,13 +230,11 @@ in
     # For options that are available in Home-Manager see
     # https://nix-community.github.io/home-manager/options.html#opt-programs.firefox.profiles
     profiles = {
-      # choose a profile name;
-      # directory is /home/<user>/.mozilla/firefox/profile_0
-      profile_0 = {
+      default = {
         # 0 is the default profile; see also option "isDefault"
         id = 0;
         # name as listed in about:profiles
-        name = "profile_0";
+        name = "default";
         # can be omitted; true if profile ID is 0
         isDefault = true;
         # specify profile-specific preferences here;
@@ -244,13 +243,14 @@ in
           # disable link preview on long-click
           "browser.ml.linkPreview.enabled" = false;
           # restore open tabs on startup
-          "browser.startup.page" = "3";
+          "browser.startup.page" = 3;
           # highlight all search results by default
           "findbar.highlightAll" = true;
           # dev console on the right
           "devtools.toolbox.host" = "right";
           # hide bookmark toolbar
           "browser.toolbars.bookmarks.visibility" = "never";
+          "browser.bookmarks.addedImportButton" = false;
           # enable auto scroll with middle click
           "general.autoScroll" = true;
           # new tab page
@@ -283,17 +283,17 @@ in
 
           # disable first time use flags
           "browser.aboutConfig.showWarning" = false;
-          "browser.toolbarbuttons.introduced.sidebar-button" = true;
-          "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
-          "trailhead.firstrun.didSeeAboutWelcome" = true;
           "browser.download.panel.shown" = true;
           "browser.eme.ui.firstContentShown" = true;
           "browser.engagement.ctrlTab.has-used" = true;
           "browser.engagement.downloads-button.has-used" = true;
           "browser.engagement.library-button.has-used" = true;
           "browser.engagement.sidebar-button.has-used" = true;
+          "browser.toolbarbuttons.introduced.sidebar-button" = true;
           "devtools.everOpened" = true;
           "devtools.inspector.simple-highlighters.message-dismissed" = true;
+          "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
+          "trailhead.firstrun.didSeeAboutWelcome" = true;
 
           # Hardening
 
@@ -303,8 +303,25 @@ in
           "network.trr.mode" = if isLocalDns then 0 else 2;
           "network.trr.uri" = "https://dns.quad9.net/dns-query";
 
+          # Disable media cache from writing to disk in Private Browsing
+          "browser.privatebrowsing.forceMediaMemoryCache" = true;
+
           # Use Punycode in Internationalized Domain Names to eliminate possible spoofing
           "network.IDN_show_punycode" = true;
+
+          # Require safe negotiation
+          # Blocks connections to servers that don't support RFC 5746 [2] as they're potentially vulnerable to a
+          # MiTM attack. A server without RFC 5746 can be safe from the attack if it disables renegotiations
+          # but the problem is that the browser can't know that. Setting this pref to true is the only way for the
+          # browser to ensure there will be no unsafe renegotiations on the channel between the browser and the server
+          # Also see:
+          #  <https://wiki.mozilla.org/Security:Renegotiation>
+          #  <https://datatracker.ietf.org/doc/html/rfc5746>
+          #  <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2009-3555>
+          # Note:
+          #  SSL Labs (May 2024) reports over 99.7% of top sites have secure renegotiation
+          #  - <https://www.ssllabs.com/ssl-pulse/>
+          "security.ssl.require_safe_negotiation" = true;
 
           "privacy.fingerprintingProtection" = true;
           "privacy.trackingprotection.enabled" = true;

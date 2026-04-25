@@ -4,7 +4,7 @@
     enable = true;
     autostart = true;
     # Options
-    # https://github.com/keepassxreboot/keepassxc/blob/44daca921a0e860845368c0d1697cea86ed79be0/src/core/Config.cpp#L52
+    # https://github.com/keepassxreboot/keepassxc/blob/develop/src/core/Config.cpp
     settings = {
       General = {
         ConfigVersion = "2";

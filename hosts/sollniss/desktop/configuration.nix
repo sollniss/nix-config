@@ -1,6 +1,7 @@
 {
   inputs,
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -27,13 +28,15 @@ in
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 
-  environment.systemPackages = with pkgs; [
-    lutris
-    gamemode
-    wineWow64Packages.stable
-    winetricks
-    wineWow64Packages.waylandFull
-  ];
+  #environment.systemPackages = with pkgs; [
+  #  lutris
+  #  gamemode
+  #  wineWow64Packages.stable
+  #  winetricks
+  #  wineWow64Packages.waylandFull
+  #];
+
+  services.gnome.gnome-keyring.enable = lib.mkForce false;
 
   users.users.${config.prefs.user.name} = {
     isNormalUser = true;
