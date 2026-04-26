@@ -244,6 +244,8 @@ in
           "browser.ml.linkPreview.enabled" = false;
           # restore open tabs on startup
           "browser.startup.page" = 3;
+          # open new tabs in foreground
+          "browser.tabs.loadInBackground" = false;
           # highlight all search results by default
           "findbar.highlightAll" = true;
           # dev console on the right
