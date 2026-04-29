@@ -36,6 +36,7 @@
           format_on_save = "on";
           formatter = {
             external = {
+              #command = "golangci-lint fmt";
               command = "gofumpt";
             };
           };

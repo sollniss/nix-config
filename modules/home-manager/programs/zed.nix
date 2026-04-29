@@ -1,11 +1,13 @@
-{ ... }:
+{ inputs, pkgs, ... }:
 {
   programs.zed-editor = {
     enable = true;
+    #package = inputs.zed-editor.packages.${pkgs.stdenv.hostPlatform.system}.default;
     #extraPackages = with pkgs; [];
     #installRemoteServer = true;
 
     extensions = [
+      "sql"
       "make"
       "toml"
       "log"

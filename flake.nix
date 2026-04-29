@@ -16,6 +16,9 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    #zed-editor = {
+    #  url = "github:zed-industries/zed?ref=nightly";
+    #};
   };
 
   outputs =
