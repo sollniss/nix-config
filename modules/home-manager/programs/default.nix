@@ -4,6 +4,7 @@
   firefox = import ./firefox.nix;
   helix = import ./helix.nix;
   keepassxc = import ./keepassxc.nix;
+  ssh = import ./ssh.nix;
   thunderbird = import ./thunderbird.nix;
   vscode = import ./vscode.nix;
   wezterm = import ./wezterm.nix;

@@ -11,6 +11,7 @@ let
     programs.shelltools
     programs.helix
     programs.fish
+    programs.ssh
   ];
 in
 {

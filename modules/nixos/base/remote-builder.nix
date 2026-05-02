@@ -2,12 +2,13 @@
 let
   network = config.prefs.network;
   hostname = config.prefs.nixos.hostname;
-  self = network.hosts.${hostname};
+  hasHost = network.hosts ? ${hostname};
+  self = if hasHost then network.hosts.${hostname} else null;
 
   buildTargets = lib.filterAttrs (_: h: (h.builder or null) == hostname) network.hosts;
-  isBuildServer = buildTargets != { };
+  isBuildServer = hasHost && buildTargets != { };
 
-  hasBuilder = (self.builder or null) != null;
+  hasBuilder = hasHost && (self.builder or null) != null;
   builder = if hasBuilder then network.hosts.${self.builder} else null;
 in
 {

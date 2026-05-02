@@ -20,6 +20,7 @@ let
     #programs.vscode
     programs.zed
     programs.wezterm
+    programs.ssh
 
     # shell
     programs.shelltools
@@ -126,6 +127,18 @@ in
     };
 
     keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
+
+    ssh = {
+      matchBlocks = {
+        raspberrypi = {
+          host = "raspberrypi ${config.prefs.network.hosts.raspberrypi.ip}";
+          hostname = config.prefs.network.hosts.raspberrypi.ip;
+          user = "root";
+          identityFile = "${config.home.homeDirectory}/.ssh/pi";
+          identitiesOnly = true;
+        };
+      };
+    };
   };
 
   accounts.email.accounts = {

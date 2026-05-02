@@ -33,7 +33,6 @@ in
     network = mkOption {
       type = types.attrs;
       default = network;
-      readOnly = true;
       description = "Centralized network topology. See prefs/network.nix.";
     };
 
