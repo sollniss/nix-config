@@ -12,7 +12,7 @@ let
 
     desktops.cosmic
 
-    programs.protonvpn
+    #programs.protonvpn
   ];
 in
 {
