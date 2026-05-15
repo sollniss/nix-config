@@ -3,6 +3,7 @@
     ./networking
 
     ./audio.nix
+    ./boot.nix
     ./docs.nix
     ./fonts.nix
     ./i18n.nix
