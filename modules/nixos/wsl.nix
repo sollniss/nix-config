@@ -41,6 +41,10 @@
     wireless.enable = lib.mkForce false;
   };
 
+  # zram and elevated swappiness are counterproductive in WSL.
+  zramSwap.enable = lib.mkForce false;
+  boot.kernel.sysctl."vm.swappiness" = lib.mkForce 60;
+
   # Allow opening files and links in Windows from WSL
   environment.variables.BROWSER = lib.mkForce "wsl-open";
   environment.systemPackages = with pkgs; [
