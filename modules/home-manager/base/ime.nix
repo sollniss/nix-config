@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -42,4 +43,6 @@
       };
     };
   };
+
+  home.sessionVariables.XMODIFIERS = lib.mkForce "";
 }
