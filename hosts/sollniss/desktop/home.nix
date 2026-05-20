@@ -116,27 +116,43 @@ in
       };
     };
 
-    git.settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
+    git.settings = {
+      user = {
+        name = "sollniss";
+        email = "sollniss" + "@" + "web.de";
+        signingkey = "${config.home.homeDirectory}/.ssh/github.pub";
+      };
+      gpg.format = "ssh";
+      commit.gpgsign = true;
+      tag.gpgsign = true;
+      # Force SSH auth over HTTPS.
+      url."git@github.com:".insteadOf = "https://github.com/";
     };
 
-    jujutsu.settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
+    jujutsu.settings = {
+      user = {
+        name = "sollniss";
+        email = "sollniss" + "@" + "web.de";
+      };
+      signing = {
+        sign-all = true;
+        backend = "ssh";
+        key = "${config.home.homeDirectory}/.ssh/github.pub";
+      };
     };
 
     keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
 
-    ssh = {
-      matchBlocks = {
-        raspberrypi = {
-          host = "raspberrypi ${config.prefs.network.hosts.raspberrypi.ip}";
-          hostname = config.prefs.network.hosts.raspberrypi.ip;
-          user = "root";
-          identityFile = "${config.home.homeDirectory}/.ssh/pi";
-          identitiesOnly = true;
-        };
+    ssh.settings = {
+      "github.com" = {
+        IdentityFile = "${config.home.homeDirectory}/.ssh/github";
+        IdentitiesOnly = true;
+      };
+      "raspberrypi ${config.prefs.network.hosts.raspberrypi.ip}" = {
+        HostName = config.prefs.network.hosts.raspberrypi.ip;
+        User = "root";
+        IdentityFile = "${config.home.homeDirectory}/.ssh/pi";
+        IdentitiesOnly = true;
       };
     };
   };
