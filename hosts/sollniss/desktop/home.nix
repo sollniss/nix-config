@@ -135,7 +135,7 @@ in
         email = "sollniss" + "@" + "web.de";
       };
       signing = {
-        sign-all = true;
+        behavior = "own";
         backend = "ssh";
         key = "${config.home.homeDirectory}/.ssh/github.pub";
       };
