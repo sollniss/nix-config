@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   keepassxc-proxy = pkgs.writeShellScript "keepassxc-proxy" ''
     if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
@@ -14,106 +19,119 @@ let
   '';
 in
 {
-  programs.keepassxc = {
-    enable = true;
-    autostart = true;
-    # Options
-    # https://github.com/keepassxreboot/keepassxc/blob/develop/src/core/Config.cpp
-    settings = {
-      General = {
-        ConfigVersion = "2";
-        BackupBeforeSave = true;
-        UpdateCheckMessageShown = true;
-        OpenPreviousDatabasesOnStartup = true;
-      };
-      Security = {
-        LockDatabaseIdleSeconds = 3600;
-      };
-      GUI = {
-        AdvancedSettings = true;
-        CompactMode = true;
-        MinimizeOnStartup = true;
-        MinimizeOnClose = true;
-        ShowExpiredEntriesOnDatabaseUnlockOffsetDays = "30";
-        ShowTrayIcon = true;
-      };
-      PasswordGenerator = {
-        AdvancedMode = true;
-        Length = "32";
-        Punctuation = true;
-        Dashes = true;
-        Math = true;
-        Braces = true;
-        Quotes = true;
-      };
-      FdoSecrets.Enabled = true;
-      Security.IconDownloadFallback = true;
-    };
-  };
-  xdg.autostart.enable = true;
-
-  # Disable gnome keyring service
-  #services.gnome-keyring.enable = lib.mkForce false; # Does not work.
-
-  # Browser integration
-
-  programs.keepassxc.settings.Browser = {
-    Enabled = true;
-    SearchInAllDatabases = true;
-    BestMatchOnly = true;
-    # When using enable = true, KeePassXC’ builtin native messaging manifest for
-    # communication with its browser extension is automatically installed.
-    # This conflicts with KeePassXC’ builtin installation mechanism.
-    # To prevent error messages,
-    # either set programs.keepassxc.settings.Browser.UpdateBinaryPath to false,
-    # or untick the checkbox
-    # Application Settings/Browser Integration/Advanced/Update native messaging manifest files at startup
-    # in the GUI.
-    UpdateBinaryPath = false;
-  };
-
-  programs.firefox = {
-    policies = {
-      ExtensionSettings = {
-        # KeePassXC-Browser
-        "keepassxc-browser@keepassxc.org" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
-          installation_mode = "force_installed";
-          updates_disabled = "false";
-          private_browsing = "true";
+  config = {
+    programs.keepassxc = {
+      enable = true;
+      autostart = true;
+      # Options
+      # https://github.com/keepassxreboot/keepassxc/blob/develop/src/core/Config.cpp
+      settings = {
+        General = {
+          ConfigVersion = "2";
+          BackupBeforeSave = true;
+          UpdateCheckMessageShown = true;
+          OpenPreviousDatabasesOnStartup = true;
         };
-      };
-
-      "3rdparty".Extensions = {
-        # https://github.com/keepassxreboot/keepassxc-browser/blob/develop/keepassxc-browser/background/page.js
-        "keepassxc-browser@keepassxc.org".settings = {
-          "passkeys" = true;
+        Security = {
+          LockDatabaseIdleSeconds = 3600;
         };
+        GUI = {
+          AdvancedSettings = true;
+          CompactMode = true;
+          MinimizeOnStartup = true;
+          MinimizeOnClose = true;
+          ShowExpiredEntriesOnDatabaseUnlockOffsetDays = "30";
+          ShowTrayIcon = true;
+        };
+        PasswordGenerator = {
+          AdvancedMode = true;
+          Length = "32";
+          Punctuation = true;
+          Dashes = true;
+          Math = true;
+          Braces = true;
+          Quotes = true;
+        };
+        Browser = {
+          Enabled = true;
+          SearchInAllDatabases = true;
+          BestMatchOnly = true;
+          # When using enable = true, KeePassXC' builtin native messaging manifest for
+          # communication with its browser extension is automatically installed.
+          # This conflicts with KeePassXC' builtin installation mechanism.
+          # To prevent error messages,
+          # either set programs.keepassxc.settings.Browser.UpdateBinaryPath to false,
+          # or untick the checkbox
+          # Application Settings/Browser Integration/Advanced/Update native messaging manifest files at startup
+          # in the GUI.
+          UpdateBinaryPath = false;
+        };
+        SSHAgent.Enabled = true;
+        FdoSecrets.Enabled = true;
+        Security.IconDownloadFallback = true;
       };
     };
+    xdg.autostart.enable = config.programs.keepassxc.autostart;
+
+    # Disable gnome keyring service
+    #services.gnome-keyring.enable = lib.mkForce false; # Does not work.
+
+    # Browser integration
+
+    programs.firefox = lib.mkIf config.programs.keepassxc.settings.Browser.Enabled {
+      policies = {
+        ExtensionSettings = {
+          # KeePassXC-Browser
+          "keepassxc-browser@keepassxc.org" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = "false";
+            private_browsing = "true";
+          };
+        };
+
+        "3rdparty".Extensions = {
+          # https://github.com/keepassxreboot/keepassxc-browser/blob/develop/keepassxc-browser/background/page.js
+          "keepassxc-browser@keepassxc.org".settings = {
+            "passkeys" = true;
+          };
+        };
+      };
+    };
+
+    # SSH
+
+    services.ssh-agent.enable = config.programs.keepassxc.settings.SSHAgent.Enabled;
+
+    # When a KeePassXC entry has "Require user confirmation when this key is used" enabled,
+    # ssh-agent needs an askpass program to show a yes/no confirmation dialog.
+    # These must be set on the agent's systemd service, not just the shell session,
+    # because the agent process itself invokes the askpass program.
+    home.sessionVariables = lib.mkIf config.programs.keepassxc.settings.SSHAgent.Enabled {
+      SSH_ASKPASS = lib.getExe pkgs.lxqt.lxqt-openssh-askpass;
+      SSH_ASKPASS_REQUIRE = "prefer";
+    };
+    # askpass needs display/wayland specific environment variables
+    # so we make it depend of the graphical session.
+    # This makes it unusable in terminal sessions.
+    systemd.user.services.ssh-agent = lib.mkIf config.programs.keepassxc.settings.SSHAgent.Enabled {
+      Unit = {
+        After = [ "graphical-session.target" ];
+        Requires = [ "graphical-session.target" ];
+      };
+      Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
+      Service.Environment = [
+        "SSH_ASKPASS=${lib.getExe pkgs.lxqt.lxqt-openssh-askpass}"
+        "SSH_ASKPASS_REQUIRE=prefer"
+      ];
+    };
+
+    # Prompt to unlock KeePassXC when SSH needs a key that isn't in the agent.
+    # The script launches KeePassXC (which prompts for the master password),
+    # waits for the key to appear in the agent, then connects via netcat.
+    programs.ssh.settings."*".ProxyCommand = lib.mkIf (
+      config.programs.keepassxc.settings.SSHAgent.Enabled
+      && config.programs.keepassxc.settings.FdoSecrets.Enabled
+    ) "${keepassxc-proxy} %h %p";
   };
-
-  # SSH
-
-  services.ssh-agent.enable = true;
-  programs.keepassxc.settings.SSHAgent.Enabled = true;
-
-  # When a KeePassXC entry has "Require user confirmation when this key is used" enabled,
-  # ssh-agent needs an askpass program to show a yes/no confirmation dialog.
-  # These must be set on the agent's systemd service, not just the shell session,
-  # because the agent process itself invokes the askpass program.
-  home.sessionVariables = {
-    SSH_ASKPASS = lib.getExe pkgs.lxqt.lxqt-openssh-askpass;
-    SSH_ASKPASS_REQUIRE = "prefer";
-  };
-  systemd.user.services.ssh-agent.Service.Environment = [
-    "SSH_ASKPASS=${lib.getExe pkgs.lxqt.lxqt-openssh-askpass}"
-    "SSH_ASKPASS_REQUIRE=prefer"
-    "DISPLAY=:0"
-  ];
-
-  # Prompt to unlock KeePassXC when SSH needs a key that isn't in the agent.
-  # The script launches KeePassXC (which prompts for the master password),
-  # waits for the key to appear in the agent, then connects via netcat.
-  programs.ssh.settings."*".ProxyCommand = "${keepassxc-proxy} %h %p";
 }

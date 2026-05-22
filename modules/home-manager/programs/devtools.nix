@@ -8,6 +8,7 @@
   home.packages = (
     with pkgs;
     [
+      devenv
     ]
     ++ lib.lists.optionals config.prefs.profile.graphical.enable [
       gg-jj # jujutsu gui

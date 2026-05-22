@@ -126,7 +126,7 @@ in
       commit.gpgsign = true;
       tag.gpgsign = true;
       # Force SSH auth over HTTPS.
-      url."git@github.com:".insteadOf = "https://github.com/";
+      #url."git@github.com:".insteadOf = "https://github.com/";
     };
 
     jujutsu.settings = {
@@ -145,13 +145,13 @@ in
 
     ssh.settings = {
       "github.com" = {
-        IdentityFile = "${config.home.homeDirectory}/.ssh/github";
+        IdentityFile = "${config.home.homeDirectory}/.ssh/github.pub";
         IdentitiesOnly = true;
       };
       "raspberrypi ${config.prefs.network.hosts.raspberrypi.ip}" = {
         HostName = config.prefs.network.hosts.raspberrypi.ip;
         User = "root";
-        IdentityFile = "${config.home.homeDirectory}/.ssh/pi";
+        IdentityFile = "${config.home.homeDirectory}/.ssh/pi.pub";
         IdentitiesOnly = true;
       };
     };
