@@ -5,17 +5,48 @@
   ...
 }:
 let
+  # Wrapper around SSH_ASKPASS that caches approval for a short window.
+  # Avoids repeated confirmation dialogs for back-to-back operations
+  # (e.g., sign + push).
+  ssh-askpass-cached = pkgs.writeShellScript "ssh-askpass-cached" ''
+    CACHE_FILE="/tmp/.ssh-askpass-cache-$(id -u)"
+    CACHE_SECONDS=60
+
+    if [ -f "$CACHE_FILE" ]; then
+      last=$(cat "$CACHE_FILE")
+      now=$(date +%s)
+      if [ $((now - last)) -lt $CACHE_SECONDS ]; then
+        exit 0
+      fi
+    fi
+
+    ${lib.getExe pkgs.lxqt.lxqt-openssh-askpass} "$@"
+    status=$?
+
+    if [ $status -eq 0 ]; then
+      date +%s > "$CACHE_FILE"
+    fi
+
+    exit $status
+  '';
   keepassxc-proxy = pkgs.writeShellScript "keepassxc-proxy" ''
     if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
       # Trigger KeePassXC's Secret Service unlock dialog via D-Bus.
-      # This shows a modal prompt that auto-dismisses after unlock.
-      ${lib.getExe' pkgs.libsecret "secret-tool"} search --unlock nonexistent dummy &> /dev/null &
-      for i in $(seq 1 10); do
-        ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null && break
-        sleep 1
-      done
+      # Blocks until the user enters their master password or times out.
+      ${lib.getExe' pkgs.libsecret "secret-tool"} search --unlock nonexistent dummy &> /dev/null
     fi
     exec ${lib.getExe' pkgs.libressl.nc "nc"} "$1" "$2"
+  '';
+
+  # Wrapper around ssh-keygen that triggers KeePassXC unlock before signing
+  # if the signing key isn't in the agent yet.
+  ssh-keygen-sign = pkgs.writeShellScript "ssh-keygen-sign" ''
+    if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
+      # Trigger KeePassXC's Secret Service unlock dialog via D-Bus.
+      # Blocks until the user enters their master password or times out.
+      ${lib.getExe' pkgs.libsecret "secret-tool"} search --unlock nonexistent dummy &> /dev/null
+    fi
+    exec ${lib.getExe' pkgs.openssh "ssh-keygen"} "$@"
   '';
 in
 {
@@ -108,7 +139,7 @@ in
     # These must be set on the agent's systemd service, not just the shell session,
     # because the agent process itself invokes the askpass program.
     home.sessionVariables = lib.mkIf config.programs.keepassxc.settings.SSHAgent.Enabled {
-      SSH_ASKPASS = lib.getExe pkgs.lxqt.lxqt-openssh-askpass;
+      SSH_ASKPASS = toString ssh-askpass-cached;
       SSH_ASKPASS_REQUIRE = "prefer";
     };
     # askpass needs display/wayland specific environment variables
@@ -121,7 +152,7 @@ in
       };
       Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
       Service.Environment = [
-        "SSH_ASKPASS=${lib.getExe pkgs.lxqt.lxqt-openssh-askpass}"
+        "SSH_ASKPASS=${ssh-askpass-cached}"
         "SSH_ASKPASS_REQUIRE=prefer"
       ];
     };
@@ -133,5 +164,18 @@ in
       config.programs.keepassxc.settings.SSHAgent.Enabled
       && config.programs.keepassxc.settings.FdoSecrets.Enabled
     ) "${keepassxc-proxy} %h %p";
+
+    # SSH commit signing: trigger KeePassXC unlock if key isn't in the agent.
+    programs.git.settings.gpg.ssh.program = lib.mkIf (
+      config.programs.keepassxc.settings.SSHAgent.Enabled
+      && config.programs.keepassxc.settings.FdoSecrets.Enabled
+      && (config.programs.git.settings.gpg.format or "") == "ssh"
+    ) (toString ssh-keygen-sign);
+    programs.jujutsu.settings.signing.backends.ssh.program = lib.mkIf (
+      config.programs.keepassxc.settings.SSHAgent.Enabled
+      && config.programs.keepassxc.settings.FdoSecrets.Enabled
+      && config.programs.jujutsu.enable
+      && (config.programs.jujutsu.settings.signing.backend or "") == "ssh"
+    ) (toString ssh-keygen-sign);
   };
 }
