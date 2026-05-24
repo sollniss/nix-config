@@ -12,6 +12,8 @@ let
 
     desktops.cosmic
 
+    services.docker
+
     #programs.protonvpn
   ];
 in
