@@ -20,6 +20,15 @@ in
 {
   imports = nixosModules;
 
+  nixpkgs.overlays = [
+    (_: prev: {
+      openldap = prev.openldap.overrideAttrs (_: {
+        # Work around nixpkgs#513245: the failing tests are on i686 only.
+        doCheck = !prev.stdenv.hostPlatform.isi686;
+      });
+    })
+  ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -30,13 +39,13 @@ in
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
 
-  #environment.systemPackages = with pkgs; [
-  #  lutris
-  #  gamemode
-  #  wineWow64Packages.stable
-  #  winetricks
-  #  wineWow64Packages.waylandFull
-  #];
+  environment.systemPackages = with pkgs; [
+    lutris
+    gamemode
+    wineWow64Packages.stable
+    winetricks
+    wineWow64Packages.waylandFull
+  ];
 
   services.gnome.gnome-keyring.enable = lib.mkForce false;
 
