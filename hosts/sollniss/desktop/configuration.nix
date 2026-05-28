@@ -34,7 +34,7 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-  #boot.kernelPackages = pkgs.linuxPackages_latest; # Can cause nvidia driver build to fail.
+  boot.kernelPackages = pkgs.linuxPackages_latest; # Can cause nvidia driver build to fail.
 
   #hardware.keyboard.qmk.enable = true;
   #services.udev.packages = [pkgs.via];
