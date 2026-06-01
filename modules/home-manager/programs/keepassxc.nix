@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   lib,
@@ -29,11 +30,18 @@ let
 
     exit $status
   '';
+  cosmic-secret-unlock = inputs.cosmic-secret-unlock.packages.${pkgs.system}.default;
+
+  keepassxc-unlock = pkgs.writeShellScript "keepassxc-unlock" ''
+    # Trigger KeePassXC's Secret Service unlock via D-Bus.
+    # If the unlock dialog blocks, force-focus the KeePassXC window
+    # using COSMIC's toplevel management protocol.
+    ${lib.getExe cosmic-secret-unlock} org.keepassxc.KeePassXC
+  '';
+
   keepassxc-proxy = pkgs.writeShellScript "keepassxc-proxy" ''
     if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
-      # Trigger KeePassXC's Secret Service unlock dialog via D-Bus.
-      # Blocks until the user enters their master password or times out.
-      ${lib.getExe' pkgs.libsecret "secret-tool"} search --unlock nonexistent dummy &> /dev/null
+      ${keepassxc-unlock}
     fi
     exec ${lib.getExe' pkgs.libressl.nc "nc"} "$1" "$2"
   '';
@@ -42,9 +50,7 @@ let
   # if the signing key isn't in the agent yet.
   ssh-keygen-sign = pkgs.writeShellScript "ssh-keygen-sign" ''
     if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
-      # Trigger KeePassXC's Secret Service unlock dialog via D-Bus.
-      # Blocks until the user enters their master password or times out.
-      ${lib.getExe' pkgs.libsecret "secret-tool"} search --unlock nonexistent dummy &> /dev/null
+      ${keepassxc-unlock}
     fi
     exec ${lib.getExe' pkgs.openssh "ssh-keygen"} "$@"
   '';

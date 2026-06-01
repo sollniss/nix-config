@@ -20,6 +20,26 @@
         "type": "github"
       }
     },
+    "cosmic-secret-unlock": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780326537,
+        "narHash": "sha256-0VNMYz8djWTcgYGOH7tmlQYacBXnB3nerpXN8AQFMu0=",
+        "owner": "sollniss",
+        "repo": "cosmic-secret-unlock",
+        "rev": "e2c0d8e3bde9192c4c2260b7c0771799440dc594",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sollniss",
+        "repo": "cosmic-secret-unlock",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -129,6 +149,7 @@
     "root": {
       "inputs": {
         "catppuccin": "catppuccin",
+        "cosmic-secret-unlock": "cosmic-secret-unlock",
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",

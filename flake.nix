@@ -16,6 +16,10 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cosmic-secret-unlock = {
+      url = "github:sollniss/cosmic-secret-unlock";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     #zed-editor = {
     #  url = "github:zed-industries/zed?ref=nightly";
     #};
