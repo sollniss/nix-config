@@ -30,7 +30,8 @@ let
 
     exit $status
   '';
-  cosmic-secret-unlock = inputs.cosmic-secret-unlock.packages.${pkgs.system}.default;
+  cosmic-secret-unlock =
+    inputs.cosmic-secret-unlock.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   keepassxc-unlock = pkgs.writeShellScript "keepassxc-unlock" ''
     # Trigger KeePassXC's Secret Service unlock via D-Bus.
