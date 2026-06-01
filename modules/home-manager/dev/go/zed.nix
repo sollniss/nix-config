@@ -8,6 +8,11 @@
       "templ"
     ];
     userSettings = {
+      file_types = {
+        Go = [
+          "**/*.go.golden"
+        ];
+      };
       lsp = {
         gopls = {
           initialization_options = {
