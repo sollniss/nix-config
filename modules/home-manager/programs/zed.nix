@@ -15,14 +15,30 @@
     #mutableUserSettings = false;
     userSettings = {
       ui_font_family = "Noto Sans";
-      buffer_font_family = "JetBrains Mono";
+      buffer_font_family = "JetBrains Mono NL";
       telemetry = {
         diagnostics = false;
         metrics = false;
       };
       format_on_save = "on";
-      #lsp = {};
-      #languages = {};
+      lsp = {
+        "vscode-html-language-server" = {
+          settings = {
+            html = {
+              format = {
+                indentInnerHtml = true;
+                contentUnformatted = "svg,script";
+                extraLiners = "div,p";
+              };
+            };
+          };
+        };
+      };
+      languages = {
+        "HTML" = {
+          formatter = "language_server";
+        };
+      };
     };
   };
 

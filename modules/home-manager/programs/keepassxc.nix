@@ -106,6 +106,8 @@ in
         };
         SSHAgent.Enabled = true;
         FdoSecrets.Enabled = true;
+        FdoSecrets.ConfirmAccessItem = false;
+        FdoSecrets.ConfirmDeleteItem = false;
         Security.IconDownloadFallback = true;
       };
     };

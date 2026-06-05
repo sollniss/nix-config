@@ -14,7 +14,7 @@ let
 
     services.docker
 
-    #programs.protonvpn
+    programs.protonvpn
   ];
 in
 {

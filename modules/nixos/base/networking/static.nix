@@ -5,7 +5,7 @@ let
   hasEntry = network.hosts ? ${hostname};
 in
 {
-  config = lib.mkIf hasEntry (
+  config = lib.mkIf (hasEntry && !config.networking.networkmanager.enable) (
     let
       self = network.hosts.${hostname};
       subnet = network.subnets.${self.subnet};

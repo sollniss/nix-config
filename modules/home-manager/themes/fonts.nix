@@ -23,7 +23,7 @@
 
       defaultFonts = {
         monospace = [
-          "JetBrains Mono"
+          "JetBrains Mono NL"
           "Noto Sans Mono CJK JP"
           "Noto Sans Mono"
           "Symbols Nerd Font Mono"

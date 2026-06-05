@@ -114,9 +114,10 @@ in
     # Hide kernel pointers from all users
     "kernel.kptr_restrict" = 2;
     # Reverse path filtering (anti-spoofing)
-    # This could break Wireguard peers where the AllowedIPs is 0.0.0.0/0
-    "net.ipv4.conf.all.rp_filter" = 1;
-    "net.ipv4.conf.default.rp_filter" = 1;
+    # Managed by networking.firewall.checkReversePath; mkDefault allows
+    # modules (e.g. VPN) to switch to loose mode (rp_filter=2).
+    "net.ipv4.conf.all.rp_filter" = lib.mkDefault 1;
+    "net.ipv4.conf.default.rp_filter" = lib.mkDefault 1;
     # Disable ICMP redirects
     "net.ipv4.conf.all.accept_redirects" = 0;
     "net.ipv4.conf.default.accept_redirects" = 0;
