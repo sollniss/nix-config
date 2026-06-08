@@ -297,6 +297,11 @@ in
           "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
           "trailhead.firstrun.didSeeAboutWelcome" = true;
 
+          # Hardware acceleration
+          "media.hardware-video-decoding.force-enabled" = true;
+          "gfx.x11-egl.force-enabled" = true;
+          "widget.dmabuf.force-enabled" = true;
+
           # Hardening
 
           # https://wiki.archlinux.org/title/Firefox/Privacy#Disable/enforce_'Trusted_Recursive_Resolver'

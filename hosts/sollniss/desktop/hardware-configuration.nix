@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   modulesPath,
   ...
 }:
@@ -48,6 +49,16 @@
   # Enable OpenGL
   hardware.graphics = {
     enable = true;
+    extraPackages = [ pkgs.nvidia-vaapi-driver ];
+  };
+
+  environment = {
+    systemPackages = [ pkgs.libva-utils ];
+    variables = {
+      MOZ_DISABLE_RDD_SANDBOX = "1";
+      NVD_BACKEND = "direct";
+      LIBVA_DRIVER_NAME = "nvidia";
+    };
   };
 
   # Load nvidia driver for Xorg and Wayland

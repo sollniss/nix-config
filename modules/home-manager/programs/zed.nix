@@ -1,4 +1,9 @@
-{ inputs, pkgs, ... }:
+{
+  lib,
+  inputs,
+  pkgs,
+  ...
+}:
 {
   programs.zed-editor = {
     enable = true;
@@ -21,6 +26,14 @@
         metrics = false;
       };
       format_on_save = "on";
+      agent_servers = {
+        "claude-acp" = {
+          type = "registry";
+          env = {
+            CLAUDE_CODE_EXECUTABLE = lib.getExe pkgs.claude-code;
+          };
+        };
+      };
       lsp = {
         "vscode-html-language-server" = {
           settings = {
