@@ -1,46 +1,25 @@
-{
-  lib,
-  config,
-  ...
-}:
+# Complete prefs schema and the canonical entry point (`import ./modules/prefs`).
+# It is the shared core (./common.nix) plus the NixOS-only nixos.* options, which
+# are only meaningful in a NixOS evaluation (hostname/interface). NixOS imports
+# this; home-manager imports ./common.nix so it never sees prefs.nixos.*.
+{ lib, ... }:
 let
-  inherit (lib) mkEnableOption mkOption types;
-  network = import ./network.nix;
+  inherit (lib) mkOption types;
 in
 {
-  options.prefs = {
-    user.name = mkOption {
-      type = types.str;
-      description = "Primary username for this configuration.";
-    };
+  imports = [ ./common.nix ];
 
-    nixos.hostname = mkOption {
+  options.prefs.nixos = {
+    hostname = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = "Primary hostname for this configuration.";
     };
 
-    nixos.interface = mkOption {
+    interface = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = "Primary network interface for this host.";
-    };
-
-    profile = {
-      graphical.enable = mkEnableOption "Graphical profile capability flag.";
-    };
-
-    network = mkOption {
-      type = types.attrs;
-      default = network;
-      description = "Centralized network topology. See prefs/network.nix.";
-    };
-
-    hosted = {
-      ssh.enable = mkEnableOption "OpenSSH server with restrictive firewall rules.";
-      vpn.enable = mkEnableOption "WireGuard VPN server.";
-      dns.enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
-      calendar.enable = mkEnableOption "Baikal CalDAV/CardDAV calendar and contacts server.";
     };
   };
 }

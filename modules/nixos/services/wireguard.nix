@@ -14,7 +14,7 @@ let
   hostname = config.prefs.nixos.hostname;
   self = network.hosts.${hostname};
 
-  hasIPv6 = vpn ? gateway6;
+  hasIPv6 = vpn.gateway6 != null;
 
   # Derive WireGuard peers from the VPN subnet.
   vpnPeers = lib.pipe network.hosts [
@@ -22,7 +22,7 @@ let
     (builtins.filter (h: h.subnet == "vpn"))
     (map (h: {
       PublicKey = h.wgPubKey;
-      AllowedIPs = [ "${h.ip}/32" ] ++ lib.optional (h ? ip6) "${h.ip6}/128";
+      AllowedIPs = [ "${h.ip}/32" ] ++ lib.optional (h.ip6 != null) "${h.ip6}/128";
     }))
   ];
 

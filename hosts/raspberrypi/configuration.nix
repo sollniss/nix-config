@@ -7,7 +7,7 @@
 let
   network = config.prefs.network;
 
-  nixosModules = with inputs.self.nixosModules; [
+  nixosModules = with inputs.self.modules.nixos; [
     core
     base
     services.ssh

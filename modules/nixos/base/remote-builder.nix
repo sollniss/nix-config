@@ -6,10 +6,10 @@ let
   hasHost = network.hosts ? ${hostname};
   self = if hasHost then network.hosts.${hostname} else null;
 
-  buildTargets = lib.filterAttrs (_: h: (h.builder or null) == hostname) network.hosts;
+  buildTargets = lib.filterAttrs (_: h: h.builder == hostname) network.hosts;
   isBuildServer = hasHost && buildTargets != { };
 
-  hasBuilder = hasHost && (self.builder or null) != null;
+  hasBuilder = hasHost && self.builder != null;
   builder = if hasBuilder then network.hosts.${self.builder} else null;
 
   deployAliases =

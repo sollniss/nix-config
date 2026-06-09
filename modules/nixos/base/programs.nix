@@ -2,7 +2,7 @@
 let
   network = config.prefs.network;
   hostname = config.prefs.nixos.hostname;
-  buildsLocally = (network.hosts.${hostname}.builder or null) == null;
+  buildsLocally = !(network.hosts ? ${hostname}) || network.hosts.${hostname}.builder == null;
 in
 {
   programs.bash.enable = true;

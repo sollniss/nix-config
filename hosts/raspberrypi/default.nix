@@ -2,7 +2,7 @@
 {
   imports = [
     "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
-    inputs.self.prefs
+    inputs.self.modules.nixos.prefs
     ./hardware-configuration.nix
     ./configuration.nix
   ];

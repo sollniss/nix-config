@@ -17,7 +17,8 @@ let
   ipv6Allowed = [
     "::1/128"
     "fe80::/10"
-  ] ++ lib.optional (vpn ? cidr6) vpn.cidr6;
+  ]
+  ++ lib.optional (vpn.cidr6 != null) vpn.cidr6;
   ipv6Csv = builtins.concatStringsSep ", " ipv6Allowed;
 in
 {

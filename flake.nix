@@ -102,7 +102,7 @@
       # home-manager switch --flake github:sollniss/nix-config#terminal
       homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        specialArgs = {
+        extraSpecialArgs = {
           inherit inputs;
         };
         modules = [
@@ -110,8 +110,13 @@
         ];
       };
 
-      prefs = ./modules/prefs;
-      nixosModules = import ./modules/nixos;
-      homeManagerModules = import ./modules/home-manager;
+      modules = {
+        nixos = import ./modules/nixos // {
+          prefs = ./modules/prefs;
+        };
+        homeManager = import ./modules/home-manager // {
+          prefs = ./modules/prefs/common.nix;
+        };
+      };
     };
 }

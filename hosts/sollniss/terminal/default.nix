@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   imports = [
-    inputs.self.prefs
+    inputs.self.modules.homeManager.prefs
     ./home.nix
   ];
 

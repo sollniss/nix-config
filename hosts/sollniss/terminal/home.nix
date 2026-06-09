@@ -5,7 +5,7 @@
 }:
 let
   # Terminal-only config, so no UI stuff needed.
-  homeManagerModules = with inputs.self.homeManagerModules; [
+  homeManagerModules = with inputs.self.modules.homeManager; [
     base
     themes
     programs.shelltools

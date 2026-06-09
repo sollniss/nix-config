@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  homeManagerModules = with inputs.self.homeManagerModules; [
+  homeManagerModules = with inputs.self.modules.homeManager; [
     base
     themes
 

@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   imports = [
-    inputs.self.prefs
+    inputs.self.modules.nixos.prefs
     ./hardware-configuration.nix
     ./configuration.nix
   ];

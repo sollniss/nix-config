@@ -18,7 +18,7 @@ let
   listenAddrs6 = [
     "::1"
   ]
-  ++ lib.optional (config.prefs.hosted.vpn.enable && vpn ? gateway6) vpn.gateway6;
+  ++ lib.optional (config.prefs.hosted.vpn.enable && vpn.gateway6 != null) vpn.gateway6;
 
   listenSockets =
     (map (addr: "${addr}:53") listenAddrs4) ++ (map (addr: "[${addr}]:53") listenAddrs6);

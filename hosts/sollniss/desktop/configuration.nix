@@ -6,7 +6,7 @@
   ...
 }:
 let
-  nixosModules = with inputs.self.nixosModules; [
+  nixosModules = with inputs.self.modules.nixos; [
     core
     base
 
