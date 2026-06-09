@@ -19,8 +19,6 @@
     ];
     #mutableUserSettings = false;
     userSettings = {
-      ui_font_family = "Noto Sans";
-      buffer_font_family = "JetBrains Mono NL";
       telemetry = {
         diagnostics = false;
         metrics = false;
