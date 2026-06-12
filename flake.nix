@@ -23,6 +23,13 @@
       url = "github:sollniss/cosmic-secret-unlock";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Always-latest Claude Code (its main branch auto-updates hourly from the
+    # upstream release). Deliberately NOT following nixpkgs: matching the
+    # flake's own pin is what keeps the claude-code.cachix.org binaries cache-hits
+    # instead of rebuilding locally. Bump with `nix flake update claude-code`.
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+    };
     #zed-editor = {
     #  url = "github:zed-industries/zed?ref=nightly";
     #};
