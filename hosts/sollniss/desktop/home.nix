@@ -96,11 +96,11 @@ in
   programs = {
     anki = {
       profiles.sollniss.sync = {
-        username = "sollniss" + "@" + "web.de";
+        username = config.prefs.user.email;
         keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
       };
       profiles.mzh.sync = {
-        username = "m." + "kodama0410" + "@" + "gmail" + ".com";
+        username = "m.kodama0410@gmail.com";
         keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
       };
       profiles.sollniss.default = true;
@@ -118,8 +118,8 @@ in
 
     git.settings = {
       user = {
-        name = "sollniss";
-        email = "sollniss" + "@" + "web.de";
+        name = config.prefs.user.name;
+        email = config.prefs.user.email;
         signingkey = "${config.home.homeDirectory}/.ssh/github.pub";
       };
       gpg.format = "ssh";
@@ -131,8 +131,8 @@ in
 
     jujutsu.settings = {
       user = {
-        name = "sollniss";
-        email = "sollniss" + "@" + "web.de";
+        name = config.prefs.user.name;
+        email = config.prefs.user.email;
       };
       signing = {
         behavior = "own";
@@ -158,10 +158,10 @@ in
   };
 
   accounts.email.accounts = {
-    "sollniss@web.de" = {
-      realName = "sollniss";
-      address = "sollniss" + "@" + "web.de";
-      userName = "sollniss";
+    "${config.prefs.user.email}" = {
+      realName = config.prefs.user.name;
+      address = config.prefs.user.email;
+      userName = config.prefs.user.name;
       primary = true;
       thunderbird = {
         enable = true;

@@ -19,6 +19,8 @@ in
 {
   imports = nixosModules;
 
+  system.stateVersion = "25.05";
+
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";

@@ -74,6 +74,11 @@ in
       description = "Primary username for this configuration.";
     };
 
+    user.email = mkOption {
+      type = types.str;
+      description = "Primary email address for this configuration.";
+    };
+
     profile = {
       graphical.enable = mkEnableOption "Graphical profile capability flag.";
     };

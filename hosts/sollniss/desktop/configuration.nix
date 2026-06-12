@@ -20,6 +20,8 @@ in
 {
   imports = nixosModules;
 
+  system.stateVersion = "25.05";
+
   nixpkgs.overlays = [
     (_: prev: {
       openldap = prev.openldap.overrideAttrs (_: {

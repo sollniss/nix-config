@@ -19,6 +19,8 @@ in
 
   imports = nixosModules;
 
+  system.stateVersion = "25.05";
+
   programs.git = {
     enable = true;
   };

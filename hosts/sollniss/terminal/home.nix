@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  config,
   ...
 }:
 let
@@ -36,8 +37,8 @@ in
   programs.git = {
     enable = true;
     settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
+      name = config.prefs.user.name;
+      email = config.prefs.user.email;
     };
   };
 }

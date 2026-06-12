@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, config, ... }:
 let
   homeManagerModules = with inputs.self.modules.homeManager; [
     base
@@ -27,8 +27,8 @@ in
 
   programs.git = {
     settings.user = {
-      name = "sollniss";
-      email = "sollniss" + "@" + "web.de";
+      name = config.prefs.user.name;
+      email = config.prefs.user.email;
     };
   };
 }
