@@ -6,10 +6,12 @@
   ...
 }:
 {
+  home.shell.enableShellIntegration = false;
+  home.shell.enableBashIntegration = config.programs.bash.enable;
+  home.shell.enableFishIntegration = config.programs.fish.enable;
+
   programs.starship = {
     enable = true;
-    enableBashIntegration = config.programs.bash.enable;
-    enableFishIntegration = config.programs.fish.enable;
   };
 
   # ls alternative
@@ -36,8 +38,6 @@
   # cd alternative
   programs.zoxide = {
     enable = true;
-    enableBashIntegration = config.programs.bash.enable;
-    enableFishIntegration = config.programs.fish.enable;
     options = [
       "--cmd cd" # alias to cd
     ];
@@ -46,8 +46,6 @@
   # tree alternative
   programs.broot = {
     enable = true;
-    enableBashIntegration = config.programs.bash.enable;
-    enableFishIntegration = config.programs.fish.enable;
 
     settings = {
       icon_theme = "nerdfont";
@@ -56,8 +54,6 @@
 
   programs.fzf = {
     enable = true;
-    enableBashIntegration = config.programs.bash.enable;
-    enableFishIntegration = config.programs.fish.enable;
 
     defaultCommand = "${lib.getExe config.programs.fd.package} --type f";
   };
