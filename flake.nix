@@ -23,12 +23,11 @@
       url = "github:sollniss/cosmic-secret-unlock";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Always-latest Claude Code (its main branch auto-updates hourly from the
-    # upstream release). Deliberately NOT following nixpkgs: matching the
-    # flake's own pin is what keeps the claude-code.cachix.org binaries cache-hits
-    # instead of rebuilding locally. Bump with `nix flake update claude-code`.
     claude-code = {
       url = "github:sadjow/claude-code-nix";
+    };
+    helix = {
+      url = "github:helix-editor/helix";
     };
     #zed-editor = {
     #  url = "github:zed-industries/zed?ref=nightly";
@@ -108,7 +107,11 @@
       # home-manager switch --flake .#terminal
       # home-manager switch --flake github:sollniss/nix-config#terminal
       homeConfigurations.terminal = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+          overlays = import ./modules/overlays { inherit inputs; };
+        };
         extraSpecialArgs = {
           inherit inputs;
         };
