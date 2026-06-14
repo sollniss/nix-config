@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   inputs,
   pkgs,
@@ -24,11 +25,11 @@
         metrics = false;
       };
       format_on_save = "on";
-      agent_servers = {
+      agent_servers = lib.mkIf config.programs.claude-code.enable {
         "claude-acp" = {
           type = "registry";
           env = {
-            CLAUDE_CODE_EXECUTABLE = lib.getExe pkgs.claude-code;
+            CLAUDE_CODE_EXECUTABLE = lib.getExe config.programs.claude-code.package;
           };
         };
       };

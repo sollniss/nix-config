@@ -1,4 +1,8 @@
-{ ... }:
+{
+  config,
+  lib,
+  ...
+}:
 {
   programs.fish = {
     enable = true;
@@ -88,12 +92,12 @@
   };
 
   programs.wezterm.extraConfig = ''
-    config.default_prog = { 'fish', '-i' }
+    config.default_prog = { '${lib.getExe config.programs.fish.package}', '-i' }
   '';
 
   programs.zed-editor.userSettings.terminal.shell = {
     with_arguments = {
-      program = "fish";
+      program = lib.getExe config.programs.fish.package;
       args = [ "-i" ];
     };
   };

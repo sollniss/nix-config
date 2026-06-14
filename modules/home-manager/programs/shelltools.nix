@@ -59,7 +59,7 @@
     enableBashIntegration = config.programs.bash.enable;
     enableFishIntegration = config.programs.fish.enable;
 
-    defaultCommand = "fd --type f";
+    defaultCommand = "${lib.getExe config.programs.fd.package} --type f";
   };
 
   programs.btop = {

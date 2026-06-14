@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -46,6 +47,6 @@ in
     };
   };
 
-  programs.git.settings.core.editor = "hx";
-  programs.jujutsu.settings.ui.editor = "hx";
+  programs.git.settings.core.editor = lib.getExe config.programs.helix.package;
+  programs.jujutsu.settings.ui.editor = lib.getExe config.programs.helix.package;
 }

@@ -8,6 +8,7 @@ let
     programs.fish
     programs.helix
 
+    programs.devtools
     dev.go
     dev.nix
   ];
