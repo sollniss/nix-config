@@ -48,6 +48,8 @@ in
   home.packages = with pkgs; [
     inkscape
 
+    leet-helix
+
     #google-chrome
 
     # minecraft
