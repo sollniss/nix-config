@@ -58,6 +58,33 @@
     defaultCommand = "${lib.getExe config.programs.fd.package} --type f";
   };
 
+  programs.ripgrep-all = {
+    enable = true;
+  };
+
+  programs.yazi = {
+    enable = true;
+    shellWrapperName = "y";
+
+    keymap.mgr.prepend_keymap = [
+      {
+        on = "o";
+        run = ''shell '$EDITOR "$@"' --block'';
+        desc = "Open with $EDITOR";
+      }
+      {
+        on = "<Enter>";
+        run = ''shell '$VISUAL "$@"' --orphan'';
+        desc = "Open with $VISUAL";
+      }
+      {
+        on = "S";
+        run = "search --via=rga";
+        desc = "Search files by content via ripgrep-all";
+      }
+    ];
+  };
+
   programs.btop = {
     enable = true;
     # Enable GPU support.

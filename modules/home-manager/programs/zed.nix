@@ -13,10 +13,12 @@
     #installRemoteServer = true;
 
     extensions = [
-      "sql"
-      "make"
-      "toml"
       "log"
+      "lua"
+      "make"
+      "sql"
+      "toml"
+
     ];
     #mutableUserSettings = false;
     userSettings = {

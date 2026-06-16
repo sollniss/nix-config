@@ -1,6 +1,7 @@
 {
   imports = [
-    ./catppuccin.nix
+    ./catppuccin
+
     ./cursor.nix
     ./fonts.nix
   ];

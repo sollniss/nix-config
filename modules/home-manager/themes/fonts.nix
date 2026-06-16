@@ -98,10 +98,6 @@ let
   # Per-language CJK disambiguation (fontconfig apps only).
   # The default region stays for untagged text and its own language.
   # Text tagged with another language gets that region's glyph forms.
-  # Generated from `cjk` above: for each generic, prepend the region-specific
-  # family for languages whose region isn't the default, keyed off the default
-  # CJK font already in that generic's chain (which identifies sans/serif/mono).
-  # Runs after generic expansion (high conf.d number); strong binding so it wins.
   cjkRules = lib.concatStringsSep "\n" (
     lib.filter (r: r != null) (
       lib.flatten (
@@ -163,8 +159,7 @@ in
       };
     };
 
-    # WezTerm fonts. Default priority slots this between wezterm.nix's
-    # mkBefore (config_builder) and mkAfter (config.* + return config).
+    # WezTerm fonts.
     programs.wezterm.extraConfig = ''
       config.font = wezterm.font_with_fallback({ ${weztermFonts} })
       config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
