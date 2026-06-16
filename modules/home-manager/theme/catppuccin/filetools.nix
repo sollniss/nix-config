@@ -1,9 +1,6 @@
 { config, lib, ... }:
 # eza, broot and yazi use slightly different colors for the same concepts
 # (directories, permissions, file types, owners, ...).
-# Here we take over theming for the three tools and
-# render all of them from a single semantic color map, derived from the live
-# catppuccin palette so it still follows `catppuccin.flavor`/`catppuccin.accent`.
 let
   inherit (config.catppuccin) flavor sources accent;
   palette = config.theme.palette;
@@ -18,10 +15,7 @@ let
     in
     "rgb(${toString p.r}, ${toString p.g}, ${toString p.b})";
 
-  # Semantic role -> catppuccin palette color name. Only genuine roles live
-  # here. Anything that isn't conceptually one of these roles references the
-  # palette directly with `col`/`rgb` instead of borrowing an unrelated role.
-  # `accent` follows config.catppuccin.accent (mauve by default).
+  # Semantic role -> catppuccin palette color name.
   sem = {
     # text
     fg = "text";
