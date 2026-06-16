@@ -14,6 +14,7 @@
   options.dev.go.neededPackages = lib.mkOption {
     type = lib.types.listOf lib.types.package;
     readOnly = true;
+    internal = true;
     default = with pkgs; [
       gopls
       gotools

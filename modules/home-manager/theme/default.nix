@@ -3,6 +3,6 @@
     ./catppuccin
 
     ./cursor.nix
-    ./fonts.nix
+    ./fonts
   ];
 }

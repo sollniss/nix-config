@@ -3,11 +3,9 @@
 # doesn't work on Cosmic) plus a custom tab bar. Colors are pulled from the live
 # palette so they follow `catppuccin.flavor`/`catppuccin.accent`.
 let
-  palette =
-    (lib.importJSON "${config.catppuccin.sources.palette}/palette.json")
-    .${config.catppuccin.flavor}.colors;
+  inherit (config.catppuccin) accent;
+  palette = config.theme.palette;
   c = name: palette.${name}.hex;
-  accent = config.catppuccin.accent;
 in
 {
   catppuccin.wezterm.enable = false;

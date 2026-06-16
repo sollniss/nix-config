@@ -5,14 +5,12 @@
 # render all of them from a single semantic color map, derived from the live
 # catppuccin palette so it still follows `catppuccin.flavor`/`catppuccin.accent`.
 let
-  cat = config.catppuccin;
-  inherit (cat) flavor accent sources;
+  inherit (config.catppuccin) flavor sources accent;
+  palette = config.theme.palette;
 
-  palette = (lib.importJSON "${sources.palette}/palette.json").${flavor}.colors;
-
-  # catppuccin palette color name -> "#rrggbb"
+  # palette color name -> "#rrggbb"
   col = name: palette.${name}.hex;
-  # catppuccin palette color name -> "rgb(r, g, b)" (broot's color syntax)
+  # palette color name -> "rgb(r, g, b)" (broot's color syntax)
   rgb =
     name:
     let
@@ -489,7 +487,7 @@ let
   '';
 in
 {
-  config = lib.mkIf cat.enable (
+  config = lib.mkIf config.catppuccin.enable (
     lib.mkMerge [
       # Stop the catppuccin module from writing its per-tool themes; we own them.
       {

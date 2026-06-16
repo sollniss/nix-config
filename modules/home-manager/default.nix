@@ -1,6 +1,6 @@
 {
   base = import ./base;
-  themes = import ./themes;
+  theme = import ./theme;
   desktops = import ./desktops;
   services = import ./services;
   programs = import ./programs;

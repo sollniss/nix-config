@@ -7,7 +7,7 @@
 let
   homeManagerModules = with inputs.self.modules.homeManager; [
     base
-    themes
+    theme
 
     desktops.cosmic
 
