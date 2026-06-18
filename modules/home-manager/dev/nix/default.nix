@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ./ai.nix
     ./helix.nix
     ./zed.nix
   ];

@@ -12,6 +12,12 @@
     '';
 
     functions = {
+      where = {
+        argumentNames = [ "cmd" ];
+        body = ''
+          readlink -f (which $cmd)
+        '';
+      };
       nixdiff = {
         argumentNames = [ "arg" ];
         body = ''

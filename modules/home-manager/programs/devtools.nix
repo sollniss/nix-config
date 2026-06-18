@@ -57,7 +57,12 @@
     };
   };
 
+  programs.mcp = {
+    enable = true;
+  };
+
   programs.claude-code = {
     enable = true;
+    enableMcpIntegration = true;
   };
 }

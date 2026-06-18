@@ -17,7 +17,6 @@
         language-servers = [
           "gopls"
           "golangci-lint-lsp"
-          "gpt"
         ];
         auto-format = true;
       }
