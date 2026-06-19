@@ -100,7 +100,7 @@ in
     "sch_cake"
   ];
   boot.kernel.sysctl = {
-    # Disable the nagic SysRq key
+    # Disable the magic SysRq key
     "kernel.sysrq" = 0;
     # Provide protection from ToCToU races
     "fs.protected_hardlinks" = 1;
