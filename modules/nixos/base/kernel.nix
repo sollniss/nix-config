@@ -5,90 +5,92 @@ let
 in
 {
   # nix eval --json .#nixosConfigurations.nixos.config.boot.blacklistedKernelModules | jq -r '.[]' | xargs -r -I{} env MOD='{}' sh -c 'modinfo -b /run/booted-system/kernel-modules -k "$(uname -r)" "$MOD" >/dev/null 2>&1 || printf "%s\n" "$MOD"'
-  boot.blacklistedKernelModules = [
+  boot.blacklistedKernelModules = lib.concatLists [
     # Linux Kernel Crypto API.
     # Most programs use user space APIs.
     #
     # https://copy.fail/
     # https://news.ycombinator.com/item?id=47956312
-    "af_alg"
-    "algif_aead"
-    "algif_hash"
-    "algif_rng"
-    "algif_skcipher"
+    [
+      "af_alg"
+      "algif_aead"
+      "algif_hash"
+      "algif_rng"
+      "algif_skcipher"
+    ]
 
     # IPSec.
     # These modules should not be used by anything else
-    # and disabling them break nothing.
+    # and disabling them should break nothing.
     #
     # https://github.com/V4bel/dirtyfrag
-    "ah4"
-    "ah6"
-    "af_key"
-    "esp4"
-    "esp6"
-    "xfrm_ipcomp"
-    "xfrm_user"
+    [
+      "ah4"
+      "ah6"
+      "af_key"
+      "esp4"
+      "esp6"
+      "xfrm_ipcomp"
+      "xfrm_user"
+    ]
 
     # Unused protocols
+    [
+      # SCTP - Stream Control Transmission Protocol
+      "sctp"
+      "sctp_diag"
+      "xt_sctp"
 
-    # DCCP
-    "xt_dccp"
+      # TIPC - Transparent Inter Process Communication
+      "tipc"
+      "tipc_diag"
 
-    # SCTP
-    "sctp"
-    "sctp_diag"
-    "xt_sctp"
-
-    # RDS
-    "rds"
-
-    # TIPC
-    "tipc"
-    "tipc_diag"
+      "xt_dccp" # DCCP
+      "rds" # RDS
+      "appletalk"
+      "can" # SocketCAN - Controller Area Network
+    ]
 
     # Unused file systems
-    "adfs" # Acorn Disc Filing System
-    "affs" # Amiga FFS
-    "befs" # BeOS FS
-    "ceph" # Ceph Distributed File System
-    "coda" # Coda Kernel-Venus Interface
-    "cramfs" # Cramfs - cram a filesystem onto a small ROM
-    "ecryptfs" # Largely superseded by fscrypt / LUKS
-    "freevxfs" # Veritas FS
-    "gfs2" # Global FS
-    "hfs" # Apple HFS
-    "hfsplus" # Apple HFS+
-    "jffs2" # Journaling Flash FS
-    "jfs" # Journaled File System
-    "kafs" # Kernel AFS
-    "minix"
-    "nilfs2"
-    "ocfs2"
-    "orangefs"
-    "romfs"
-    "rxrpc" # AFS dependency, main cause of Dirty Frag
-    "ubifs"
-    "ufs"
-    "zonefs"
-
-    # Amateur radio
-    "ax25"
-    "netrom"
-    "rose"
-
-    # Useless stuff
-    "appletalk"
-    "caif"
-    "can"
+    [
+      "adfs" # Acorn Disc Filing System
+      "affs" # Amiga FFS
+      "befs" # BeOS FS
+      "ceph" # Ceph Distributed File System
+      "coda" # Coda Kernel-Venus Interface
+      "cramfs" # Cramfs - cram a filesystem onto a small ROM
+      "ecryptfs" # Largely superseded by fscrypt / LUKS
+      "efs" # Extent File System
+      "freevxfs" # Veritas FS
+      "gfs2" # Global FS
+      "hfs" # Apple HFS
+      "hfsplus" # Apple HFS+
+      "jffs2" # Journaling Flash FS
+      "jfs" # Journaled File System
+      "kafs" # Kernel AFS
+      "ksmbd" # In-kernel SMB server
+      "minix" # minix fs
+      "nilfs2" # New Implementation of a Log-structured File System
+      "nfs" # Network File System
+      "nfsv3"
+      "nfsv4"
+      "ocfs2" # Oracle Cluster File System 2
+      "omfs" # Optimized MPEG Filesystem
+      "orangefs" # OrangeFS, a scale-out network file system
+      "romfs" # Read-Only Memory File System
+      "rxrpc" # AFS dependency, main cause of Dirty Frag
+      "ubifs" # Unsorted Block Image File System
+      "ufs" # Universal Flash Storage
+      "zonefs" # Zone filesystem for Zoned block devices
+    ]
 
     # Unused stuff
-    "nfc"
-    "firewire-core"
-    "thunderbolt"
-    "usbip-core"
-    "ksmbd" # In-kernel SMB server
-
+    [
+      "nfc"
+      "firewire-core"
+      "thunderbolt"
+      "usbip-core"
+    ]
   ];
 
   boot.extraModprobeConfig = mkDisableConfig config.boot.blacklistedKernelModules;
@@ -98,6 +100,8 @@ in
     "sch_cake"
   ];
   boot.kernel.sysctl = {
+    # Disable the nagic SysRq key
+    "kernel.sysrq" = 0;
     # Provide protection from ToCToU races
     "fs.protected_hardlinks" = 1;
     "fs.protected_symlinks" = 1;
