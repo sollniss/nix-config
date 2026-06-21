@@ -12,6 +12,8 @@
     #extraPackages = with pkgs; [];
     #installRemoteServer = true;
 
+    enableMcpIntegration = config.programs.mcp.enable;
+
     extensions = [
       "log"
       "lua"
