@@ -42,13 +42,14 @@ in
   home.sessionVariables = {
     EDITOR = "hx";
     VISUAL = "zeditor";
+
+    KOOHA_EXPERIMENTAL = "window-recording";
   };
 
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
-
-    leet-helix
+    kooha
 
     #google-chrome
 
