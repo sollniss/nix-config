@@ -40,8 +40,7 @@ in
       environment.shellAliases = deployAliases;
 
       # Sign store paths so remote hosts trust them.
-      # sudo nix-store --generate-binary-cache-key nixos-desktop /etc/nix/signing-key.private /etc/nix/signing-key.public
-      nix.settings.secret-key-files = [ "/etc/nix/signing-key.private" ];
+      nix.settings.secret-key-files = [ config.prefs.secrets.nixSigningKey ];
     })
 
     # Target: trust the builder's signing key.

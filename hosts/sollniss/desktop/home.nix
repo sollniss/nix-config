@@ -39,6 +39,11 @@ in
 
   home.stateVersion = "25.05";
 
+  prefs.secrets = {
+    ankiSollniss = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
+    ankiMzh = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
+  };
+
   home.sessionVariables = {
     EDITOR = "hx";
     VISUAL = "zeditor";
@@ -100,11 +105,11 @@ in
     anki = {
       profiles.sollniss.sync = {
         username = config.prefs.user.email;
-        keyFile = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
+        keyFile = config.prefs.secrets.ankiSollniss;
       };
       profiles.mzh.sync = {
         username = "m.kodama0410@gmail.com";
-        keyFile = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
+        keyFile = config.prefs.secrets.ankiMzh;
       };
       profiles.sollniss.default = true;
     };

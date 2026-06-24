@@ -28,6 +28,7 @@ in
   users.users.${config.prefs.user.name} = {
     isNormalUser = true;
     description = config.prefs.user.name;
+    hashedPasswordFile = config.prefs.secrets.userPassword;
     extraGroups = [
       "wheel"
     ];

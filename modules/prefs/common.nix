@@ -96,5 +96,14 @@ in
       dns.enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
       calendar.enable = mkEnableOption "Baikal CalDAV/CardDAV calendar and contacts server.";
     };
+
+    secrets = mkOption {
+      type = types.attrsOf types.path;
+      default = { };
+      example = {
+        wireguardPrivateKey = "/var/lib/secrets/wireguard-private-key";
+      };
+      description = "Named paths to out-of-band secret files on this host.";
+    };
   };
 }

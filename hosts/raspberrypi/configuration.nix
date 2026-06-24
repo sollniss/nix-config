@@ -26,7 +26,7 @@ in
     protocol = "dyndns2";
     username = "none";
     server = "dynv6.com";
-    passwordFile = "/etc/ddclient/password";
+    passwordFile = config.prefs.secrets.ddclientPassword;
     domains = [
       "c423m89n.76bnh564543.dynv6.net"
     ];

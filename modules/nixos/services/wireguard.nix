@@ -7,7 +7,7 @@
 let
   port = 443; # Pretend to be QUIC to bypass strict firewalls.
   iface = "wg0";
-  keyPath = "/etc/wireguard/private.key";
+  keyPath = config.prefs.secrets.wireguardPrivateKey;
   network = config.prefs.network;
   vpn = network.subnets.vpn;
 
@@ -28,7 +28,7 @@ let
 
   # Inner MTU is 1420 (WireGuard default).
   # MSS must fit both IPv4 (MTU − 40) and IPv6 (MTU − 60) inner packets.
-  # Use the smaller value (1360) so a single clamp covers both families.
+  # Use the smaller value (1360) so a single clamp covers both.
   mss = 1360;
 in
 {
