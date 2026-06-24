@@ -16,11 +16,12 @@
 
     extensions = [
       "log"
+      "color-highlight"
       "lua"
-      "make"
       "sql"
       "toml"
-
+      "make"
+      "just"
     ];
     #mutableUserSettings = false;
     userSettings = {
@@ -28,6 +29,7 @@
         diagnostics = false;
         metrics = false;
       };
+      semantic_tokens = "combined";
       format_on_save = "on";
       agent_servers = lib.mkIf config.programs.claude-code.enable {
         "claude-acp" = {
