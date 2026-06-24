@@ -58,14 +58,7 @@ in
       network.hosts.nixos.sshPubKey
     ];
   };
-
-  # Also create a user to check logs, etc.
-  users.users.${config.prefs.user.name} = {
-    isNormalUser = true;
-    openssh.authorizedKeys.keys = [
-      network.hosts.nixos.sshPubKey
-    ];
-  };
+  users.mutableUsers = false;
 
   # Minimize SD card writes by keeping logs in memory only.
   services.journald.storage = "volatile";

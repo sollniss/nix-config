@@ -8,8 +8,6 @@
   ];
 
   prefs = {
-    user.name = "sollniss";
-    user.email = "sollniss@web.de";
     nixos.hostname = "raspberrypi";
     hosted.ssh.enable = true;
     hosted.vpn.enable = true;

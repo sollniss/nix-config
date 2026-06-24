@@ -5,10 +5,13 @@ let
   buildsLocally = !(network.hosts ? ${hostname}) || network.hosts.${hostname}.builder == null;
 in
 {
+  # Don't need perl, rsync and strace.
+  environment.defaultPackages = lib.mkForce [ ];
+
   programs.bash.enable = true;
 
   # Git and nh are only needed on hosts that build locally.
-  # Hosts with a remote builder (e.g. the Pi) are deployed to, not built on.
+  # Hosts with a remote builder are deployed to, not built on.
   programs.git.enable = buildsLocally;
 
   programs.nh = lib.mkIf buildsLocally {
