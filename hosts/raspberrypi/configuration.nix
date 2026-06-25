@@ -21,6 +21,10 @@ in
 
   system.stateVersion = "25.05";
 
+  # Immutable /etc via overlayfs.
+  system.etc.overlay.enable = true;
+  system.etc.overlay.mutable = false;
+
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";
@@ -37,6 +41,15 @@ in
   systemd.services.ddclient = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    # Wait for a routable ipv6 address.
+    serviceConfig.ExecStartPre = [
+      (lib.concatStringsSep " " [
+        "!-${config.systemd.package}/lib/systemd/systemd-networkd-wait-online"
+        "--ipv6"
+        "--interface=${config.prefs.nixos.interface}:routable"
+        "--timeout=60"
+      ])
+    ];
   };
 
   # We run our own DNS with dnscrypt-proxy.
