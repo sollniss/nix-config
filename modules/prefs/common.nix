@@ -70,8 +70,9 @@ in
 {
   options.prefs = {
     user.name = mkOption {
-      type = types.str;
-      description = "Primary username for this configuration.";
+      type = types.nullOr types.str;
+      default = null;
+      description = "Primary username, or null on hosts without an interactive user.";
     };
 
     user.email = mkOption {

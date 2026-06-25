@@ -51,16 +51,6 @@ in
 
   services.gnome.gnome-keyring.enable = lib.mkForce false;
 
-  users.users.${config.prefs.user.name} = {
-    isNormalUser = true;
-    description = config.prefs.user.name;
-    hashedPasswordFile = config.prefs.secrets.userPassword;
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-    ];
-  };
-
   services.printing.enable = true;
 
   home-manager.users.${config.prefs.user.name} = {

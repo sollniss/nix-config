@@ -58,7 +58,6 @@ in
       network.hosts.nixos.sshPubKey
     ];
   };
-  users.mutableUsers = false;
 
   # Minimize SD card writes by keeping logs in memory only.
   services.journald.storage = "volatile";

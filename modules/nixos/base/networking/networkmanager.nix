@@ -8,6 +8,10 @@ in
   networking.useDHCP = false;
   networking.networkmanager.enable = lib.mkDefault config.prefs.profile.graphical.enable;
 
+  users.users = lib.optionalAttrs config.networking.networkmanager.enable {
+    ${config.prefs.user.name}.extraGroups = [ "networkmanager" ];
+  };
+
   # When NM is enabled and we have a static IP entry, configure it via an NM
   # connection profile. This ensures VPN plugins have a base device to anchor to.
   networking.networkmanager.ensureProfiles =

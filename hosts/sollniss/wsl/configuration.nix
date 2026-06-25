@@ -25,15 +25,6 @@ in
     enable = true;
   };
 
-  users.users.${config.prefs.user.name} = {
-    isNormalUser = true;
-    description = config.prefs.user.name;
-    hashedPasswordFile = config.prefs.secrets.userPassword;
-    extraGroups = [
-      "wheel"
-    ];
-  };
-
   home-manager.users.${config.prefs.user.name} = {
     imports = [
       ./home.nix
