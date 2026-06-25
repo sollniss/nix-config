@@ -90,6 +90,13 @@ in
       wait-online.anyInterface = true;
     };
 
+    # The net.netfilter.nf_conntrack_tcp_be_liberal sysctl below lives under
+    # /proc/sys/net/netfilter, which only exists once nf_conntrack is loaded.
+    # Without this, the module loads lazily when nftables first touches conntrack,
+    # so systemd-sysctl finds the key missing and silently skips it, leaving
+    # be_liberal at its strict default of 0.
+    boot.kernelModules = [ "nf_conntrack" ];
+
     boot.kernel.sysctl = {
       # Explicitly enable global IP forwarding. systemd-networkd's IPMasquerade=
       # is supposed to imply this via networkd.conf, but in practice (systemd 256+)
