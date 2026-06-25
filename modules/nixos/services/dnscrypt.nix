@@ -39,6 +39,11 @@ let
 in
 {
   config = lib.mkIf config.prefs.hosted.dns.enable {
+    # We resolve via our own dnscrypt-proxy,
+    # write it statically so it survives a read-only /etc overlay.
+    networking.resolvconf.enable = lib.mkForce false;
+    environment.etc."resolv.conf".text = lib.concatMapStrings (ns: "nameserver ${ns}\n") self.dns;
+
     services.dnscrypt-proxy = {
       enable = true;
 

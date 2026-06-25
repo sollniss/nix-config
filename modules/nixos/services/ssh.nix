@@ -12,6 +12,18 @@ in
     services.openssh = {
       enable = true;
       openFirewall = false; # We manage the firewall rules ourselves below.
+      # Keep host keys outside /etc so they survive a read-only /etc overlay.
+      hostKeys = [
+        {
+          path = "/var/lib/ssh/ssh_host_ed25519_key";
+          type = "ed25519";
+        }
+        {
+          path = "/var/lib/ssh/ssh_host_rsa_key";
+          bits = 4096;
+          type = "rsa";
+        }
+      ];
       settings = {
         PermitRootLogin = "prohibit-password";
         PasswordAuthentication = false;
