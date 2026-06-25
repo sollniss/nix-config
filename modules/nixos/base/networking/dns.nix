@@ -21,10 +21,13 @@ in
     dhcpcd.extraConfig = "nohook resolv.conf";
     networkmanager.dns = lib.mkIf config.networking.networkmanager.enable "none";
 
-    # networking.nameservers only feeds into resolv.conf via scripted networking if networkd is disabled.
-    # networkd only feeds into resolv.conf if resolved is enabled (which we don't have).
-    # Hence, we need to manually write the servers if networkd is enabled.
-    resolvconf.extraConfig = lib.mkIf config.networking.useNetworkd "name_servers='${lib.concatStringsSep " " dnsServers}'";
+    # We write our own resolv.conf.
+    resolvconf.enable = lib.mkIf hasEntry (lib.mkForce false);
   };
+
+  environment.etc."resolv.conf" = lib.mkIf hasEntry {
+    text = lib.concatMapStrings (ns: "nameserver ${ns}\n") dnsServers;
+  };
+
   services.resolved.enable = false;
 }
