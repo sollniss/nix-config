@@ -21,10 +21,6 @@ in
 
   system.stateVersion = "25.05";
 
-  # Immutable /etc via overlayfs.
-  system.etc.overlay.enable = true;
-  system.etc.overlay.mutable = false;
-
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";

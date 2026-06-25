@@ -22,6 +22,10 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
+  # WSL has no real initrd, so the read-only /etc overlay (enabled in base)
+  # can't be set up here.
+  system.etc.overlay.enable = lib.mkForce false;
+
   services = {
     printing.enable = lib.mkForce false;
     xserver.enable = lib.mkForce false;

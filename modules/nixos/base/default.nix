@@ -5,6 +5,7 @@
     ./audio.nix
     ./boot.nix
     ./docs.nix
+    ./etc.nix
     ./fonts.nix
     ./i18n.nix
     ./kernel.nix
