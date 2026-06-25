@@ -29,7 +29,7 @@
       # Trust paths signed by the desktop's signing key for remote deployments.
       # sudo nix-store --generate-binary-cache-key nixos-desktop /etc/nix/signing-key.private /etc/nix/signing-key.public
       signingKey = "nixos-desktop:Zc1ZNwDzEr/fBkktS9yrdDCDavc/koH16xOawRnAEMo=";
-      sshPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd";
+      userPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd";
       platform = "x86_64-linux";
     };
     raspberrypi = {
@@ -41,6 +41,8 @@
       ];
       platform = "aarch64-linux";
       builder = "nixos";
+      # cat /var/lib/ssh/ssh_host_ed25519_key.pub
+      hostPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK5cYk2HDFfgR2OEURV/0YVBptASpddYrD2ciybCLh1R";
     };
     phone-d = {
       ip = "10.100.0.2";

@@ -23,11 +23,29 @@ in
 
       # Sign store paths so remote hosts trust them.
       nix.settings.secret-key-files = [ config.prefs.secrets.nixSigningKey ];
+
+      # Verify each deploy target's host identity, so pushing the closure
+      # over SSH needs no interactive known_hosts prompt.
+      programs.ssh.knownHosts = lib.mapAttrs (name: h: {
+        hostNames = [
+          name
+          h.ip
+        ];
+        publicKey = h.hostPubKey;
+      }) (lib.filterAttrs (_: h: h.hostPubKey != null) buildTargets);
     })
 
     # Target: trust the builder's signing key.
     (lib.mkIf hasBuilder {
       nix.settings.trusted-public-keys = [ builder.signingKey ];
+
+      # The builder pushes the closure over SSH, so sshd must be up.
+      assertions = [
+        {
+          assertion = config.services.openssh.enable;
+          message = "${hostname} has builder \"${self.builder}\" but sshd is disabled; the builder can't deploy to it.";
+        }
+      ];
     })
   ];
 }

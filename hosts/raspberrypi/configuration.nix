@@ -5,8 +5,6 @@
   ...
 }:
 let
-  network = config.prefs.network;
-
   nixosModules = with inputs.self.modules.nixos; [
     core
     base
@@ -64,7 +62,7 @@ in
   users.users.root = {
     hashedPassword = "!"; # Lock account.
     openssh.authorizedKeys.keys = [
-      network.hosts.nixos.sshPubKey
+      config.prefs.network.hosts.nixos.userPubKey
     ];
   };
 

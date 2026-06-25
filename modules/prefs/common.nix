@@ -49,7 +49,11 @@ let
         type = types.nullOr types.str;
         default = null;
       };
-      sshPubKey = mkOption {
+      userPubKey = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+      };
+      hostPubKey = mkOption {
         type = types.nullOr types.str;
         default = null;
       };
