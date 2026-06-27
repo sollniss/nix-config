@@ -22,6 +22,8 @@ in
 
   system.stateVersion = "25.05";
 
+  environment.etc."machine-id".text = "221dd93f87d143cdba4f1690f6d4a1f6\n";
+
   nixpkgs.overlays = [
     (_: prev: {
       openldap = prev.openldap.overrideAttrs (_: {

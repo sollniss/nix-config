@@ -19,6 +19,8 @@ in
 
   system.stateVersion = "25.05";
 
+  environment.etc."machine-id".text = "aebfd9ebc40f42ce9b30b54981e9d88e\n";
+
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";
