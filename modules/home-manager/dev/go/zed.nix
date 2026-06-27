@@ -33,10 +33,20 @@ in
       "templ"
     ];
     userSettings = {
-      # `binary` is the path to dlv that the shim runs in the terminal — not
-      # the adapter. Pin it to the Nix dlv so nothing is resolved off $PATH or
-      # auto-installed.
       dap.Delve.binary = "${pkgs.delve}/bin/dlv";
+      # https://pkg.go.dev/golang.org/x/tools/gopls/internal/protocol/semtok#Modifier
+      global_lsp_settings.semantic_token_rules = [
+        {
+          token_type = "variable";
+          token_modifiers = [
+            "defaultLibrary"
+            "readonly" # Go uses readonly for constants.
+          ];
+          style = [
+            "constant.builtin"
+          ];
+        }
+      ];
       file_types = {
         Go = [
           "**/*.go.golden"

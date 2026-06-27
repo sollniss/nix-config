@@ -29,8 +29,28 @@
         diagnostics = false;
         metrics = false;
       };
-      semantic_tokens = "combined";
       format_on_save = "on";
+
+      semantic_tokens = "combined";
+      global_lsp_settings.semantic_token_rules = [
+        {
+          token_type = "type";
+          token_modifiers = [ "defaultLibrary" ];
+          style = [
+            "type.builtin"
+          ];
+        }
+        {
+          token_type = "parameter";
+          style = [
+            "variable.parameter"
+            "parameter"
+            "variable.special"
+            "variable"
+          ];
+        }
+      ];
+
       agent_servers = lib.mkIf config.programs.claude-code.enable {
         "claude-acp" = {
           type = "registry";
