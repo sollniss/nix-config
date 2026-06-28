@@ -21,7 +21,6 @@
       gofumpt
       golangci-lint
       delve
-      gcc
     ];
   };
 
@@ -35,4 +34,8 @@
   config.home.sessionPath = [
     "${config.xdg.dataHome}/go/bin"
   ];
+
+  config.home.sessionVariables = {
+    CGO_ENABLED = "0";
+  };
 }
