@@ -53,11 +53,11 @@ in
         ];
       };
       lsp = {
-        gopls = {
-          initialization_options = {
-            gofumpt = true;
-          };
-        };
+        #gopls = {
+        #  initialization_options = {
+        #    gofumpt = true;
+        #  };
+        #};
         golangci-lint = {
           initialization_options = {
             command = [
@@ -78,12 +78,12 @@ in
           ];
           tab_size = 4;
           format_on_save = "on";
-          formatter = {
-            external = {
-              #command = "golangci-lint fmt";
-              command = "gofumpt";
-            };
-          };
+          #formatter = {
+          #  external = {
+          #    # command = "golangci-lint fmt";
+          #    # command = "gofumpt";
+          #  };
+          #};
         };
       };
     };

@@ -18,7 +18,7 @@
     default = with pkgs; [
       gopls
       gotools
-      gofumpt
+      # gofumpt
       golangci-lint
       delve
     ];

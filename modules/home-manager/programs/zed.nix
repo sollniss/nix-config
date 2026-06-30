@@ -16,14 +16,14 @@
 
     extensions = [
       "log"
-      "color-highlight"
+      # "color-highlight" # Broken.
       "lua"
       "sql"
       "toml"
       "make"
       "just"
     ];
-    #mutableUserSettings = false;
+    mutableUserSettings = false;
     userSettings = {
       telemetry = {
         diagnostics = false;
