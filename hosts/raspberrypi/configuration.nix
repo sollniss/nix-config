@@ -10,6 +10,7 @@ let
     base
     services.ssh
     services.dnscrypt
+    services.dhcp
     services.wireguard
     services.sogo
   ];

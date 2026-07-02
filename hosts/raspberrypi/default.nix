@@ -14,6 +14,7 @@
       ssh.enable = true;
       vpn.enable = true;
       dns.enable = true;
+      dhcp.enable = true;
       calendar.enable = true;
     };
 

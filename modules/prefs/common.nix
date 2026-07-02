@@ -99,6 +99,7 @@ in
       ssh.enable = mkEnableOption "OpenSSH server with restrictive firewall rules.";
       vpn.enable = mkEnableOption "WireGuard VPN server.";
       dns.enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
+      dhcp.enable = mkEnableOption "systemd-networkd DHCP server for the LAN, pointing clients at this host for DNS.";
       calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
     };
 

@@ -1,4 +1,5 @@
 {
+  dhcp = import ./dhcp.nix;
   dnscrypt = import ./dnscrypt.nix;
   docker = import ./docker.nix;
   sogo = import ./sogo.nix;
