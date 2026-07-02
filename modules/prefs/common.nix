@@ -99,7 +99,7 @@ in
       ssh.enable = mkEnableOption "OpenSSH server with restrictive firewall rules.";
       vpn.enable = mkEnableOption "WireGuard VPN server.";
       dns.enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
-      calendar.enable = mkEnableOption "Baikal CalDAV/CardDAV calendar and contacts server.";
+      calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
     };
 
     secrets = mkOption {

@@ -22,6 +22,9 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
+  # Keep a persistent `systemd --user` instance.
+  users.users.${config.prefs.user.name}.linger = true;
+
   # WSL has no real initrd, so the read-only /etc overlay (enabled in base)
   # can't be set up here.
   system.etc.overlay.enable = lib.mkForce false;
@@ -34,6 +37,12 @@
     # resolv.conf is managed by WSL
     resolved.enable = lib.mkForce false;
   };
+
+  # WSL has no real virtual terminals.
+  systemd.services."serial-getty@ttyS0".enable = lib.mkForce false;
+  systemd.services."serial-getty@hvc0".enable = lib.mkForce false;
+  systemd.services."getty@tty1".enable = lib.mkForce false;
+  systemd.services."autovt@tty1".enable = lib.mkForce false;
 
   networking = {
     # Managed by Windows

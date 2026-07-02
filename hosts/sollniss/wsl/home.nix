@@ -22,12 +22,17 @@ in
   #home.packages = with pkgs; [
   #];
 
-  programs.zed-editor = {
-    installRemoteServer = true;
-  };
+  programs = {
+    zed-editor = {
+      installRemoteServer = true;
+    };
 
-  programs.git = {
-    settings.user = {
+    git.settings.user = {
+      name = config.prefs.user.name;
+      email = config.prefs.user.email;
+    };
+
+    jujutsu.settings.user = {
       name = config.prefs.user.name;
       email = config.prefs.user.email;
     };

@@ -11,7 +11,7 @@ let
     services.ssh
     services.dnscrypt
     services.wireguard
-    services.baikal
+    services.sogo
   ];
 in
 {
