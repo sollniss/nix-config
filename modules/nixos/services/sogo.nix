@@ -79,6 +79,40 @@ let
     '') users
   );
 
+  # A new event gets no sensible default length, and SOGo has no setting for
+  # it, so patch the (minified) frontend bundle nginx serves straight from the
+  # store (see the vhost below):
+  #
+  # 1. adjustAllDay(): unchecking "All day" spans the event across the whole
+  #    business day (SOGoDayStartTime..SOGoDayEndTime). That length then
+  #    sticks, because editing the start time preserves the duration, so a
+  #    15:00 start pushes the end past midnight. Make it one hour long.
+  #
+  # 2. onDoubleClick(): every event created by double-clicking the grid starts
+  #    out as an all-day event, in every view. Make it a one-hour event instead
+  #    (4 quarters = 1 hour). On an hour cell of the day/week view it starts at
+  #    the double-clicked time — the pointer handler already knows how to map a
+  #    click to a quarter-hour, that machinery just isn't used on this path.
+  #    The month view and the all-day row have no hour to read, so those fall
+  #    back to the start of the business day, like SOGo does when turning an
+  #    all-day event into a timed one.
+  #
+  # Both replacements are literal --replace-fail, so a SOGo update that touches
+  # this code fails the build instead of silently shipping an unpatched file,
+  # and node then checks the result still parses.
+  schedulerJs = pkgs.runCommand "sogo-scheduler-1h-events.js" { } ''
+    cp ${pkgs.sogo}/lib/GNUstep/SOGo/WebServerResources/js/Scheduler.services.js $out
+    chmod +w $out
+    substituteInPlace $out \
+      --replace-fail \
+        'this.component.end.setHours(w),this.component.end.setMinutes(0)' \
+        'this.component.end.setTime(this.component.start.getTime()+36e5)' \
+      --replace-fail \
+        'isAllDay:1};(n={component:new y(n),dayNumber:s.dayNumber,length:0}).component.blocks=[n],(t=new d("double-click")).initFromBlock(n),t.currentEventCoordinates.duration=0,' \
+        'isAllDay:0};(n={component:new y(n),dayNumber:s.dayNumber,length:0}).component.blocks=[n],(t=new d("double-click")).initFromBlock(n),t.currentEventCoordinates.duration=4,(function(q){q?t.setTimeFromQuarters(n.component.start,q.y):n.component.start.setHours(parseInt(m.defaults.SOGoDayStartTime),0)})(r.hasClass("clickableHourCell")&&f.$view?(t.prepareWithEventType("multiday"),t.initFromEvent(e),t.getEventViewCoordinates(f.$view)):null),'
+    ${lib.getExe pkgs.nodejs} --check $out
+  '';
+
   # SOGo creates all of its OCS tables on demand, but the table it
   # authenticates against must exist before login works.
   usersTable = pkgs.writeText "sogo-users.sql" ''
@@ -105,8 +139,7 @@ in
 
         // Calendar and tasks only. Tasks live inside the Calendar
         // module; Mail is hidden by a constraint no user row matches.
-        // The Contacts module cannot be disabled, but with
-        // isAddressBook = NO it only holds each user's personal book.
+        // The Contacts module cannot be disabled.
         SOGoLoginModule = Calendar;
 
         // No MTA on this host: never try to send invitations or alarms.
@@ -114,6 +147,11 @@ in
         SOGoACLsSendEMailNotifications = NO;
         SOGoFoldersSendEMailNotifications = NO;
         SOGoEnableEMailAlarms = NO;
+
+        // Our logins are a single character, and the default of 2 means the
+        // attendee autocomplete never fires for them (it is the md-min-length
+        // of the search field, and also gates the lookup server side).
+        SOGoSearchMinimumWordLength = 1;
 
         // Every authenticated user (i.e. the other account) may read
         // all events in everyone's calendars; the subscription itself
@@ -135,9 +173,15 @@ in
           {
             type = sql;
             id = users;
+            displayName = "Users";
             viewURL = "${db}/sogo_users";
             canAuthenticate = YES;
-            isAddressBook = NO;
+            // Required for the attendee autocomplete to find the accounts: it
+            // searches the Contacts subfolders (Contacts/allContactSearch),
+            // and a user source only becomes one of those when it is exposed
+            // as an address book. The cost is that "Users" shows up as a
+            // read-only address book next to each user's personal one.
+            isAddressBook = YES;
             userPasswordAlgorithm = "plain";
             ModulesConstraints = {
               Mail = { c_uid = "_mail_disabled_"; };
@@ -253,6 +297,13 @@ in
           rewrite ^ /SOGo/dav;
           allow all;
         '';
+
+        # The upstream module serves WebServerResources straight from the
+        # store, so the patch above only needs to shadow a single file.
+        # Exact-match locations win over the module's prefix aliases; SOGo
+        # requests the bundle under both prefixes.
+        locations."= /SOGo.woa/WebServerResources/js/Scheduler.services.js".alias = schedulerJs;
+        locations."= /SOGo/WebServerResources/js/Scheduler.services.js".alias = schedulerJs;
       };
     };
 
