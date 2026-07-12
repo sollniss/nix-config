@@ -255,6 +255,8 @@ in
           "browser.bookmarks.addedImportButton" = false;
           # enable auto scroll with middle click
           "general.autoScroll" = true;
+          # Treat *.pi as a hostname instead of a search keyword.
+          "browser.fixup.domainsuffixwhitelist.pi" = true;
           # new tab page
           "browser.newtabpage.activity-stream.feeds.section.highlights" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
