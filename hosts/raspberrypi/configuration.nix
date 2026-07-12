@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   config,
   lib,
   ...
@@ -22,6 +23,11 @@ in
 
   environment.etc."machine-id".text = "aebfd9ebc40f42ce9b30b54981e9d88e\n";
 
+  #environment.systemPackages = with pkgs; [
+  #  libraspberrypi
+  #  raspberrypi-eeprom
+  #];
+
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";
@@ -36,7 +42,13 @@ in
 
   };
   systemd.services.ddclient = {
-    after = [ "network-online.target" ];
+    after = [
+      "network-online.target"
+      # ddclient runs under DynamicUser, so its user is only resolvable via NSS
+      # while nsncd is up. Without this, a switch that restarts nsncd can start
+      # ddclient in the window where lookups fail.
+      "nscd.service"
+    ];
     wants = [ "network-online.target" ];
     # Wait for a routable ipv6 address.
     serviceConfig.ExecStartPre = [
