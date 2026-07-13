@@ -98,9 +98,39 @@ in
     hosted = {
       ssh.enable = mkEnableOption "OpenSSH server with restrictive firewall rules.";
       vpn.enable = mkEnableOption "WireGuard VPN server.";
-      dns.enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
+      dns = {
+        enable = mkEnableOption "dnscrypt-proxy encrypted DNS resolver.";
+
+        cloaking = mkOption {
+          type = types.attrsOf types.str;
+          default = { };
+          example = {
+            "calendar.pi" = "192.168.0.101";
+          };
+          description = ''
+            Names the hosted resolver answers itself, mapped to a fixed address.
+            Services hosted here register their own name so LAN and VPN clients
+            can reach them by name. Ignored when dns.enable is false.
+          '';
+        };
+      };
       dhcp.enable = mkEnableOption "systemd-networkd DHCP server for the LAN, pointing clients at this host for DNS.";
       calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
+      photos = {
+        enable = mkEnableOption "Immich photo and video library.";
+
+        mediaLocation = mkOption {
+          type = types.path;
+          default = "/var/lib/immich";
+          example = "/mnt/photos";
+          description = ''
+            Directory holding the Immich library (originals, thumbnails, database
+            backups). The default lives on the root filesystem, which on the Pi is
+            the SD card: point this at external storage before uploading anything
+            substantial.
+          '';
+        };
+      };
     };
 
     secrets = mkOption {

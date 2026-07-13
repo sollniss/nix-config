@@ -16,6 +16,7 @@
       dns.enable = true;
       dhcp.enable = true;
       calendar.enable = true;
+      photos.enable = true;
     };
 
     secrets = {

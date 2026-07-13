@@ -5,27 +5,11 @@
   ...
 }:
 let
-  port = 80;
   network = config.prefs.network;
-  vpn = network.subnets.vpn;
   hostname = config.prefs.nixos.hostname;
   self = network.hosts.${hostname};
 
-  # Friendly name for LAN and VPN clients, resolved by the dnscrypt-proxy
-  # cloaking rule below.
   domain = "calendar.pi";
-
-  # Collect CIDRs from all defined subnets.
-  subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
-  cidrCsv = builtins.concatStringsSep ", " subnetCidrs;
-
-  # IPv6 subnets for firewall rules.
-  ipv6Allowed = [
-    "::1/128"
-    "fe80::/10"
-  ]
-  ++ lib.optional (vpn.cidr6 != null) vpn.cidr6;
-  ipv6Csv = builtins.concatStringsSep ", " ipv6Allowed;
 
   # SOGo talks to PostgreSQL over the unix socket.
   db = "postgresql://sogo@%2Frun%2Fpostgresql/sogo";
@@ -128,6 +112,9 @@ let
   '';
 in
 {
+  # nginx hardening and the LAN/VPN-only firewall rules for port 80.
+  imports = [ ./nginx.nix ];
+
   config = lib.mkIf config.prefs.hosted.calendar.enable {
     services.sogo = {
       enable = true;
@@ -284,8 +271,6 @@ in
     # serves plain HTTP on the LAN, so rewrite relative to the vhost.
     services.nginx = {
       enable = true;
-      recommendedOptimisation = true;
-      recommendedGzipSettings = true;
       virtualHosts.${hostname} = {
         default = true; # Accept requests by IP as well as by hostname.
         serverAliases = [ domain ];
@@ -307,24 +292,7 @@ in
       };
     };
 
-    # Resolve ${domain} to this host for every client using the local
-    # dnscrypt-proxy resolver (LAN clients and WireGuard peers alike).
-    # Cloaking answers before the block_undelegated plugin runs, so the
-    # made-up TLD works despite block_undelegated = true.
-    services.dnscrypt-proxy = lib.mkIf config.prefs.hosted.dns.enable {
-      settings.cloaking_rules = toString (
-        pkgs.writeText "sogo-cloaking-rules.txt" ''
-          ${domain} ${self.ip}
-        ''
-      );
-    };
-
-    # Only allow HTTP access from known subnets (LAN + VPN).
-    networking.nftables.enable = true;
-    networking.firewall.extraInputRules = ''
-      ip saddr { ${cidrCsv} } tcp dport ${toString port} accept
-      ip6 saddr { ${ipv6Csv} } tcp dport ${toString port} accept
-      tcp dport ${toString port} drop
-    '';
+    # Resolve ${domain} to this host for every client using the local resolver.
+    prefs.hosted.dns.cloaking.${domain} = self.ip;
   };
 }

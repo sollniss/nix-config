@@ -14,6 +14,7 @@ let
     services.dhcp
     services.wireguard
     services.sogo
+    services.immich
   ];
 in
 {

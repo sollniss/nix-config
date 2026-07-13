@@ -1,12 +1,20 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
   network = config.prefs.network;
   self = network.hosts.${config.prefs.nixos.hostname};
   vpn = network.subnets.vpn;
+
+  # Names the services hosted here registered for themselves, so LAN clients and
+  # WireGuard peers can reach them by name (see prefs.hosted.dns.cloaking).
+  cloaking = config.prefs.hosted.dns.cloaking;
+  cloakingRules = pkgs.writeText "cloaking-rules.txt" (
+    lib.concatStringsSep "\n" (lib.mapAttrsToList (name: addr: "${name} ${addr}") cloaking)
+  );
 
   # Derive listen addresses: loopback + host LAN IP + VPN gateway (if VPN is hosted).
   listenAddrs4 = [
@@ -120,6 +128,13 @@ in
             minisign_key = "RWTp2E4t64BrL651lEiDLNon+DqzPG4jhZ97pfdNkcq1VDdocLKvl5FW";
           };
         };
+      }
+      # Cloaking answers before the block_undelegated plugin above runs, so the
+      # made-up .pi TLD the hosted services register resolves despite that plugin.
+      # (settings is types.attrs, so this has to be merged here rather than with
+      # a mkIf inside the set, which would end up in the TOML verbatim.)
+      // lib.optionalAttrs (cloaking != { }) {
+        cloaking_rules = toString cloakingRules;
       };
     };
 
