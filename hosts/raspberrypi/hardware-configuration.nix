@@ -21,4 +21,49 @@
 
   # Broadcom WiFi/Bluetooth firmware.
   hardware.enableRedistributableFirmware = true;
+
+  # The SMB share (see modules/nixos/services/samba.nix), on the external SSD.
+  #
+  # Formatted, with the export in a subvolume of its own so it can be snapshotted
+  # without dragging in anything else that later lands on this disk:
+  #
+  #   wipefs -a /dev/sda
+  #   sfdisk /dev/sda <<< 'label: gpt
+  #   ,,L'
+  #   mkfs.btrfs -L share /dev/sda1
+  #   mount /dev/sda1 /mnt && btrfs subvolume create /mnt/share && umount /mnt
+  #   blkid -s UUID -o value /dev/sda1   # <- goes below
+  boot.supportedFilesystems = [ "btrfs" ];
+
+  fileSystems."/srv/share" = {
+    device = "/dev/disk/by-uuid/00000000-0000-0000-0000-000000000000"; # TODO: blkid
+    fsType = "btrfs";
+    options = [
+      "subvol=share"
+      "compress=zstd"
+      "noatime"
+
+      # Clients write whatever they like into this share, over a protocol with no
+      # notion of unix permissions. None of it may ever become a setuid binary, a
+      # device node, or something this host will execute. Drop noexec if the share
+      # ever needs to hold something runnable.
+      "nosuid"
+      "nodev"
+      "noexec"
+
+      # Never hold up the boot for a USB disk. If it is missing, the mount fails,
+      # smbd refuses to start on top of an empty mountpoint (see samba.nix), and
+      # everything else on this host — DNS, DHCP, the VPN — comes up regardless.
+      "nofail"
+      "x-systemd.device-timeout=10"
+    ];
+  };
+
+  # Detects bit rot early rather than at restore time, which is the entire reason
+  # for putting the share on btrfs. Reads the whole disk, so keep it off-peak.
+  services.btrfs.autoScrub = {
+    enable = true;
+    interval = "monthly";
+    fileSystems = [ "/srv/share" ];
+  };
 }

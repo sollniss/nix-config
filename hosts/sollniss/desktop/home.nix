@@ -59,7 +59,7 @@ in
     #google-chrome
 
     # minecraft
-    #prismlauncher
+    prismlauncher
   ];
 
   #programs.lutris = {
