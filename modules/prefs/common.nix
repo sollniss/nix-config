@@ -127,8 +127,7 @@ in
             Directory exported over both protocols. There is one account and one
             share, so everyone who can log in sees and edits the same files, all
             of them owned by the same user, whichever protocol wrote them. The
-            default lives on the root filesystem, which on the Pi is the SD card:
-            point this at external storage before putting anything in it.
+            default lives on the root filesystem.
 
             When this path is also a fileSystems entry, the share only comes up
             once that filesystem is mounted.

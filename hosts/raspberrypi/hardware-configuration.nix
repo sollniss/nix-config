@@ -22,7 +22,7 @@
   # Broadcom WiFi/Bluetooth firmware.
   hardware.enableRedistributableFirmware = true;
 
-  # The NAS share (see modules/nixos/services/nas.nix), on the external SSD.
+  # The NAS share, on the external SSD.
   #
   # Formatted, with the export in a subvolume of its own so it can be snapshotted
   # without dragging in anything else that later lands on this disk:
@@ -51,9 +51,8 @@
       "nodev"
       "noexec"
 
-      # Never hold up the boot for a USB disk. If it is missing, the mount fails,
-      # smbd and nfsd refuse to start on top of an empty mountpoint (see nas.nix),
-      # and everything else on this host — DNS, DHCP, the VPN — comes up anyway.
+      # Never hold up the boot for a USB disk.
+      # If it is missing, the mount fails.
       "nofail"
       "x-systemd.device-timeout=10"
     ];

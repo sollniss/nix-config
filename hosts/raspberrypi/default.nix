@@ -26,9 +26,7 @@
     secrets = {
       wireguardPrivateKey = "/var/lib/secrets/wireguard-private-key";
       ddclientPassword = "/var/lib/secrets/ddclient-password";
-      # Long, random, and used nowhere else: Samba stores an unsalted MD4 hash
-      # of it, which is password equivalent. Generate it in KeePassXC.
-      #   install -Dm0400 -o root -g root /dev/stdin /var/lib/secrets/samba-password
+      # install -Dm0400 -o root -g root /dev/stdin /var/lib/secrets/samba-password
       sambaPassword = "/var/lib/secrets/samba-password";
     };
   };
