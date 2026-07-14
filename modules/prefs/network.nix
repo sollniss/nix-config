@@ -6,9 +6,9 @@
   # Subnets
   subnets = {
     lan = {
-      cidr = "192.168.0.0/24";
+      cidr = "192.168.1.0/24";
       prefixLength = 24;
-      gateway = "192.168.0.1";
+      gateway = "192.168.1.1";
     };
     vpn = {
       cidr = "10.100.0.0/24";
@@ -23,9 +23,9 @@
   # Managed hosts
   hosts = {
     nixos = {
-      ip = "192.168.0.100";
+      ip = "192.168.1.100";
       subnet = "lan";
-      dns = [ "192.168.0.101" ];
+      dns = [ "192.168.1.101" ];
       # Trust paths signed by the desktop's signing key for remote deployments.
       # sudo nix-store --generate-binary-cache-key nixos-desktop /etc/nix/signing-key.private /etc/nix/signing-key.public
       signingKey = "nixos-desktop:Zc1ZNwDzEr/fBkktS9yrdDCDavc/koH16xOawRnAEMo=";
@@ -33,7 +33,7 @@
       platform = "x86_64-linux";
     };
     raspberrypi = {
-      ip = "192.168.0.101";
+      ip = "192.168.1.101";
       subnet = "lan";
       dns = [
         "127.0.0.1"

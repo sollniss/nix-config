@@ -105,7 +105,7 @@ in
           type = types.attrsOf types.str;
           default = { };
           example = {
-            "calendar.pi" = "192.168.0.101";
+            "calendar.pi" = "192.168.1.101";
           };
           description = ''
             Names the hosted resolver answers itself, mapped to a fixed address.

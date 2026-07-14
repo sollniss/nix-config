@@ -86,7 +86,7 @@
         ];
       };
 
-      # nixos-rebuild switch --flake .#raspberrypi --target-host root@192.168.0.101
+      # nixos-rebuild switch --flake .#raspberrypi --target-host root@192.168.1.101
       #
       # Build SD image:
       # nix build .#nixosConfigurations.raspberrypi.config.system.build.sdImage
