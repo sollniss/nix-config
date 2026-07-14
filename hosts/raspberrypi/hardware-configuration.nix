@@ -22,7 +22,7 @@
   # Broadcom WiFi/Bluetooth firmware.
   hardware.enableRedistributableFirmware = true;
 
-  # The SMB share (see modules/nixos/services/samba.nix), on the external SSD.
+  # The NAS share (see modules/nixos/services/nas.nix), on the external SSD.
   #
   # Formatted, with the export in a subvolume of its own so it can be snapshotted
   # without dragging in anything else that later lands on this disk:
@@ -30,16 +30,16 @@
   #   wipefs -a /dev/sda
   #   sfdisk /dev/sda <<< 'label: gpt
   #   ,,L'
-  #   mkfs.btrfs -L share /dev/sda1
-  #   mount /dev/sda1 /mnt && btrfs subvolume create /mnt/share && umount /mnt
+  #   mkfs.btrfs -L nas /dev/sda1
+  #   mount /dev/sda1 /mnt && btrfs subvolume create /mnt/nas && umount /mnt
   #   blkid -s UUID -o value /dev/sda1   # <- goes below
   boot.supportedFilesystems = [ "btrfs" ];
 
-  fileSystems."/srv/share" = {
+  fileSystems."/srv/nas" = {
     device = "/dev/disk/by-uuid/00000000-0000-0000-0000-000000000000"; # TODO: blkid
     fsType = "btrfs";
     options = [
-      "subvol=share"
+      "subvol=nas"
       "compress=zstd"
       "noatime"
 
@@ -52,8 +52,8 @@
       "noexec"
 
       # Never hold up the boot for a USB disk. If it is missing, the mount fails,
-      # smbd refuses to start on top of an empty mountpoint (see samba.nix), and
-      # everything else on this host — DNS, DHCP, the VPN — comes up regardless.
+      # smbd and nfsd refuse to start on top of an empty mountpoint (see nas.nix),
+      # and everything else on this host — DNS, DHCP, the VPN — comes up anyway.
       "nofail"
       "x-systemd.device-timeout=10"
     ];
@@ -64,6 +64,6 @@
   services.btrfs.autoScrub = {
     enable = true;
     interval = "monthly";
-    fileSystems = [ "/srv/share" ];
+    fileSystems = [ "/srv/nas" ];
   };
 }

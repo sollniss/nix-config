@@ -1,0 +1,295 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  cfg = config.prefs.hosted.nas;
+  network = config.prefs.network;
+  hostname = config.prefs.nixos.hostname;
+  self = network.hosts.${hostname};
+
+  domain = "nas.pi";
+  smbPort = 445;
+  nfsPort = 2049;
+
+  user = "nas";
+  group = "nas";
+  passwordPath = config.prefs.secrets.sambaPassword;
+
+  # A fixed user id.
+  # 399 is out of reach of both NixOS (400-999),
+  # and nixpkgs' static ids.
+  id = 399;
+
+  wgIface = "wg0";
+
+  subnets = builtins.attrValues network.subnets;
+  cidrs = map (s: s.cidr) subnets;
+  cidrs6 = builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
+
+  cidrCsv = builtins.concatStringsSep ", " cidrs;
+  ipv6Csv = builtins.concatStringsSep ", " (
+    [
+      "::1/128"
+      "fe80::/10"
+    ]
+    ++ cidrs6
+  );
+  portCsv = builtins.concatStringsSep ", " (
+    map toString [
+      smbPort
+      nfsPort
+    ]
+  );
+
+  # Samba allow list.
+  hostsAllow = [
+    "127.0.0.1"
+    "::1"
+  ]
+  ++ cidrs
+  ++ cidrs6;
+
+  # The NFS allow list.
+  exportOptions = builtins.concatStringsSep "," [
+    "rw"
+    "sync"
+    "no_subtree_check"
+
+    # The NFS equivalent of Samba's `force user`.
+    "all_squash"
+    "anonuid=${toString id}"
+    "anongid=${toString id}"
+
+    # Only a privileged source port may mount.
+    "secure"
+
+    # Pin the fs id, so filehandles survive a remount.
+    "fsid=1"
+  ];
+  exports = builtins.concatStringsSep " " (map (c: "${c}(${exportOptions})") (cidrs ++ cidrs6));
+
+in
+{
+  config = lib.mkIf cfg.enable {
+    # SMB, for Windows.
+    services.samba = {
+      enable = true;
+
+      # NetBIOS name service is legacy.
+      nmbd.enable = false;
+      # Only ever used to join an Active Directory domain.
+      winbindd.enable = false;
+      # Never let a non-root user publish a share of their own.
+      usershares.enable = false;
+
+      # Would open 139/445 tcp and 137/138 udp to everyone.
+      # We write the rules ourselves.
+      openFirewall = false;
+
+      settings = {
+        global = {
+          security = "user";
+          "server role" = "standalone server";
+          workgroup = "WORKGROUP";
+          # Default is "Samba %v", which hands out the version to anyone asking.
+          "server string" = "";
+
+          # Listen on 445 only, and on nothing but loopback,
+          # the LAN and the tunnel.
+          # NetBIOS is off, so port 139 never opens.
+          "smb ports" = smbPort;
+          "disable netbios" = "yes";
+          "bind interfaces only" = "yes";
+          interfaces = [
+            "lo"
+            config.prefs.nixos.interface
+          ]
+          ++ lib.optional config.prefs.hosted.vpn.enable wgIface;
+          "hosts allow" = hostsAllow;
+          "hosts deny" = "ALL";
+
+          # Force SMB 3.1.1 or newer.
+          "server min protocol" = "SMB3_11";
+          "client min protocol" = "SMB3_11";
+
+          # The anti-relay and anti-tamper control.
+          "server signing" = "required";
+
+          # No session encryption.
+          # Pi has no hardware encryption and we trust the LAN anyways.
+          "smb encrypt" = "off";
+
+          # No LANMAN, no NTLMv1.
+          "ntlm auth" = "ntlmv2-only";
+
+          # Nothing is anonymous, and a bad password is a failure rather than a
+          # silent downgrade to a guest session.
+          "guest ok" = "no";
+          "map to guest" = "never";
+          "restrict anonymous" = 2;
+          "invalid users" = [ "root" ];
+
+          # Clients may write whatever they like into the share, so give them no
+          # way to reach out of it.
+          "follow symlinks" = "no";
+          "wide links" = "no";
+
+          # No printers.
+          "load printers" = "no";
+          printing = "bsd";
+          "printcap name" = "/dev/null";
+          "disable spoolss" = "yes";
+
+          # Log to the journal rather than to files under /var/log/samba.
+          logging = "systemd";
+          "log level" = 1;
+        };
+
+        share = {
+          path = cfg.path;
+          comment = "";
+          browseable = "yes";
+          "read only" = "no";
+          "guest ok" = "no";
+          "valid users" = [ user ];
+
+          # One pool, one owner.
+          "force user" = user;
+          "force group" = group;
+          "create mask" = "0660";
+          "force create mode" = "0660";
+          "directory mask" = "2770";
+          "force directory mode" = "2770";
+        };
+      };
+    };
+
+    # NFS, for Linux.
+    services.nfs = {
+      server = {
+        enable = true;
+        exports = ''
+          ${cfg.path} ${exports}
+        '';
+      };
+
+      # NFSv4 only.
+      settings.nfsd = {
+        vers3 = false;
+        vers4 = true;
+        "vers4.0" = false;
+        "vers4.1" = true;
+        "vers4.2" = true;
+        udp = false;
+        tcp = true;
+      };
+    };
+
+    # Setup for account, directory, and firewall.
+
+    # isSystemUser keeps the account out of the login uid range, the locked
+    # password and nologin shell keep it from being an identity anywhere but in
+    # Samba's own passdb, and it is not in wheel.
+    users.groups.${group}.gid = id;
+    users.users.${user} = {
+      isSystemUser = true;
+      uid = id;
+      inherit group;
+      description = "NAS share";
+      home = cfg.path;
+      createHome = false;
+      shell = pkgs.shadow; # nologin
+      hashedPassword = "!";
+    };
+
+    systemd.tmpfiles.settings.nas-share.${cfg.path}.d = {
+      inherit user group;
+      mode = "2770";
+    };
+
+    # Samba keeps its own password database, so the account above needs a Samba
+    # password as well as a unix one.
+    systemd.services.samba-account = {
+      description = "Samba share account provisioning";
+      wantedBy = [ "samba.target" ];
+      before = [ "samba-smbd.service" ];
+      requiredBy = [ "samba-smbd.service" ];
+      after = [
+        # smbpasswd maps the Samba account onto a unix uid, so the unix user has
+        # to exist first. On the very first boot after enabling this, that is not
+        # a given: userborn is what creates it.
+        "userborn.service"
+        # /var/lib/samba/private is a tmpfiles rule of the upstream module.
+        "systemd-tmpfiles-setup.service"
+      ];
+      path = [
+        config.services.samba.package # smbpasswd, pdbedit
+        pkgs.coreutils
+        pkgs.gnugrep
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+
+        # Runs as root: it reads a root-only secret and writes the passdb.
+        CapabilityBoundingSet = "";
+        NoNewPrivileges = true;
+        PrivateDevices = true;
+        PrivateTmp = true;
+        ProtectHome = true;
+        ProtectSystem = "strict";
+        ReadWritePaths = [
+          "/var/lib/samba"
+          "/var/cache/samba"
+          "/var/lock/samba"
+        ];
+        RestrictAddressFamilies = [ "AF_UNIX" ];
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        UMask = "0077";
+      };
+      script = ''
+        set -euo pipefail
+
+        if [ ! -r ${lib.escapeShellArg passwordPath} ]; then
+          echo "No Samba password at ${passwordPath}." >&2
+          echo "Write one out of band, and make it long, random and unique:" >&2
+          echo "  install -Dm0400 -o root -g root /dev/stdin ${passwordPath}" >&2
+          exit 1
+        fi
+
+        password="$(head -n1 ${lib.escapeShellArg passwordPath})"
+
+        # -a adds, plain sets; -s takes the password on stdin, twice, and as root
+        # never asks for the old one. Either way the result is the same account
+        # holding the password that is in the file right now.
+        if pdbedit --list | grep -q "^${user}:"; then
+          printf '%s\n%s\n' "$password" "$password" | smbpasswd -s ${user} >/dev/null
+        else
+          printf '%s\n%s\n' "$password" "$password" | smbpasswd -s -a ${user} >/dev/null
+        fi
+
+        smbpasswd -e ${user} >/dev/null
+      '';
+    };
+
+    # Fail daemons if mount fails.
+    systemd.services.samba-smbd.unitConfig.RequiresMountsFor = [ cfg.path ];
+    systemd.services.nfs-server.unitConfig.RequiresMountsFor = [ cfg.path ];
+    systemd.services.nfs-mountd.unitConfig.RequiresMountsFor = [ cfg.path ];
+
+    networking.nftables.enable = true;
+    networking.firewall.extraInputRules = ''
+      ip saddr { ${cidrCsv} } tcp dport { ${portCsv} } accept
+      ip6 saddr { ${ipv6Csv} } tcp dport { ${portCsv} } accept
+      tcp dport { ${portCsv} } drop
+    '';
+
+    # Resolve ${domain} to this host for every client using the local resolver.
+    prefs.hosted.dns.cloaking.${domain} = self.ip;
+  };
+}

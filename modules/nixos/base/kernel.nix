@@ -71,9 +71,6 @@ in
       "ksmbd" # In-kernel SMB server
       "minix" # minix fs
       "nilfs2" # New Implementation of a Log-structured File System
-      "nfs" # Network File System
-      "nfsv3"
-      "nfsv4"
       "ocfs2" # Oracle Cluster File System 2
       "omfs" # Optimized MPEG Filesystem
       "orangefs" # OrangeFS, a scale-out network file system
@@ -83,6 +80,17 @@ in
       "ufs" # Universal Flash Storage
       "zonefs" # Zone filesystem for Zoned block devices
     ]
+
+    # Network File System
+    # These are required by clients only,
+    # so we can blacklist them on the server.
+    (
+      [ "nfsv3" ]
+      ++ lib.optionals config.prefs.hosted.nas.enable [
+        "nfs"
+        "nfsv4"
+      ]
+    )
 
     # Unused stuff
     [

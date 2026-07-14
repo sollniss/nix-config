@@ -17,9 +17,9 @@
       dhcp.enable = true;
       calendar.enable = true;
       photos.enable = true;
-      share = {
+      nas = {
         enable = true;
-        path = "/srv/share";
+        path = "/srv/nas";
       };
     };
 

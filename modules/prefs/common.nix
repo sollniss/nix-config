@@ -116,19 +116,19 @@ in
       };
       dhcp.enable = mkEnableOption "systemd-networkd DHCP server for the LAN, pointing clients at this host for DNS.";
       calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
-      share = {
-        enable = mkEnableOption "Samba file share over SMB3, reachable from the LAN and the VPN.";
+      nas = {
+        enable = mkEnableOption "File share over SMB3 (Windows) and NFSv4 (Linux), reachable from the LAN and the VPN.";
 
         path = mkOption {
           type = types.path;
-          default = "/srv/share";
-          example = "/mnt/share";
+          default = "/srv/nas";
+          example = "/mnt/nas";
           description = ''
-            Directory exported over SMB. There is one account and one share, so
-            everyone who can log in sees and edits the same files, all of them
-            owned by the same user. The default lives on the root filesystem,
-            which on the Pi is the SD card: point this at external storage
-            before putting anything in it.
+            Directory exported over both protocols. There is one account and one
+            share, so everyone who can log in sees and edits the same files, all
+            of them owned by the same user, whichever protocol wrote them. The
+            default lives on the root filesystem, which on the Pi is the SD card:
+            point this at external storage before putting anything in it.
 
             When this path is also a fileSystems entry, the share only comes up
             once that filesystem is mounted.

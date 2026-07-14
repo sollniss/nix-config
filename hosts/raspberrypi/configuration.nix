@@ -15,7 +15,7 @@ let
     services.wireguard
     services.sogo
     services.immich
-    services.samba
+    services.nas
   ];
 in
 {
