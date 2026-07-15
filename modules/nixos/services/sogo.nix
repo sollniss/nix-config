@@ -276,11 +276,19 @@ in
         serverAliases = [ domain ];
         locations."/".extraConfig = lib.mkForce ''
           rewrite ^ /SOGo;
-          allow all;
         '';
         locations."/principals/".extraConfig = lib.mkForce ''
           rewrite ^ /SOGo/dav;
-          allow all;
+        '';
+
+        # The upstream module writes an "allow all" into these two, which would
+        # shadow the http-level allowlist, so restate them without it.
+        # The alias is upstream's, verbatim.
+        locations."/SOGo.woa/WebServerResources/".extraConfig = lib.mkForce ''
+          alias ${pkgs.sogo}/lib/GNUstep/SOGo/WebServerResources/;
+        '';
+        locations."/SOGo/WebServerResources/".extraConfig = lib.mkForce ''
+          alias ${pkgs.sogo}/lib/GNUstep/SOGo/WebServerResources/;
         '';
 
         # The upstream module serves WebServerResources straight from the

@@ -24,19 +24,6 @@ let
     password = "photos";
   };
 
-  # nginx-level allow list, mirroring the nftables rules in ./nginx.nix: the
-  # packet filter already drops anything that is not LAN or VPN, and this drops
-  # it a second time a layer up, so a firewall change alone cannot expose the
-  # library. Note the vhost is not the default one, so it only ever answers to
-  # requests that ask for ${domain} by name.
-  subnets = builtins.attrValues network.subnets;
-  allowed = [
-    "127.0.0.1"
-    "::1"
-  ]
-  ++ map (s: s.cidr) subnets
-  ++ builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
-  allowRules = lib.concatMapStringsSep "\n" (c: "allow ${c};") allowed;
 in
 {
   imports = [ ./nginx.nix ];
@@ -105,9 +92,6 @@ in
           proxyWebsockets = true; # Immich pushes updates over a websocket.
           recommendedProxySettings = true;
           extraConfig = ''
-            ${allowRules}
-            deny all;
-
             # Uploads are whole photos and videos: no size cap, and stream them
             # straight through instead of spooling them to the SD card first.
             client_max_body_size 0;
@@ -127,11 +111,7 @@ in
     # works without credentials, and only for as long as the instance has no user
     # at all, so this succeeds once on the first boot and is a no-op from then on.
     #
-    # Claiming the instance the moment it comes up is also what keeps that
-    # endpoint from being an open door: an Immich with no account hands admin to
-    # whoever signs up first, and until this ran, that is anyone on the LAN.
-    #
-    # Consequently this only ever *creates* the account. Changing the password
+    # Consequently this only ever creates the account. Changing the password
     # afterwards is not something the API lets us do without the current one, so
     # editing it above will not move an account that already exists: that is a UI
     # operation, or `immich-admin reset-admin-password` on this host.
