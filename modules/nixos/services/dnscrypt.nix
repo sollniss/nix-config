@@ -31,20 +31,10 @@ let
   listenSockets =
     (map (addr: "${addr}:53") listenAddrs4) ++ (map (addr: "[${addr}]:53") listenAddrs6);
 
-  # Derive IPv4 allowed subnets.
-  subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
-  ipv4Allowed = [ "127.0.0.0/8" ] ++ subnetCidrs;
-
-  ipv6Allowed = [
-    "::1/128"
-    "fe80::/10"
-  ]
-  ++ lib.optional (vpn.cidr6 != null) vpn.cidr6;
-
-  ipv4Csv = builtins.concatStringsSep ", " ipv4Allowed;
-  ipv6Csv = builtins.concatStringsSep ", " ipv6Allowed;
 in
 {
+  imports = [ ./firewall.nix ];
+
   config = lib.mkIf config.prefs.hosted.dns.enable {
     services.dnscrypt-proxy = {
       enable = true;
@@ -145,14 +135,9 @@ in
     };
 
     # Open DNS port for known subnets only.
-    networking.nftables.enable = true;
-    networking.firewall.extraInputRules = ''
-      ip saddr { ${ipv4Csv} } tcp dport 53 accept
-      ip saddr { ${ipv4Csv} } udp dport 53 accept
-      ip6 saddr { ${ipv6Csv} } tcp dport 53 accept
-      ip6 saddr { ${ipv6Csv} } udp dport 53 accept
-      tcp dport 53 drop
-      udp dport 53 drop
-    '';
+    prefs.hosted.subnetOnlyPorts = {
+      tcp = [ 53 ];
+      udp = [ 53 ];
+    };
   };
 }

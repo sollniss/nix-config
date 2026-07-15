@@ -1,13 +1,7 @@
 { config, lib, ... }:
-let
-  port = 22;
-  network = config.prefs.network;
-
-  # Collect CIDRs from all defined subnets.
-  subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
-  cidrCsv = builtins.concatStringsSep ", " subnetCidrs;
-in
 {
+  imports = [ ./firewall.nix ];
+
   config = lib.mkIf config.prefs.hosted.ssh.enable {
     services.openssh = {
       enable = true;
@@ -42,10 +36,6 @@ in
     };
 
     # Only allow SSH from known subnets.
-    networking.nftables.enable = true;
-    networking.firewall.extraInputRules = ''
-      ip saddr { ${cidrCsv} } tcp dport ${toString port} accept
-      tcp dport ${toString port} drop
-    '';
+    prefs.hosted.subnetOnlyPorts.tcp = [ 22 ];
   };
 }

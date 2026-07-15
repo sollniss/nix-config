@@ -33,12 +33,8 @@ let
   # shows up in their calendar list without manual sharing.
   #
   # A user's Calendar/personal folder only exists once they have logged in at
-  # least once (nothing seeds it earlier — the tool's claimed auto-create does
-  # not happen here). Running "subscribe" against a missing *owner* folder
-  # aborts the tool (SIGABRT), and a missing *subscriber* folder means the
-  # subscription silently fails to persist. So only subscribe a pair once both
-  # folders exist; the timer below re-runs until then, converging as users log
-  # in for the first time.
+  # least once. So only subscribe a pair once both folders exist.
+  # The timer below re-runs until then, converging as users log in for the first time.
   folderExists =
     u:
     "[ \"$(${psql} -tAX -d sogo -c \"SELECT 1 FROM sogo_folder_info WHERE c_path = '/Users/${u}/Calendar/personal'\")\" = 1 ]";

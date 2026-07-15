@@ -29,21 +29,6 @@ let
   cidrs = map (s: s.cidr) subnets;
   cidrs6 = builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
 
-  cidrCsv = builtins.concatStringsSep ", " cidrs;
-  ipv6Csv = builtins.concatStringsSep ", " (
-    [
-      "::1/128"
-      "fe80::/10"
-    ]
-    ++ cidrs6
-  );
-  portCsv = builtins.concatStringsSep ", " (
-    map toString [
-      smbPort
-      nfsPort
-    ]
-  );
-
   # Samba allow list.
   hostsAllow = [
     "127.0.0.1"
@@ -82,6 +67,8 @@ let
 
 in
 {
+  imports = [ ./firewall.nix ];
+
   config = lib.mkIf cfg.enable {
     # SMB, for Windows.
     services.samba = {
@@ -292,19 +279,19 @@ in
     systemd.services.nfs-server.unitConfig.RequiresMountsFor = [ cfg.path ];
     systemd.services.nfs-mountd.unitConfig.RequiresMountsFor = [ cfg.path ];
 
-    # SMB is open to the subnets (it authenticates), NFS only to the pinned
-    # clients (no authentication).
+    # SMB is open to the subnets.
+    # NFS is not, so its accept list is the pinned clients, not the subnets.
+    prefs.hosted.subnetOnlyPorts.tcp = [ smbPort ];
+
     networking.nftables.enable = true;
     networking.firewall.extraInputRules = ''
-      ip saddr { ${cidrCsv} } tcp dport ${toString smbPort} accept
-      ip6 saddr { ${ipv6Csv} } tcp dport ${toString smbPort} accept
       ${lib.optionalString (
         nfsAddrs4 != [ ]
       ) "ip saddr { ${builtins.concatStringsSep ", " nfsAddrs4} } tcp dport ${toString nfsPort} accept"}
       ${lib.optionalString (
         nfsAddrs6 != [ ]
       ) "ip6 saddr { ${builtins.concatStringsSep ", " nfsAddrs6} } tcp dport ${toString nfsPort} accept"}
-      tcp dport { ${portCsv} } drop
+      tcp dport ${toString nfsPort} drop
     '';
 
     # Resolve ${domain} to this host for every client using the local resolver.

@@ -10,35 +10,22 @@
   ...
 }:
 let
-  port = 80;
-  network = config.prefs.network;
-  vpn = network.subnets.vpn;
+  subnets = builtins.attrValues config.prefs.network.subnets;
 
-  subnets = builtins.attrValues network.subnets;
-
-  # Collect CIDRs from all defined subnets.
-  subnetCidrs = map (s: s.cidr) subnets;
-  cidrCsv = builtins.concatStringsSep ", " subnetCidrs;
-
-  # IPv6 subnets for firewall rules.
-  ipv6Allowed = [
-    "::1/128"
-    "fe80::/10"
-  ]
-  ++ lib.optional (vpn.cidr6 != null) vpn.cidr6;
-  ipv6Csv = builtins.concatStringsSep ", " ipv6Allowed;
-
-  # The nftables allowlist below, restated at the HTTP layer: loopback plus
-  # every known subnet, so a firewall change alone cannot expose a vhost.
+  # The nftables allowlist (prefs.hosted.subnetOnlyPorts below), restated at
+  # the HTTP layer: loopback plus every known subnet, so a firewall change
+  # alone cannot expose a vhost.
   allowed = [
     "127.0.0.1"
     "::1"
   ]
-  ++ subnetCidrs
+  ++ map (s: s.cidr) subnets
   ++ builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
   allowRules = lib.concatMapStringsSep "\n" (c: "allow ${c};") allowed;
 in
 {
+  imports = [ ./firewall.nix ];
+
   config = lib.mkIf config.services.nginx.enable {
     services.nginx = {
       recommendedOptimisation = true;
@@ -89,11 +76,6 @@ in
       ];
 
     # Only allow HTTP access from known subnets.
-    networking.nftables.enable = true;
-    networking.firewall.extraInputRules = ''
-      ip saddr { ${cidrCsv} } tcp dport ${toString port} accept
-      ip6 saddr { ${ipv6Csv} } tcp dport ${toString port} accept
-      tcp dport ${toString port} drop
-    '';
+    prefs.hosted.subnetOnlyPorts.tcp = [ 80 ];
   };
 }

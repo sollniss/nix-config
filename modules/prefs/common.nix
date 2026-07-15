@@ -134,6 +134,27 @@ in
           '';
         };
       };
+      subnetOnlyPorts = {
+        tcp = mkOption {
+          type = types.listOf types.port;
+          default = [ ];
+          example = [ 22 ];
+          description = ''
+            TCP ports reachable only from the known subnets.
+            Service modules declare their ports here instead of hand-writing
+            firewall snippets; the shared renderer
+            (modules/nixos/services/firewall.nix) turns the merged lists into
+            nftables accept-then-drop rules.
+          '';
+        };
+        udp = mkOption {
+          type = types.listOf types.port;
+          default = [ ];
+          example = [ 53 ];
+          description = "UDP counterpart of subnetOnlyPorts.tcp.";
+        };
+      };
+
       photos = {
         enable = mkEnableOption "Immich photo and video library.";
 
