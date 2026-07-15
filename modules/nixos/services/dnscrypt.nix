@@ -35,12 +35,11 @@ let
   subnetCidrs = map (s: s.cidr) (builtins.attrValues network.subnets);
   ipv4Allowed = [ "127.0.0.0/8" ] ++ subnetCidrs;
 
-  # Use standard defaults for IPv6.
   ipv6Allowed = [
     "::1/128"
     "fe80::/10"
-    "fd00::/8"
-  ];
+  ]
+  ++ lib.optional (vpn.cidr6 != null) vpn.cidr6;
 
   ipv4Csv = builtins.concatStringsSep ", " ipv4Allowed;
   ipv6Csv = builtins.concatStringsSep ", " ipv6Allowed;

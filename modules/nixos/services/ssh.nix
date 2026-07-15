@@ -27,6 +27,11 @@ in
       settings = {
         PermitRootLogin = "prohibit-password";
         PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        AllowUsers = [
+          "root"
+        ]
+        ++ lib.optional (config.prefs.user.name != null) config.prefs.user.name;
         # DANGER: Changing this to listen only on local addresses causes lockout.
         # I've tried to force sshd binding the addresses after the interface comes online,
         # but that didn't work.
