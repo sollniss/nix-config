@@ -117,7 +117,7 @@ in
       dhcp.enable = mkEnableOption "systemd-networkd DHCP server for the LAN, pointing clients at this host for DNS.";
       calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
       nas = {
-        enable = mkEnableOption "File share over SMB3 (Windows) and NFSv4 (Linux), reachable from the LAN and the VPN.";
+        enable = mkEnableOption "File share over SMB3 (Windows, reachable from the LAN and the VPN) and NFSv4 (Linux, exported only to the managed hosts in the network topology).";
 
         path = mkOption {
           type = types.path;

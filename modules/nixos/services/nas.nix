@@ -19,7 +19,7 @@ let
   passwordPath = config.prefs.secrets.sambaPassword;
 
   # A fixed user id.
-  # 399 is out of reach of both NixOS (400-999),
+  # 399 is out of reach of both NixOS (400-999)
   # and nixpkgs' static ids.
   id = 399;
 
@@ -52,6 +52,15 @@ let
   ++ cidrs
   ++ cidrs6;
 
+  # NFS clients, pinned by address.
+  nfsClients = lib.pipe network.hosts [
+    (lib.filterAttrs (name: h: name != hostname && h.platform != null))
+    builtins.attrValues
+  ];
+  nfsAddrs4 = map (h: h.ip) nfsClients;
+  nfsAddrs6 = builtins.filter (a: a != null) (map (h: h.ip6) nfsClients);
+  nfsAddrs = nfsAddrs4 ++ nfsAddrs6;
+
   # The NFS allow list.
   exportOptions = builtins.concatStringsSep "," [
     "rw"
@@ -69,7 +78,7 @@ let
     # Pin the fs id, so filehandles survive a remount.
     "fsid=1"
   ];
-  exports = builtins.concatStringsSep " " (map (c: "${c}(${exportOptions})") (cidrs ++ cidrs6));
+  exports = builtins.concatStringsSep " " (map (a: "${a}(${exportOptions})") nfsAddrs);
 
 in
 {
@@ -170,7 +179,8 @@ in
     # NFS, for Linux.
     services.nfs = {
       server = {
-        enable = true;
+        # No clients pinned means nothing to serve.
+        enable = nfsAddrs != [ ];
         exports = ''
           ${cfg.path} ${exports}
         '';
@@ -282,10 +292,18 @@ in
     systemd.services.nfs-server.unitConfig.RequiresMountsFor = [ cfg.path ];
     systemd.services.nfs-mountd.unitConfig.RequiresMountsFor = [ cfg.path ];
 
+    # SMB is open to the subnets (it authenticates), NFS only to the pinned
+    # clients (no authentication).
     networking.nftables.enable = true;
     networking.firewall.extraInputRules = ''
-      ip saddr { ${cidrCsv} } tcp dport { ${portCsv} } accept
-      ip6 saddr { ${ipv6Csv} } tcp dport { ${portCsv} } accept
+      ip saddr { ${cidrCsv} } tcp dport ${toString smbPort} accept
+      ip6 saddr { ${ipv6Csv} } tcp dport ${toString smbPort} accept
+      ${lib.optionalString (
+        nfsAddrs4 != [ ]
+      ) "ip saddr { ${builtins.concatStringsSep ", " nfsAddrs4} } tcp dport ${toString nfsPort} accept"}
+      ${lib.optionalString (
+        nfsAddrs6 != [ ]
+      ) "ip6 saddr { ${builtins.concatStringsSep ", " nfsAddrs6} } tcp dport ${toString nfsPort} accept"}
       tcp dport { ${portCsv} } drop
     '';
 
