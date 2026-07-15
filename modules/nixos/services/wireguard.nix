@@ -36,7 +36,7 @@ in
     # Ensure WireGuard private key exists before networkd starts.
     # The key must be readable by the systemd-network user.
     systemd.services.wireguard-key-generate = {
-      description = "Generate WireGuard private key if missing";
+      description = "Generate WireGuard key pair if missing";
       wantedBy = [ "systemd-networkd.service" ];
       before = [ "systemd-networkd.service" ];
       serviceConfig = {
@@ -47,11 +47,14 @@ in
       script = ''
         if [ ! -f "${keyPath}" ]; then
           mkdir -p "$(dirname "${keyPath}")"
-          wg genkey > "${keyPath}"
+          (umask 077; wg genkey > "${keyPath}")
           echo "Generated new WireGuard private key at ${keyPath}"
         fi
-        chown systemd-network:systemd-network "${keyPath}"
+        chown root:systemd-network "${keyPath}"
         chmod 640 "${keyPath}"
+
+        # Re-derived on every run.
+        wg pubkey < "${keyPath}" > "${keyPath}.pub"
       '';
     };
 
