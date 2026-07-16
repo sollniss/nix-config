@@ -1,4 +1,9 @@
 { config, lib, ... }:
+let
+  network = config.prefs.network;
+  hostname = config.prefs.nixos.hostname;
+  self = if hostname != null then network.hosts.${hostname} or null else null;
+in
 {
   imports = [ ./firewall.nix ];
 
@@ -26,13 +31,20 @@
           "root"
         ]
         ++ lib.optional (config.prefs.user.name != null) config.prefs.user.name;
-        # DANGER: Changing this to listen only on local addresses causes lockout.
-        # I've tried to force sshd binding the addresses after the interface comes online,
-        # but that didn't work.
-        # Might recheck this in the future, not really a fan of listening to all addresses
-        # (even with the firewall settings).
-        ListenAddress = "0.0.0.0";
+        ListenAddress = if self != null then self.ip else "0.0.0.0";
       };
+    };
+
+    # allow bind() to addresses this host doesn't own (yet)
+    # to prevent lockout because of races.
+    boot.kernel.sysctl."net.ipv4.ip_nonlocal_bind" = 1;
+
+    # never let a transient start failure escalate into systemd
+    # giving up on sshd forever. start-limit-hit can only be cleared from a
+    # console, which a headless host doesn't have.
+    systemd.services.sshd = {
+      unitConfig.StartLimitIntervalSec = 0;
+      serviceConfig.RestartSec = 5;
     };
 
     # Only allow SSH from known subnets.

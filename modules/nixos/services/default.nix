@@ -7,6 +7,7 @@
   nginx = import ./nginx.nix;
   sogo = import ./sogo.nix;
   ssh = import ./ssh.nix;
+  ssh-failsafe = import ./ssh-failsafe.nix;
   unbound = import ./unbound.nix;
   wireguard = import ./wireguard.nix;
 }
