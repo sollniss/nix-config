@@ -155,6 +155,24 @@ in
         };
       };
 
+      music = {
+        enable = mkEnableOption "Navidrome music collection server and streamer.";
+
+        musicFolder = mkOption {
+          type = types.path;
+          default = "/var/lib/navidrome/music";
+          example = "/mnt/music";
+          description = ''
+            Directory holding the music library. Navidrome only ever reads it;
+            files get there by other means (scp, the NAS share, ...).
+
+            Created owned by navidrome with mode 700 when missing; a directory
+            that already exists keeps its ownership and mode, and then merely
+            has to be readable by the navidrome user.
+          '';
+        };
+      };
+
       photos = {
         enable = mkEnableOption "Immich photo and video library.";
 
@@ -164,9 +182,7 @@ in
           example = "/mnt/photos";
           description = ''
             Directory holding the Immich library (originals, thumbnails, database
-            backups). The default lives on the root filesystem, which on the Pi is
-            the SD card: point this at external storage before uploading anything
-            substantial.
+            backups).
           '';
         };
       };

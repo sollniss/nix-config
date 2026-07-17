@@ -17,6 +17,7 @@
       dhcp.enable = true;
       calendar.enable = true;
       photos.enable = true;
+      music.enable = true;
       nas = {
         enable = true;
         path = "/srv/nas";
