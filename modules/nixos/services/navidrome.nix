@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -11,17 +10,22 @@ let
   self = network.hosts.${hostname};
 
   domain = "music.pi";
-  port = 4533;
+  username = "music";
 
-  account = {
-    username = "music";
-    password = "music";
-  };
+  # Host-side socket path. The nixpkgs module chroots navidrome into its
+  # runtime directory (RootDirectory = /run/navidrome), so inside the service
+  # this same socket lives at /navidrome.sock.
+  socket = "/run/navidrome/navidrome.sock";
 in
 {
   imports = [ ./nginx.nix ];
 
   config = lib.mkIf cfg.enable {
+    # Navidrome has no declarative users. Instead of registering an account
+    # over the API, nginx asserts the identity on every request via the
+    # Remote-User header; navidrome auto-creates that account on first
+    # request (the first user ever becomes admin) with a random, never-used
+    # password. Trust model: anyone who can reach nginx is ${username}.
     services.navidrome = {
       enable = true;
 
@@ -29,8 +33,15 @@ in
       openFirewall = false;
 
       settings = {
-        Address = "127.0.0.1";
-        Port = port;
+        # Path as seen from inside the service's chroot; ${socket} on the host.
+        Address = "unix:/navidrome.sock";
+        # Default value, but the group access above depends on it.
+        UnixSocketPerm = "0660";
+
+        ExtAuth.TrustedSources = "@";
+        # Passwords are never consulted with header auth.
+        # Don't offer to edit them in the UI.
+        EnableUserEditing = false;
 
         MusicFolder = cfg.musicFolder;
 
@@ -46,93 +57,31 @@ in
       };
     };
 
-    # Disable internet access completely.
-    systemd.services.navidrome.serviceConfig = {
-      IPAddressAllow = "localhost";
-      IPAddressDeny = "any";
-    };
+    # Navidrome is only reachable over the unix socket and, with the external
+    # services above disabled, never needs the network itself.
+    systemd.services.navidrome.serviceConfig.IPAddressDeny = "any";
+
+    # Lets nginx connect to the 0660 socket.
+    users.users.nginx.extraGroups = [ "navidrome" ];
 
     services.nginx = {
       enable = true;
       virtualHosts.${domain} = {
         locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString port}";
+          proxyPass = "http://unix:${socket}";
           recommendedProxySettings = true;
           extraConfig = ''
             # An audio stream is consumed at playback speed, don't buffer.
             proxy_buffering off;
+
+            # proxy_set_header replaces any client-supplied value, so the
+            # identity cannot be forged from outside. With the header present
+            # navidrome also ignores Subsonic u/p/t/s parameters, so mobile
+            # clients work with any password.
+            proxy_set_header Remote-User ${username};
           '';
         };
       };
-    };
-
-    # Navidrome has no declarative users, so we register the account over the API.
-    # createAdmin is the only endpoint that works without credentials,
-    # and only for as long as the instance has no user at all,
-    # so this succeeds once on the first boot and is a no-op from then on.
-    #
-    # Consequently this only ever creates the account. Editing the password
-    # above will not move an account that already exists: that is a UI
-    # operation.
-    systemd.services.navidrome-account = {
-      description = "Navidrome account registration";
-      after = [ "navidrome.service" ];
-      requires = [ "navidrome.service" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.curl ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        DynamicUser = true;
-
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
-      };
-      script = ''
-        set -euo pipefail
-
-        api="http://127.0.0.1:${toString port}"
-        creds=${lib.escapeShellArg (builtins.toJSON account)}
-
-        # navidrome answers /ping as soon as the HTTP server is up; the first
-        # boot also kicks off the initial library scan but does not block on it.
-        for _ in $(seq 1 60); do
-          if curl -fsS -o /dev/null "$api/ping"; then
-            break
-          fi
-          sleep 2
-        done
-
-        # Logging in successfully means the account already exists.
-        if curl -fsS -o /dev/null -X POST "$api/auth/login" \
-          -H 'Content-Type: application/json' --data "$creds"; then
-          exit 0
-        fi
-
-        status=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$api/auth/createAdmin" \
-          -H 'Content-Type: application/json' --data "$creds")
-        case "$status" in
-          # 403 means users exist, just not with the credentials above (e.g.
-          # the password was changed in the UI): leave the accounts alone.
-          200) echo "Registered ${account.username}." ;;
-          403) echo "Users exist already; nothing to register." ;;
-          *)
-            echo "createAdmin failed with HTTP $status" >&2
-            exit 1
-            ;;
-        esac
-      '';
     };
 
     # Resolve ${domain} to this host for every client using the local resolver.
