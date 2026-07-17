@@ -41,10 +41,7 @@ in
 
       mediaLocation = cfg.mediaLocation;
 
-      # Face detection and smart (CLIP) search. The models are far too heavy for
-      # this host to run alongside everything else, so the service is left off
-      # and the feature is disabled server side below, otherwise every upload
-      # queues a job against a machine-learning URL that answers nothing.
+      # Disable face detection and smart (CLIP) search.
       machine-learning.enable = false;
 
       # Declaring settings makes Immich read them from a config file, which also
@@ -72,8 +69,8 @@ in
     # The upstream module only tightens the permissions of an existing media
     # directory ("e"), which is enough for the default location because systemd
     # creates that one as the service's StateDirectory. A mediaLocation on
-    # external storage has to be created, so replace that rule with a "d" —
-    # same ownership and mode, but it also creates the directory when missing.
+    # external storage has to be created, so replace that rule with a "d" to
+    # also create the directory when missing.
     # Two rules for one path would collide, hence the override rather than a
     # second entry.
     systemd.tmpfiles.settings.immich.${cfg.mediaLocation} = lib.mkForce {

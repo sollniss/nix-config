@@ -13,6 +13,7 @@ let
     services.ssh-failsafe # TRIAL until ~2026-08: see the module header.
     services.dnscrypt
     services.dhcp
+    services.slaac
     services.wireguard
     services.sogo
     services.immich

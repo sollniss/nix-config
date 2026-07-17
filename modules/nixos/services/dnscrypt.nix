@@ -26,6 +26,8 @@ let
   listenAddrs6 = [
     "::1"
   ]
+  # Stable LAN ULA, so IPv6 clients pointed here (RA RDNSS / router DHCPv6) can resolve.
+  ++ lib.optional (config.prefs.hosted.slaac.enable && self.ip6 != null) self.ip6
   ++ lib.optional (config.prefs.hosted.vpn.enable && vpn.gateway6 != null) vpn.gateway6;
 
   listenSockets =

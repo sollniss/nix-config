@@ -9,6 +9,12 @@
       cidr = "192.168.1.0/24";
       prefixLength = 24;
       gateway = "192.168.1.1";
+      # Self-assigned ULA (RFC 4193), independent of the ISP's rotating
+      # delegation. Announced on-link by the pi's Router Advertisements
+      # (services.slaac) so IPv6 clients have a stable address to reach the
+      # pi's resolver at. The ISP GUA prefix stays owned by the real router.
+      cidr6 = "fdca:6321:8b7e::/64";
+      prefixLength6 = 64;
     };
     vpn = {
       cidr = "10.100.0.0/24";
@@ -34,6 +40,11 @@
     };
     raspberrypi = {
       ip = "192.168.1.101";
+      # Static LAN ULA. This is the address the pi answers DNS on over IPv6
+      # and advertises as the IPv6 resolver (via RA RDNSS, and via the
+      # router's DHCPv6 once its WAN "Use the following DNS Addresses" is
+      # pointed here). Stable across ISP prefix rotations.
+      ip6 = "fdca:6321:8b7e::101";
       subnet = "lan";
       dns = [
         "127.0.0.1"

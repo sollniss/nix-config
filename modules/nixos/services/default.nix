@@ -6,6 +6,7 @@
   nas = import ./nas.nix;
   navidrome = import ./navidrome.nix;
   nginx = import ./nginx.nix;
+  slaac = import ./slaac.nix;
   sogo = import ./sogo.nix;
   ssh = import ./ssh.nix;
   ssh-failsafe = import ./ssh-failsafe.nix;
