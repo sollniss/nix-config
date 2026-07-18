@@ -17,8 +17,17 @@
       dhcp.enable = true;
       slaac.enable = true;
       calendar.enable = true;
-      photos.enable = true;
-      music.enable = true;
+      photos = {
+        enable = true;
+        # Read-only index over a folder on the NAS share: drop photos in over
+        # SMB/NFS and they appear in Immich, no upload needed.
+        externalLibrary = "/srv/nas/photos";
+      };
+      music = {
+        enable = true;
+        # Navidrome reads its library straight from a folder on the NAS share.
+        musicFolder = "/srv/nas/music";
+      };
       nas = {
         enable = true;
         path = "/srv/nas";

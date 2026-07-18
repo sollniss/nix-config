@@ -192,6 +192,21 @@ in
             backups).
           '';
         };
+
+        externalLibrary = mkOption {
+          type = types.nullOr types.path;
+          default = null;
+          example = "/srv/nas/photos";
+          description = ''
+            Path to a directory of photos and videos managed outside Immich.
+            When set, Immich indexes it as a read-only external library: files
+            added to it (for example over the NAS share) show up in the timeline,
+            and Immich never moves or edits the originals. Immich still keeps its
+            own mediaLocation for the thumbnails and transcodes it derives.
+
+            The Immich service user must be able to read this path.
+          '';
+        };
       };
     };
 

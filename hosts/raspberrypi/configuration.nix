@@ -66,6 +66,14 @@ in
     ];
   };
 
+  # Navidrome and Immich read their libraries out of the NAS share, whose files
+  # are owned by the `nas` user and group (files 0660, dirs setgid 2770). Adding
+  # both service users to the `nas` group gives them the read access those
+  # setgid directories grant the group, and nothing more: neither service ever
+  # writes to the share.
+  users.users.navidrome.extraGroups = [ "nas" ];
+  users.users.immich.extraGroups = [ "nas" ];
+
   # We run our own DNS with dnscrypt-proxy.
   services.resolved.enable = lib.mkForce false;
 

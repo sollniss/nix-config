@@ -55,6 +55,21 @@ in
 
   services.printing.enable = true;
 
+  # NAS share on the pi, over NFSv4.
+  users.groups.nas.gid = 399;
+  users.users.${config.prefs.user.name}.extraGroups = [ "nas" ];
+
+  fileSystems."/mnt/nas" = {
+    device = "${config.prefs.network.hosts.raspberrypi.ip}:/srv/nas";
+    fsType = "nfs";
+    options = [
+      "nfsvers=4.2"
+      "x-systemd.automount" # mount on first access, not at boot
+      "noauto" # so a missing pi never holds up boot
+      "_netdev" # it is a network filesystem
+    ];
+  };
+
   home-manager.users.${config.prefs.user.name} = {
     imports = [
       ./home.nix

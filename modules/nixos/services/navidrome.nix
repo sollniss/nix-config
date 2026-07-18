@@ -61,6 +61,23 @@ in
     # services above disabled, never needs the network itself.
     systemd.services.navidrome.serviceConfig.IPAddressDeny = "any";
 
+    # The nixpkgs module runs navidrome in a RootDirectory chroot but provides
+    # no /tmp — its taglib helper creates one lazily. The quick scanner writes
+    # its "scan-targets" list to os.TempDir() (= /tmp) and can win the race
+    # against that lazy creation, failing intermittently with
+    #   failed to create temp file: open /tmp/navidrome-scan-targets-*.txt: no such file or directory
+    # A private tmpfs /tmp, mounted by systemd before the service starts,
+    # guarantees the directory exists and removes the race.
+    systemd.services.navidrome.serviceConfig.PrivateTmp = true;
+
+    # Its state (database, cache) lives on the USB SSD, and the music folder is
+    # on the NAS share, also the SSD. Both mounts are nofail, so gate the
+    # service on them rather than let it start against empty mountpoints.
+    systemd.services.navidrome.unitConfig.RequiresMountsFor = [
+      "/var/lib/navidrome"
+      cfg.musicFolder
+    ];
+
     # Lets nginx connect to the 0660 socket.
     users.users.nginx.extraGroups = [ "navidrome" ];
 
