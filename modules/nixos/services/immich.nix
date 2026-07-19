@@ -25,6 +25,24 @@ let
   };
 
   keyFile = config.prefs.secrets.immichApiKey;
+
+  # Sandbox settings shared by every provisioning unit below.
+  # Each service merges its own settings (and any deviations) on top with //.
+  hardening = {
+    CapabilityBoundingSet = "";
+    NoNewPrivileges = true;
+    PrivateDevices = true;
+    ProtectHome = true;
+    ProtectSystem = "strict";
+    RestrictAddressFamilies = [
+      "AF_INET"
+      "AF_UNIX"
+    ];
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
+    UMask = "0077";
+  };
 in
 {
   imports = [ ./nginx.nix ];
@@ -155,7 +173,7 @@ in
         pkgs.curl
         pkgs.jq
       ];
-      serviceConfig = {
+      serviceConfig = hardening // {
         Type = "oneshot";
         RemainAfterExit = true;
 
@@ -163,20 +181,6 @@ in
         # created 0400 root:root next to the hand-installed secrets, which a
         # dynamic user could neither create there nor chown.
         ReadWritePaths = [ (dirOf keyFile) ];
-
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
       };
       script = ''
         set -euo pipefail
@@ -246,25 +250,11 @@ in
       requires = [ "immich-account.service" ];
       wantedBy = [ "multi-user.target" ];
       path = [ pkgs.curl ];
-      serviceConfig = {
+      serviceConfig = hardening // {
         Type = "oneshot";
         RemainAfterExit = true;
         DynamicUser = true;
         LoadCredential = [ "api-key:${keyFile}" ];
-
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
       };
       script = ''
         set -euo pipefail
@@ -321,25 +311,11 @@ in
         pkgs.curl
         pkgs.jq
       ];
-      serviceConfig = {
+      serviceConfig = hardening // {
         Type = "oneshot";
         RemainAfterExit = true;
         DynamicUser = true;
         LoadCredential = [ "api-key:${keyFile}" ];
-
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
       };
       script = ''
         set -euo pipefail
@@ -410,25 +386,11 @@ in
         pkgs.jq
         pkgs.coreutils
       ];
-      serviceConfig = {
+      serviceConfig = hardening // {
         Type = "oneshot";
         DynamicUser = true;
         LoadCredential = [ "api-key:${keyFile}" ];
-
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
         PrivateTmp = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
       };
       script = ''
         set -euo pipefail
