@@ -405,14 +405,27 @@ in
 
         auth="x-api-key: $(cat "$CREDENTIALS_DIRECTORY/api-key")"
 
-        # Pull every asset (id + on-disk path), paging through the results.
+        # The asset dump below is scoped to the external library, so uploaded
+        # assets never cross the wire; the path filter in the grouping still
+        # decides what lands in albums. No library yet (registration pending
+        # or failed) also means no external assets, so nothing to sync.
+        library="$(curl -fsS "$api/libraries" -H "$auth" \
+          | jq -r --arg p "$root" 'map(select(.importPaths | index($p))) | .[0].id // empty')"
+        if [ -z "$library" ]; then
+          echo "No library imports $root yet; nothing to sync."
+          exit 0
+        fi
+
+        # Pull the library's assets (id + on-disk path), paging through the
+        # results.
         assets="$(mktemp)"
         trap 'rm -f "$assets"' EXIT
         page=1
         while [ "$page" != "null" ]; do
           resp="$(curl -fsS -X POST "$api/search/metadata" -H "$auth" \
             -H 'Content-Type: application/json' \
-            --data "$(jq -nc --argjson pg "$page" '{page: $pg, size: 1000}')")"
+            --data "$(jq -nc --argjson pg "$page" --arg lib "$library" \
+              '{page: $pg, size: 1000, libraryId: $lib}')")"
           printf '%s' "$resp" | jq -c '.assets.items[] | {id, path: .originalPath}' >> "$assets"
           page="$(printf '%s' "$resp" | jq -r '.assets.nextPage // "null"')"
         done
@@ -465,13 +478,23 @@ in
         printf '%s' "$groups" | jq -c '.[]' | while read -r g; do
           name="$(printf '%s' "$g" | jq -r .name)"
           ids="$(printf '%s' "$g" | jq -c .ids)"
-          id="$(printf '%s' "$existing" | jq -r --arg n "$name" \
-            'map(select(.albumName == $n)) | .[0].id // empty')"
+          album="$(printf '%s' "$existing" | jq -c --arg n "$name" \
+            'map(select(.albumName == $n)) | .[0] // empty')"
 
-          if [ -n "$id" ]; then
-            curl -fsS -o /dev/null -X PUT "$api/albums/$id/assets" -H "$auth" \
-              -H 'Content-Type: application/json' \
-              --data "$(jq -nc --argjson ids "$ids" '{ids: $ids}')"
+          if [ -n "$album" ]; then
+            # The sync is additive and removals are manual, so an album that
+            # already counts as many assets as the folder has nothing to add,
+            # and skipping the PUT keeps the steady-state run read-only. (An
+            # album hand-padded to exactly the folder's count would be
+            # mis-skipped until the counts diverge again; accepted as rare.)
+            have="$(printf '%s' "$album" | jq .assetCount)"
+            want="$(printf '%s' "$ids" | jq length)"
+            if [ "$have" != "$want" ]; then
+              curl -fsS -o /dev/null -X PUT \
+                "$api/albums/$(printf '%s' "$album" | jq -r .id)/assets" -H "$auth" \
+                -H 'Content-Type: application/json' \
+                --data "$(jq -nc --argjson ids "$ids" '{ids: $ids}')"
+            fi
           else
             new="$(curl -fsS -X POST "$api/albums" -H "$auth" \
               -H 'Content-Type: application/json' \
