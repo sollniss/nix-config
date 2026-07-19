@@ -15,11 +15,7 @@
       vpn.enable = true;
       dns.enable = true;
       dhcp.enable = true;
-      # Off since 2026-07-20 (A/B test): our RAs kept Android phones
-      # half-provisioned on IPv6 when wifi multicast loss expired their
-      # short-lived GUAs (router advertises 300s lifetimes), causing
-      # "no internet" flapping in far rooms.
-      slaac.enable = false;
+      slaac.enable = true;
       calendar.enable = true;
       photos = {
         enable = true;

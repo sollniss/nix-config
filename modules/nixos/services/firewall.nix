@@ -10,8 +10,7 @@ let
 
   # ULA destinations are unreachable from the internet (fc00::/7 is unrouted),
   # so packets addressed to this host's ULAs are from a known subnet even when
-  # sourced from a GUA — as Android does for DNS once its ULA goes deprecated.
-  # Admits nobody new: on-link hosts can self-assign a ULA source anyway.
+  # sourced from a GUA.
   dstCidrs6 = builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
 
   csv = builtins.concatStringsSep ", ";
