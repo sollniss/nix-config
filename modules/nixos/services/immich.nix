@@ -24,6 +24,7 @@ let
     password = "photos";
   };
 
+  keyFile = config.prefs.secrets.immichApiKey;
 in
 {
   imports = [ ./nginx.nix ];
@@ -107,6 +108,14 @@ in
       };
     };
 
+    # immich-account's ReadWritePaths refuses to start the unit while the
+    # secrets directory is missing, which it is on a first boot.
+    systemd.tmpfiles.settings.immich.${dirOf keyFile}.d = {
+      user = "root";
+      group = "root";
+      mode = "0755";
+    };
+
     services.nginx = {
       enable = true;
       virtualHosts.${domain} = {
@@ -134,10 +143,9 @@ in
     # works without credentials, and only for as long as the instance has no user
     # at all, so this succeeds once on the first boot and is a no-op from then on.
     #
-    # Consequently this only ever creates the account. Changing the password
-    # afterwards is not something the API lets us do without the current one, so
-    # editing it above will not move an account that already exists: that is a UI
-    # operation, or `immich-admin reset-admin-password` on this host.
+    # The same run then generates an admin API key and files it 0400 root:root with
+    # the host's other secrets. The sibling immich-* services authenticate with
+    # that key (via LoadCredential) instead of logging in.
     systemd.services.immich-account = {
       description = "Immich joint account registration";
       after = [ "immich-server.service" ];
@@ -150,7 +158,11 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        DynamicUser = true;
+
+        # Root rather than DynamicUser, unlike the siblings: the key file is
+        # created 0400 root:root next to the hand-installed secrets, which a
+        # dynamic user could neither create there nor chown.
+        ReadWritePaths = [ (dirOf keyFile) ];
 
         CapabilityBoundingSet = "";
         NoNewPrivileges = true;
@@ -170,25 +182,55 @@ in
         set -euo pipefail
 
         api="http://127.0.0.1:${toString port}/api"
+        key_file=${lib.escapeShellArg keyFile}
 
-        # immich-server accepts connections only after it has migrated the
-        # database, which on the first boot is not quick.
-        for _ in $(seq 1 150); do
-          if curl -fsS -o /dev/null "$api/server/ping"; then
-            break
-          fi
-          sleep 2
-        done
-
-        if [ "$(curl -fsS "$api/server/config" | jq -r .isInitialized)" = true ]; then
+        # Account and key are provisioned together, so an existing (non-empty)
+        # key means there is nothing left to do.
+        if [ -s "$key_file" ]; then
           exit 0
         fi
 
-        curl -fsS -o /dev/null -X POST "$api/auth/admin-sign-up" \
-          -H 'Content-Type: application/json' \
-          --data ${lib.escapeShellArg (builtins.toJSON account)}
+        # immich-server accepts connections only after it has migrated the
+        # database, which on the first boot is not quick. Fails the unit here,
+        # with curl's error, if the server is still not up after ~5 minutes.
+        curl -fsS --retry 150 --retry-delay 2 --retry-all-errors \
+          -o /dev/null "$api/server/ping"
 
-        echo "Registered ${account.email}."
+        if [ "$(curl -fsS "$api/server/config" | jq -r .isInitialized)" = false ]; then
+          curl -fsS -o /dev/null -X POST "$api/auth/admin-sign-up" \
+            -H 'Content-Type: application/json' \
+            --data ${lib.escapeShellArg (builtins.toJSON account)}
+          echo "Registered ${account.email}."
+        fi
+
+        # The one place the password is used after sign-up. Should this ever
+        # have to run again (key file lost) after the password was changed in
+        # the UI, this login fails. Generate a new key in the UI instead
+        # (Account Settings -> API Keys) and install it by hand:
+        #   install -m0400 /dev/stdin "$key_file"
+        token="$(curl -fsS -X POST "$api/auth/login" \
+          -H 'Content-Type: application/json' \
+          --data ${
+            lib.escapeShellArg (
+              builtins.toJSON {
+                inherit (account) email password;
+              }
+            )
+          } | jq -r .accessToken)"
+
+        # jq -e fails on a missing .secret, and the guard above retries a run
+        # that left an empty file behind.
+        curl -fsS -X POST "$api/api-keys" \
+          -H "Authorization: Bearer $token" \
+          -H 'Content-Type: application/json' \
+          --data '{"name": "NixOS provisioning", "permissions": ["all"]}' \
+          | jq -jre .secret | install -m0400 /dev/stdin "$key_file"
+
+        # The login above opened a session; provisioning should leave none.
+        curl -fsS -o /dev/null -X POST "$api/auth/logout" \
+          -H "Authorization: Bearer $token"
+
+        echo "Provisioned API key at $key_file."
       '';
     };
 
@@ -203,14 +245,12 @@ in
       after = [ "immich-account.service" ];
       requires = [ "immich-account.service" ];
       wantedBy = [ "multi-user.target" ];
-      path = [
-        pkgs.curl
-        pkgs.jq
-      ];
+      path = [ pkgs.curl ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         DynamicUser = true;
+        LoadCredential = [ "api-key:${keyFile}" ];
 
         CapabilityBoundingSet = "";
         NoNewPrivileges = true;
@@ -231,23 +271,13 @@ in
 
         api="http://127.0.0.1:${toString port}/api"
 
-        for _ in $(seq 1 150); do
-          if curl -fsS -o /dev/null "$api/server/ping"; then
-            break
-          fi
-          sleep 2
-        done
+        # Wait for immich-server to accept connections; fails the unit here,
+        # with curl's error, if it is still not up after ~5 minutes.
+        curl -fsS --retry 150 --retry-delay 2 --retry-all-errors \
+          -o /dev/null "$api/server/ping"
 
-        token="$(curl -fsS -X POST "$api/auth/login" \
-          -H 'Content-Type: application/json' \
-          --data ${
-            lib.escapeShellArg (
-              builtins.toJSON {
-                inherit (account) email password;
-              }
-            )
-          } | jq -r .accessToken)"
-        auth="Authorization: Bearer $token"
+        # API-key auth.
+        auth="x-api-key: $(cat "$CREDENTIALS_DIRECTORY/api-key")"
 
         curl -fsS -o /dev/null -X PUT "$api/users/me/preferences" -H "$auth" \
           -H 'Content-Type: application/json' \
@@ -295,6 +325,7 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         DynamicUser = true;
+        LoadCredential = [ "api-key:${keyFile}" ];
 
         CapabilityBoundingSet = "";
         NoNewPrivileges = true;
@@ -317,24 +348,13 @@ in
         path=${lib.escapeShellArg cfg.externalLibrary}
 
         # immich-server accepts connections only after it has migrated the
-        # database, which on the first boot is not quick.
-        for _ in $(seq 1 150); do
-          if curl -fsS -o /dev/null "$api/server/ping"; then
-            break
-          fi
-          sleep 2
-        done
+        # database, which on the first boot is not quick. Fails the unit here,
+        # with curl's error, if the server is still not up after ~5 minutes.
+        curl -fsS --retry 150 --retry-delay 2 --retry-all-errors \
+          -o /dev/null "$api/server/ping"
 
-        token="$(curl -fsS -X POST "$api/auth/login" \
-          -H 'Content-Type: application/json' \
-          --data ${
-            lib.escapeShellArg (
-              builtins.toJSON {
-                inherit (account) email password;
-              }
-            )
-          } | jq -r .accessToken)"
-        auth="Authorization: Bearer $token"
+        # API-key auth.
+        auth="x-api-key: $(cat "$CREDENTIALS_DIRECTORY/api-key")"
 
         # Already registered? Match on the import path so re-runs are no-ops.
         if curl -fsS "$api/libraries" -H "$auth" \
@@ -377,7 +397,14 @@ in
 
     systemd.services.immich-album-sync = lib.mkIf (cfg.externalLibrary != null) {
       description = "Sync Immich external library folders into albums";
-      after = [ "immich-server.service" ];
+      # immich-account also provides the api-key credential, which it stays active
+      # (RemainAfterExit), so the requires is satisfied whenever the timer
+      # fires and never re-runs the provisioning.
+      after = [
+        "immich-server.service"
+        "immich-account.service"
+      ];
+      requires = [ "immich-account.service" ];
       path = [
         pkgs.curl
         pkgs.jq
@@ -386,6 +413,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         DynamicUser = true;
+        LoadCredential = [ "api-key:${keyFile}" ];
 
         CapabilityBoundingSet = "";
         NoNewPrivileges = true;
@@ -408,23 +436,12 @@ in
         api="http://127.0.0.1:${toString port}/api"
         root=${lib.escapeShellArg cfg.externalLibrary}
 
-        for _ in $(seq 1 150); do
-          if curl -fsS -o /dev/null "$api/server/ping"; then
-            break
-          fi
-          sleep 2
-        done
+        # Wait for immich-server to accept connections; fails the unit here,
+        # with curl's error, if it is still not up after ~5 minutes.
+        curl -fsS --retry 150 --retry-delay 2 --retry-all-errors \
+          -o /dev/null "$api/server/ping"
 
-        token="$(curl -fsS -X POST "$api/auth/login" \
-          -H 'Content-Type: application/json' \
-          --data ${
-            lib.escapeShellArg (
-              builtins.toJSON {
-                inherit (account) email password;
-              }
-            )
-          } | jq -r .accessToken)"
-        auth="Authorization: Bearer $token"
+        auth="x-api-key: $(cat "$CREDENTIALS_DIRECTORY/api-key")"
 
         # Pull every asset (id + on-disk path), paging through the results.
         assets="$(mktemp)"

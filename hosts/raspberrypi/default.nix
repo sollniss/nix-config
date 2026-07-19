@@ -35,10 +35,14 @@
     };
 
     secrets = {
-      wireguardPrivateKey = "/var/lib/secrets/wireguard-private-key";
+      # Copy from webui.
       ddclientPassword = "/var/lib/secrets/ddclient-password";
       # install -Dm0400 -o root -g root /dev/stdin /var/lib/secrets/samba-password
       sambaPassword = "/var/lib/secrets/samba-password";
+
+      # Generated automatically.
+      immichApiKey = "/var/lib/secrets/immich-api-key";
+      wireguardPrivateKey = "/var/lib/secrets/wireguard-private-key";
     };
   };
 }
