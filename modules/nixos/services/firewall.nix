@@ -8,6 +8,12 @@ let
   cidrs4 = map (s: s.cidr) subnets;
   cidrs6 = [ "fe80::/10" ] ++ builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
 
+  # ULA destinations are unreachable from the internet (fc00::/7 is unrouted),
+  # so packets addressed to this host's ULAs are from a known subnet even when
+  # sourced from a GUA — as Android does for DNS once its ULA goes deprecated.
+  # Admits nobody new: on-link hosts can self-assign a ULA source anyway.
+  dstCidrs6 = builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
+
   csv = builtins.concatStringsSep ", ";
 
   rules =
@@ -19,6 +25,7 @@ let
       ''
         ip saddr { ${csv cidrs4} } ${proto} dport { ${portSet} } accept
         ip6 saddr { ${csv cidrs6} } ${proto} dport { ${portSet} } accept
+        ip6 daddr { ${csv dstCidrs6} } ${proto} dport { ${portSet} } accept
         ${proto} dport { ${portSet} } drop
       ''
     );
