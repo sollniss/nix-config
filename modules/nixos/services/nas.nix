@@ -207,6 +207,81 @@ in
       mode = "2770";
     };
 
+    # The pool is single-owner: everything ${user}:${group}, directories 2770
+    # (setgid + group-writable) and files 0660 — exactly what the Samba share
+    # forces on anything written through it, so every group member (Immich for
+    # its XMP sidecars, Navidrome) can read and write. Samba enforces that with
+    # `force create mode`/`force directory mode`; NFS has no equivalent. Over NFS
+    # `all_squash` fixes the owner to ${user}:${group}, but the mode is whatever
+    # the client's umask leaves: a folder created over the share lands 2755 —
+    # setgid inherited from its parent, but no group write — which locks the
+    # group, and so Immich's sidecar writes, out of every new folder. This puts
+    # the mode back on a timer, touching only the entries that are actually wrong
+    # so it stays cheap even on a large tree.
+    #
+    # A default POSIX ACL cannot replace this: the NFS client's umask still
+    # clamps the mode at creation, so new folders would come out group-unwritable
+    # regardless.
+    systemd.services.nas-normalize = {
+      description = "Normalize ownership and permissions across the NAS pool";
+      after = [ "local-fs.target" ];
+      unitConfig.RequiresMountsFor = [ cfg.path ];
+      path = [
+        pkgs.findutils
+        pkgs.coreutils
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+
+        # Runs as root: it has to chown and chmod files it does not own, and set
+        # the setgid bit on directories whose group it is not a member of. Keep
+        # only the four capabilities that needs — chown, chmod-as-non-owner, set
+        # the setgid bit (FSETID), and traversal of the group-only pool
+        # directories — and drop the rest.
+        CapabilityBoundingSet = [
+          "CAP_CHOWN"
+          "CAP_DAC_READ_SEARCH"
+          "CAP_FOWNER"
+          "CAP_FSETID"
+        ];
+        NoNewPrivileges = true;
+        PrivateDevices = true;
+        ProtectHome = true;
+        ProtectSystem = "strict";
+        ReadWritePaths = [ cfg.path ];
+        RestrictAddressFamilies = [ "AF_UNIX" ];
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        # RestrictSUIDSGID must stay off (its default): it seccomp-blocks the
+        # `chmod 2770` — setgid on a directory — that this service exists to do.
+        UMask = "0077";
+      };
+      script = ''
+        set -euo pipefail
+        root=${lib.escapeShellArg cfg.path}
+
+        # Skip symlinks throughout: never chmod a link's target, and the share
+        # refuses to follow them anyway.
+        find "$root" -mindepth 1 ! -type l \( ! -user ${user} -o ! -group ${group} \) \
+          -exec chown -h ${user}:${group} {} +
+        find "$root" -mindepth 1 -type d ! -perm 2770 -exec chmod 2770 {} +
+        find "$root" -mindepth 1 -type f ! -perm 0660 -exec chmod 0660 {} +
+      '';
+    };
+
+    systemd.timers.nas-normalize = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        # Shortly after boot, then every 15 minutes — the same cadence as
+        # Immich's library scan, so freshly dropped folders are already correct
+        # by the time it imports and lets you edit them. Persistent catches a run
+        # missed while the host was off.
+        OnBootSec = "2min";
+        OnUnitActiveSec = "15min";
+        Persistent = true;
+      };
+    };
+
     # Samba keeps its own password database, so the account above needs a Samba
     # password as well as a unix one.
     systemd.services.samba-account = {

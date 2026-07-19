@@ -50,11 +50,14 @@ in
       settings = {
         machineLearning.enabled = false;
 
-        # Both of these reach out to the internet: a version check to github.com
-        # from the server, and map tiles to Immich's CDN from every browser that
-        # opens the app.
+        # Reaches out to github.com from the server on a timer; no browser or LAN
+        # feature depends on it, so keep it off.
         newVersionCheck.enabled = false;
-        map.enabled = false;
+
+        # The map view is enabled deliberately, with the trade-off that every
+        # browser opening the app fetches map tiles from Immich's CDN over the
+        # internet (the tiles are the only piece here that leaves the LAN).
+        map.enabled = true;
 
         # Used to build shared links, which only resolve on the LAN or over VPN.
         server.externalDomain = "http://${domain}";
@@ -76,6 +79,13 @@ in
         };
       };
     };
+
+    # Immich persists metadata edits (GPS, description) for external-library
+    # assets to an XMP sidecar written next to the original. The NAS pool is
+    # owned by nas:nas (mode 2770), so the immich user needs the nas group to
+    # create those sidecars; without it, edits silently revert.
+    users.users.${config.services.immich.user}.extraGroups =
+      lib.optional config.prefs.hosted.nas.enable "nas";
 
     # The database and the vector extensions are set up by the upstream module;
     # it connects over the unix socket, so, like SOGo, it needs no TCP listener.
@@ -182,12 +192,91 @@ in
       '';
     };
 
+    # Enable the Folders and Tags features on the joint account. These are
+    # per-user preferences (Account Settings -> Features), not server system
+    # config, so they cannot go in services.immich.settings and instead ride the
+    # same API pattern as the account and library above. updateMyPreferences is a
+    # partial update, so sending only these two leaves the rest untouched. It
+    # is a plain set and safe to re-run on every boot.
+    systemd.services.immich-preferences = {
+      description = "Immich joint account feature preferences";
+      after = [ "immich-account.service" ];
+      requires = [ "immich-account.service" ];
+      wantedBy = [ "multi-user.target" ];
+      path = [
+        pkgs.curl
+        pkgs.jq
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        DynamicUser = true;
+
+        CapabilityBoundingSet = "";
+        NoNewPrivileges = true;
+        PrivateDevices = true;
+        ProtectHome = true;
+        ProtectSystem = "strict";
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_UNIX"
+        ];
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        UMask = "0077";
+      };
+      script = ''
+        set -euo pipefail
+
+        api="http://127.0.0.1:${toString port}/api"
+
+        for _ in $(seq 1 150); do
+          if curl -fsS -o /dev/null "$api/server/ping"; then
+            break
+          fi
+          sleep 2
+        done
+
+        token="$(curl -fsS -X POST "$api/auth/login" \
+          -H 'Content-Type: application/json' \
+          --data ${
+            lib.escapeShellArg (
+              builtins.toJSON {
+                inherit (account) email password;
+              }
+            )
+          } | jq -r .accessToken)"
+        auth="Authorization: Bearer $token"
+
+        curl -fsS -o /dev/null -X PUT "$api/users/me/preferences" -H "$auth" \
+          -H 'Content-Type: application/json' \
+          --data ${
+            lib.escapeShellArg (
+              builtins.toJSON {
+                folders = {
+                  enabled = true;
+                  sidebarWeb = true;
+                };
+                tags = {
+                  enabled = true;
+                  sidebarWeb = true;
+                };
+              }
+            )
+          }
+
+        echo "Enabled Folders and Tags for ${account.email}."
+      '';
+    };
+
     # Immich's storage, and the external library when set, both live on the USB
     # SSD. Don't start the server until they are mounted: the mounts are nofail,
     # so a missing disk would otherwise leave Immich writing to the SD card.
-    systemd.services.immich-server.unitConfig.RequiresMountsFor =
-      [ cfg.mediaLocation ]
-      ++ lib.optional (cfg.externalLibrary != null) cfg.externalLibrary;
+    systemd.services.immich-server.unitConfig.RequiresMountsFor = [
+      cfg.mediaLocation
+    ]
+    ++ lib.optional (cfg.externalLibrary != null) cfg.externalLibrary;
 
     # Register the external library over the API, the same pattern as the
     # account above: Immich has no declarative option for it. Idempotent, so it
@@ -238,9 +327,13 @@ in
 
         token="$(curl -fsS -X POST "$api/auth/login" \
           -H 'Content-Type: application/json' \
-          --data ${lib.escapeShellArg (builtins.toJSON {
-            inherit (account) email password;
-          })} | jq -r .accessToken)"
+          --data ${
+            lib.escapeShellArg (
+              builtins.toJSON {
+                inherit (account) email password;
+              }
+            )
+          } | jq -r .accessToken)"
         auth="Authorization: Bearer $token"
 
         # Already registered? Match on the import path so re-runs are no-ops.
@@ -265,11 +358,12 @@ in
 
     # Mirror the external library's folder tree into albums: one album per
     # directory, named by its path relative to the library root (so
-    # photos/2024/Italy becomes album "2024/Italy"). Immich has no native
-    # folder-to-album feature, so this runs over the API on a timer. It is
-    # additive and idempotent — it creates missing albums and adds new photos to
-    # them, and never deletes; moving a file between folders leaves it in the
-    # old album until removed by hand.
+    # photos/2024/Italy becomes album "2024/Italy"). A leading date prefix on
+    # each path segment is stripped from the album name. "20241120-27 Paris"
+    # and "20241123 - New York" become "Paris" and "New York".
+    # Immich has no native folder-to-album feature, so this runs  over the API
+    # on a timer. It is additive and idempotent: moving a file between folders
+    # leaves it in the old album until removed by hand.
     systemd.timers.immich-album-sync = lib.mkIf (cfg.externalLibrary != null) {
       wantedBy = [ "timers.target" ];
       timerConfig = {
@@ -323,9 +417,13 @@ in
 
         token="$(curl -fsS -X POST "$api/auth/login" \
           -H 'Content-Type: application/json' \
-          --data ${lib.escapeShellArg (builtins.toJSON {
-            inherit (account) email password;
-          })} | jq -r .accessToken)"
+          --data ${
+            lib.escapeShellArg (
+              builtins.toJSON {
+                inherit (account) email password;
+              }
+            )
+          } | jq -r .accessToken)"
         auth="Authorization: Bearer $token"
 
         # Pull every asset (id + on-disk path), paging through the results.
@@ -342,12 +440,45 @@ in
 
         # Group assets under the library root by their relative directory. Files
         # sitting directly in the root (no subfolder) get no album.
+        #
+        # The album name is the relative directory with a leading "YYYYMMDD"
+        # (optionally a "-DD" or "-MMDD" range end) and its " - " or " "
+        # separator dropped from each path segment; a segment without a date
+        # prefix is left as-is.
+        #
+        # Two folders whose names collide after that stripping (e.g.
+        # "20210913 - Paris" and "20260224 - Paris") would otherwise merge into
+        # one album, so those — and only those — get the shortest date suffix
+        # that tells them apart: "(YYYY)" when the years differ, "(YYYY-MM)" when
+        # two share a year, "(YYYY-MM-DD)" when they share a month. A name that is
+        # already unique stays bare.
         groups="$(jq -s --arg root "$root" '
+          def undate: sub("^[0-9]{8}(-[0-9]{2,4})?( +- +| +)"; "");
           map(select(.path | startswith($root + "/")))
           | map(.dir = (.path | ltrimstr($root + "/") | split("/") | .[:-1] | join("/")))
           | map(select(.dir != ""))
           | group_by(.dir)
-          | map({name: .[0].dir, ids: map(.id)})
+          | map({
+              base: (.[0].dir | split("/") | map(undate) | join("/")),
+              d: (.[0].dir | split("/")[0]
+                  | (capture("^(?<y>[0-9]{4})(?<m>[0-9]{2})(?<day>[0-9]{2})") // null)),
+              ids: map(.id)
+            })
+          | [ group_by(.base)[]
+              | . as $set
+              | $set[]
+              | . as $g
+              | { name: (
+                    if ($set | length) == 1 or $g.d == null then $g.base
+                    elif ([ $set[] | select(.d.y == $g.d.y) ] | length) == 1
+                      then "\($g.base) (\($g.d.y))"
+                    elif ([ $set[] | select(.d.y == $g.d.y and .d.m == $g.d.m) ] | length) == 1
+                      then "\($g.base) (\($g.d.y)-\($g.d.m))"
+                    else "\($g.base) (\($g.d.y)-\($g.d.m)-\($g.d.day))"
+                    end
+                  ),
+                  ids: $g.ids }
+            ]
         ' "$assets")"
 
         existing="$(curl -fsS "$api/albums" -H "$auth")"
@@ -363,10 +494,17 @@ in
               -H 'Content-Type: application/json' \
               --data "$(jq -nc --argjson ids "$ids" '{ids: $ids}')"
           else
-            curl -fsS -o /dev/null -X POST "$api/albums" -H "$auth" \
+            new="$(curl -fsS -X POST "$api/albums" -H "$auth" \
               -H 'Content-Type: application/json' \
               --data "$(jq -nc --arg n "$name" --argjson ids "$ids" \
-                '{albumName: $n, assetIds: $ids}')"
+                '{albumName: $n, assetIds: $ids}')")"
+            # New albums default to newest-first (desc), which makes a trip read
+            # in reverse. Flip to oldest-first so the photos run chronologically.
+            # Only at creation, so a manual per-album order set later in the UI is
+            # left untouched.
+            curl -fsS -o /dev/null -X PATCH "$api/albums/$(printf '%s' "$new" | jq -r .id)" \
+              -H "$auth" -H 'Content-Type: application/json' \
+              --data '{"order": "asc"}'
             echo "Created album \"$name\"."
           fi
         done
