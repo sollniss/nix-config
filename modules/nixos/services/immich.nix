@@ -30,6 +30,8 @@ let
   # Each service merges its own settings (and any deviations) on top with //.
   hardening = {
     CapabilityBoundingSet = "";
+    IPAddressDeny = "any";
+    IPAddressAllow = "localhost";
     NoNewPrivileges = true;
     PrivateDevices = true;
     ProtectHome = true;
