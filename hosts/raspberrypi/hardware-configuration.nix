@@ -48,6 +48,24 @@
     ];
   };
 
+  # The SSD's top level, holding the subvolumes above plus btrbk's snapshot
+  # directory. Mounted outside /srv/nas so snapshots never appear in the SMB
+  # share (and cannot be touched over it).
+  fileSystems."/mnt/pool" = {
+    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
+    fsType = "btrfs";
+    options = [
+      "subvol=/"
+      "compress=zstd"
+      "noatime"
+      "nosuid"
+      "nodev"
+      "noexec"
+      "nofail"
+      "x-systemd.device-timeout=10"
+    ];
+  };
+
   # Immich's own storage (thumbnails, transcoded video, database backups, etc)
   fileSystems."/var/lib/immich" = {
     device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
