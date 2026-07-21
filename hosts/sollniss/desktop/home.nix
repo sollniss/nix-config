@@ -56,6 +56,8 @@ in
     inkscape
     kooha
 
+    picard
+
     #google-chrome
 
     # minecraft

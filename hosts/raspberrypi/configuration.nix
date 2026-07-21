@@ -18,6 +18,7 @@ let
     services.sogo
     services.immich
     services.navidrome
+    services.feishin
     services.nas
   ];
 in

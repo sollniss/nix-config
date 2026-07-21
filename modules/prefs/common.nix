@@ -178,6 +178,11 @@ in
             has to be readable by the navidrome user.
           '';
         };
+
+        feishin.enable = mkEnableOption ''
+          the Feishin web player as an alternative front-end for the music
+          server, on its own vhost behind the shared nginx. Requires
+          music.enable'';
       };
 
       photos = {

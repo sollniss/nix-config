@@ -15,7 +15,7 @@
       vpn.enable = true;
       dns.enable = true;
       dhcp.enable = true;
-      slaac.enable = true;
+      slaac.enable = false;
       calendar.enable = true;
       photos = {
         enable = true;
@@ -27,6 +27,8 @@
         enable = true;
         # Navidrome reads its library straight from a folder on the NAS share.
         musicFolder = "/srv/nas/music";
+        # Second front-end over the same library, for UI comparison.
+        feishin.enable = true;
       };
       nas = {
         enable = true;

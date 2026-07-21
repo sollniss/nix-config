@@ -2,6 +2,7 @@
   dhcp = import ./dhcp.nix;
   dnscrypt = import ./dnscrypt.nix;
   docker = import ./docker.nix;
+  feishin = import ./feishin.nix;
   immich = import ./immich.nix;
   nas = import ./nas.nix;
   navidrome = import ./navidrome.nix;
