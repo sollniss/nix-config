@@ -17,7 +17,6 @@
     };
     catppuccin = {
       url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     cosmic-secret-unlock = {
       url = "github:sollniss/cosmic-secret-unlock";

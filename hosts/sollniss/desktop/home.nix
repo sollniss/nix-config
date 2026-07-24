@@ -57,6 +57,7 @@ in
     kooha
 
     picard
+    whipper
 
     #google-chrome
 
