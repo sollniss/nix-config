@@ -58,6 +58,7 @@ in
 
     picard
     whipper
+    spek
 
     #google-chrome
 

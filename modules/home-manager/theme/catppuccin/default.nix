@@ -62,19 +62,19 @@ in
     };
     #}
 
-    # GTK: use inofficial catppuccin theme.
-    # https://github.com/Fausto-Korpsvart/Catppuccin-GTK-Theme
+    # GTK
     gtk = {
       enable = config.prefs.profile.graphical.enable;
       theme = {
-        package = pkgs.magnetic-catppuccin-gtk.override {
-          accent = [ config.catppuccin.accent ];
+        package = pkgs.catppuccin-gtk.override {
+          accents = [ config.catppuccin.accent ];
+          variant = config.catppuccin.flavor;
+          size = "standard";
           #tweaks = [ "black" ];
-          shade = "dark"; # mocha
         };
-        name = "Catppuccin-GTK-Mauve-Dark";
+        name = "catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}-standard";
       };
-      gtk4.theme = null;
+      gtk4.theme = config.gtk.theme;
     };
 
     # qt (not sure if this actually works)

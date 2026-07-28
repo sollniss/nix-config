@@ -52,6 +52,15 @@ in
             SuggestURLTemplate = "https://suggestqueries.google.com/complete/search?output=firefox&ds=yt&q={searchTerms}";
           }
           {
+            Name = "MusicBrainz";
+            Description = "MusicBrainz recording search";
+            Alias = "mu";
+            IconURL = "https://musicbrainz.org/static/images/entity/recording.png";
+            Method = "GET";
+            URLTemplate = "https://musicbrainz.org/search?query={searchTerms}&type=recording&method=indexed";
+            #SuggestURLTemplate = "";
+          }
+          {
             Name = "Wadoku";
             Description = "和独辞典";
             Alias = "wa";

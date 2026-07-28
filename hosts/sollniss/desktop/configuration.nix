@@ -13,6 +13,7 @@ let
     desktops.cosmic
 
     services.docker
+    services.firewall
 
     programs.protonvpn
   ];
@@ -54,6 +55,17 @@ in
   services.gnome.gnome-keyring.enable = lib.mkForce false;
 
   services.printing.enable = true;
+
+  # Syncthing
+  # 22000 for the sync protocol (TCP) and QUIC (UDP)
+  # 21027 forlocal discovery
+  prefs.hosted.subnetOnlyPorts = {
+    tcp = [ 22000 ];
+    udp = [
+      22000
+      21027
+    ];
+  };
 
   # NAS share on the pi, over NFSv4.
   users.groups.nas.gid = 399;
