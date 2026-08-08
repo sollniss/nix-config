@@ -16,6 +16,8 @@ let
   # runtime directory (RootDirectory = /run/navidrome), so inside the service
   # this same socket lives at /navidrome.sock.
   socket = "/run/navidrome/navidrome.sock";
+
+  artistImageFolder = "${cfg.musicFolder}/.artist-images";
 in
 {
   imports = [ ./nginx.nix ];
@@ -44,6 +46,10 @@ in
         EnableUserEditing = false;
 
         MusicFolder = cfg.musicFolder;
+
+        PreferSortTags = true;
+        ArtistImageFolder = artistImageFolder;
+        ArtistArtPriority = "artist.*, album/artist.*, image-folder";
 
         # Disable stuff that accesses the internet.
         EnableExternalServices = false;
