@@ -1,6 +1,16 @@
-{ ... }:
+{ config, ... }:
 {
+  nix.gc = {
+    automatic = !config.programs.nh.clean.enable;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+    randomizedDelaySec = "45min";
+  };
+
   nix.settings = {
+    min-free = 3 * 1024 * 1024 * 1024;
+    max-free = 10 * 1024 * 1024 * 1024;
+
     # makes everything opening super slow on cosmic
     # also, zed doesn't open with it enabled for some reason.
     #auto-optimise-store = true;

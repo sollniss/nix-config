@@ -31,6 +31,12 @@ in
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
 
+      # Log through syslog so the access log lands in the journal instead of a
+      # file.
+      commonHttpConfig = ''
+        access_log syslog:server=unix:/dev/log,nohostname combined;
+      '';
+
       # The allowlist is inherited by every vhost and location,
       # but only those that carry no access directives of their
       # own: nginx replaces inherited allow/deny wholesale rather than

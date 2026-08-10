@@ -22,8 +22,15 @@
   # Broadcom WiFi/Bluetooth firmware.
   hardware.enableRedistributableFirmware = true;
 
-  # External SSD.
-  boot.supportedFilesystems = [ "btrfs" ];
+  fileSystems."/".options = [ "noatime" ];
+
+  boot.supportedFilesystems = {
+    # External SSD.
+    btrfs = true;
+
+    # Enabled by sdcard image builder for some reason.
+    zfs = false;
+  };
 
   fileSystems."/srv/nas" = {
     device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
@@ -96,6 +103,68 @@
     ];
   };
 
+  # A copy-on-write filesystem and a database that rewrites pages in place
+  # fragment each other badly, so this cluster wants NOCOW. Deliberately NOT
+  # done with a nodatacow mount option: btrfs applies the filesystem-specific
+  # options from whichever subvolume mounts first, and every mount of this disk
+  # already reports the same superblock (compress=zstd:3, full CoW). A
+  # nodatacow here would be silently ignored. Only the VFS options below
+  # (nosuid/nodev/noexec/noatime) are genuinely per-mount.
+  #
+  # NOCOW is therefore set with `chattr +C` on the empty subvolume root before
+  # any data is copied in; files created inside inherit it, and NOCOW files are
+  # never compressed, which also sidesteps the inherited zstd. The inheritance
+  # is the reason ordering matters: the cluster must be copied in *after* the
+  # +C flag is set, never moved in beside it.
+  #
+  # nofail is safe here despite the usual worry that Postgres would initdb a
+  # blank cluster onto the bare SD-card directory: the upstream module already
+  # sets RequiresMountsFor on its dataDir, which systemd resolves to this mount
+  # unit, so postgresql.service refuses to start rather than start empty.
+  fileSystems."/var/lib/postgresql" = {
+    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
+    fsType = "btrfs";
+    options = [
+      "subvol=postgresql"
+      "noatime"
+      "nosuid"
+      "nodev"
+      "noexec"
+      "nofail"
+      "x-systemd.device-timeout=10"
+    ];
+  };
+
+  # Immich's Redis.
+  # No chattr +C here, unlike the Postgres subvolume above. Redis does not
+  # rewrite pages in place — BGSAVE writes a fresh temp file and renames it over
+  # dump.rdb — so every save allocates new extents anyway. That is exactly the
+  # pattern copy-on-write and compression handle well.
+  fileSystems."/var/lib/redis-immich" = {
+    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
+    fsType = "btrfs";
+    options = [
+      "subvol=redis-immich"
+      "compress=zstd"
+      "noatime"
+      "nosuid"
+      "nodev"
+      "noexec"
+      "nofail"
+      "x-systemd.device-timeout=10"
+    ];
+  };
+
+  # Postgres gets this guard for free from the upstream module; Redis does not,
+  # and without it a missing SSD is silent rather than loud: StateDirectory=
+  # would recreate /var/lib/redis-immich on the SD card, Redis would come up on
+  # an empty dump.rdb, and the host would quietly go back to hammering the card
+  # while the copy on the SSD went stale. Fail closed instead. Nothing is lost
+  # by doing so — this Redis holds Immich's job queue, which is derived state
+  # rebuilt from Postgres, and Postgres is on the same disk and already refuses
+  # to start without it.
+  systemd.services.redis-immich.unitConfig.RequiresMountsFor = [ "/var/lib/redis-immich" ];
+
   # Detects bit rot early rather than at restore time, which is the entire reason
   # for putting the share on btrfs. Scrub works at the filesystem level, so the
   # one entry below covers every subvolume on this disk. Reads the whole disk,
@@ -119,9 +188,18 @@
       ATTR{provisioning_mode}="unmap"
   '';
 
-  # Batch the discards into a weekly fstrim rather than mounting with
-  # discard=async: continuous discard would need the udev rule applied before
-  # the mount (a boot-order race), and UNMAP over a USB bridge is happier
-  # batched than fired on every delete.
-  services.fstrim.enable = true;
+  # btrfs caps each async UNMAP at max_discard_size (64 MiB) and rate-limits
+  # to iops_limit, where fstrim issues them at the device's discard_max_bytes (4 GiB)
+  # back to back.
+  #
+  # fstrim stays as the catch-up sweep, because async discard only ever sees
+  # extents freed since the mount and its queue is not guaranteed to drain on
+  # unmount, so every reboot strands whatever was pending. Monthly rather than
+  # weekly: async handles the steady state now, this share is append-mostly.
+  # Worth revisiting if the pool passes ~70% full,
+  # where trimming starts to matter for write amplification again.
+  services.fstrim = {
+    enable = true;
+    interval = "monthly";
+  };
 }

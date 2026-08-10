@@ -95,6 +95,9 @@ in
     path = [ pkgs.btrfs-progs ];
     serviceConfig = {
       Type = "oneshot";
+
+      ExecStartPre = "${pkgs.coreutils}/bin/install -d -m 0700 -o root -g root /mnt/pool/snapshots";
+
       ExecStart = "${pkgs.btrbk}/bin/btrbk -c ${pkgs.writeText "btrbk-nas.conf" ''
         # Skip the snapshot when nothing changed since the last one.
         snapshot_create onchange
@@ -124,14 +127,6 @@ in
       # Take the missed snapshot on the next boot if the pi was off at midnight.
       Persistent = true;
     };
-  };
-
-  # btrbk refuses to run if the snapshot directory is missing, and never
-  # creates it itself.
-  systemd.tmpfiles.settings.btrbk."/mnt/pool/snapshots".d = {
-    user = "root";
-    group = "root";
-    mode = "0700";
   };
 
   # We run our own DNS with dnscrypt-proxy.
