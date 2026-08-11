@@ -37,7 +37,11 @@ in
 
     # Target: trust the builder's signing key.
     (lib.mkIf hasBuilder {
-      nix.settings.trusted-public-keys = [ builder.signingKey ];
+      nix.settings.substituters = lib.mkForce [ "https://cache.nixos.org/" ];
+      nix.settings.trusted-public-keys = lib.mkForce [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        builder.signingKey
+      ];
 
       # Remove nixpkgs source (~200 MB) from the closure.
       nixpkgs.flake.setFlakeRegistry = false;

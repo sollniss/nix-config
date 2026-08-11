@@ -29,11 +29,16 @@ in
       };
     };
 
-    # DHCP requests arrive as broadcast from 0.0.0.0, so allow port 67 by
-    # interface rather than source subnet. DNS (:53) is opened by dnscrypt.
+    # A client with no lease yet broadcasts from 0.0.0.0, which no source
+    # allowlist can match, so this port cannot go through
+    # prefs.hosted.subnetOnlyPorts like the others.
+    #
+    # DNS (:53) is opened by dnscrypt.
     networking.nftables.enable = true;
     networking.firewall.extraInputRules = ''
-      iifname "${iface}" udp dport 67 accept
+      iifname "${iface}" ip saddr 0.0.0.0 ip daddr 255.255.255.255 udp dport 67 accept
+      iifname "${iface}" ip saddr ${lan.cidr} udp dport 67 accept
+      udp dport 67 drop
     '';
   };
 }
