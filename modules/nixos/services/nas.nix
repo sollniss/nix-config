@@ -163,6 +163,109 @@ in
       };
     };
 
+    # Upstream ships smbd with no confinement whatsoever: no capability bound,
+    # no filesystem protection, no syscall filter. It is the only daemon on this
+    # host that runs as root and listens on a socket, so a bug in it is a
+    # straight path to root (it setuids to the connecting user once per session,
+    # which is why User=/DynamicUser= are not an option here).
+    #
+    # RestrictSUIDSGID must stay off (its default), for the same reason it does
+    # in nas-normalize below: the share forces `directory mode 2770`, and that
+    # setgid bit is exactly what the seccomp filter behind RestrictSUIDSGID
+    # blocks. Turning it on breaks every directory created over SMB.
+    systemd.services.samba-smbd.serviceConfig = {
+      # Kept: bind 445, setuid/setgid into the session user, and the file
+      # ownership and mode calls the share's force-user/force-mode settings
+      # imply. Everything else goes: CAP_SYS_MODULE, CAP_SYS_PTRACE,
+      # CAP_SYS_RAWIO, CAP_NET_ADMIN and CAP_MKNOD, so a compromised smbd can
+      # no longer load a kernel module, attach to another process, or rewrite
+      # the firewall.
+      #
+      # CAP_SYS_ADMIN is dropped too, which would matter if the share ever
+      # stored NT ACLs: `vfs objects = acl_xattr` writes them to the
+      # security.NTACL xattr, and that namespace needs it. No vfs objects are
+      # configured, so nothing writes there today.
+      CapabilityBoundingSet = [
+        "CAP_AUDIT_WRITE"
+        "CAP_CHOWN"
+        "CAP_DAC_OVERRIDE"
+        "CAP_DAC_READ_SEARCH"
+        "CAP_FOWNER"
+        "CAP_FSETID"
+        "CAP_KILL"
+        "CAP_NET_BIND_SERVICE"
+        "CAP_SETGID"
+        "CAP_SETUID"
+        "CAP_SYS_RESOURCE"
+      ];
+      NoNewPrivileges = true;
+
+      # Read-only everywhere but the pool and Samba's own state.
+      ProtectSystem = "strict";
+      ReadWritePaths = [
+        cfg.path
+        "/var/lib/samba"
+        "/var/cache/samba"
+        "/var/lock/samba"
+        "/var/log/samba"
+      ];
+      RuntimeDirectory = "samba";
+      RuntimeDirectoryMode = "0755";
+
+      # ProtectHome would also hide the pool if someone pointed it at a home
+      # directory, so only take it when the two cannot collide.
+      ProtectHome = !(lib.hasPrefix "/home" (toString cfg.path));
+
+      PrivateDevices = true;
+      PrivateTmp = true;
+      ProtectClock = true;
+      ProtectControlGroups = true;
+      ProtectHostname = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      ProtectKernelTunables = true;
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      LockPersonality = true;
+
+      # Only smbd's own processes in /proc.
+      ProtectProc = "invisible";
+
+      # Upstream sets this to "infinity". A core dump from a root daemon that
+      # has just handled an authentication lands the passdb contents and live
+      # session keys in a file on disk; there is no debugging story here that
+      # justifies keeping them.
+      LimitCORE = lib.mkForce 0;
+
+      # AF_NETLINK is needed for the interface enumeration behind
+      # `bind interfaces only`.
+      RestrictAddressFamilies = [
+        "AF_INET"
+        "AF_INET6"
+        "AF_NETLINK"
+        "AF_UNIX"
+      ];
+
+      SystemCallArchitectures = "native";
+      # @system-service already excludes @module, @mount, @raw-io, @reboot and
+      # @swap, and still allows the @setuid and @chown calls smbd depends on.
+      #
+      # quotactl has to be added back by hand: it sits in @privileged, not in
+      # @system-service, and smbd calls it whenever a client asks for quota
+      # information (which Windows Explorer does on opening a share).
+      SystemCallFilter = [
+        "@system-service"
+        "quotactl"
+      ];
+      # Fail blocked syscalls with EPERM instead of killing the process.
+      SystemCallErrorNumber = "EPERM";
+    };
+
+    # services.samba installs this unconditionally.
+    # It is a client-side tool for mounting someone else's share,
+    # which we don't need.
+    security.wrappers."mount.cifs".enable = lib.mkForce false;
+
     # NFS, for Linux.
     services.nfs = {
       server = {
