@@ -23,8 +23,6 @@ let
   # and nixpkgs' static ids.
   id = 399;
 
-  wgIface = "wg0";
-
   subnets = builtins.attrValues network.subnets;
   cidrs = map (s: s.cidr) subnets;
   cidrs6 = builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
@@ -93,17 +91,39 @@ in
           # Default is "Samba %v", which hands out the version to anyone asking.
           "server string" = "";
 
-          # Listen on 445 only, and on nothing but loopback,
-          # the LAN and the tunnel.
+          # Listen on 445 only, and on nothing but loopback and the LAN.
           # NetBIOS is off, so port 139 never opens.
           "smb ports" = smbPort;
           "disable netbios" = "yes";
           "bind interfaces only" = "yes";
+
+          # Addresses, not interface names. Named this way Samba binds every
+          # address the interface happens to hold, and on a host with a
+          # delegated IPv6 prefix that includes the ISP GUAs: smbd ends up
+          # listening for SMB on a publicly routable address. The nftables
+          # rules and `hosts deny` below both still reject anything arriving
+          # there, but not listening at all beats listening behind two filters.
+          #
+          # Nothing is lost by dropping those: the resolver answers ${domain}
+          # with an A record only (see the cloaking rule at the end of this
+          # file), and no other name service on this host advertises the
+          # machine, so no client ever finds an IPv6 address to try.
+          #
+          # The tunnel is deliberately not here. Named as an interface it never
+          # worked anyway (Samba's enumeration skips wg0, which is
+          # point-to-point and carries no broadcast address), so listing its
+          # addresses would not restore the share to VPN peers, it would open
+          # it to them for the first time. That is a change in what the host
+          # offers, not hardening, so it should be its own decision.
           interfaces = [
-            "lo"
-            config.prefs.nixos.interface
+            "127.0.0.1"
+            "::1"
+            self.ip
           ]
-          ++ lib.optional config.prefs.hosted.vpn.enable wgIface;
+          # Only once services.slaac gives this host its stable ULA; the GUAs
+          # above are the only other IPv6 addresses it has, and they are the
+          # ones being avoided.
+          ++ lib.optional (config.prefs.hosted.slaac.enable && self.ip6 != null) self.ip6;
           "hosts allow" = hostsAllow;
           "hosts deny" = "ALL";
 
