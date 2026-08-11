@@ -39,6 +39,10 @@ in
     (lib.mkIf hasBuilder {
       nix.settings.trusted-public-keys = [ builder.signingKey ];
 
+      # Remove nixpkgs source (~200 MB) from the closure.
+      nixpkgs.flake.setFlakeRegistry = false;
+      nixpkgs.flake.setNixPath = false;
+
       # The builder pushes the closure over SSH, so sshd must be up.
       assertions = [
         {

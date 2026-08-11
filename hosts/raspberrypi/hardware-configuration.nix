@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, pkgs, ... }:
 {
   # Use extlinux as bootloader since there is no GRUB on the Pi.
   boot.loader.grub.enable = false;
@@ -19,8 +19,11 @@
 
   nixpkgs.hostPlatform = "aarch64-linux";
 
-  # Broadcom WiFi/Bluetooth firmware.
-  hardware.enableRedistributableFirmware = true;
+  # Broadcom WiFi/Bluetooth firmware, for this board only.
+  # mkForce because hardware/all-hardware.nix, pulled in by the sd-image
+  # profile this host is built from, turns it on unconditionally.
+  hardware.enableRedistributableFirmware = lib.mkForce false;
+  hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
 
   fileSystems."/".options = [ "noatime" ];
 
