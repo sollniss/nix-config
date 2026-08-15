@@ -61,6 +61,33 @@ let
         type = types.nullOr types.str;
         default = null;
       };
+      syncthingId = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+      };
+    };
+  };
+
+  syncFolderType = types.submodule {
+    options = {
+      id = mkOption { type = types.str; };
+      hosts = mkOption { type = types.listOf types.str; };
+      untrusted = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          Subset of hosts that participate without ever seeing the contents:
+          they store and forward only ciphertext.
+        '';
+      };
+      receiveOnly = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          Subset of hosts holding a backup replica: they receive changes but
+          never propagate local ones back.
+        '';
+      };
     };
   };
 
@@ -93,6 +120,27 @@ in
       default = import ./network.nix;
       readOnly = true;
       description = "Centralized network topology. See prefs/network.nix.";
+    };
+
+    sync = mkOption {
+      type = types.submodule {
+        options = {
+          folders = mkOption { type = types.attrsOf syncFolderType; };
+          # Syncthing's standard ports,
+          # specified here because we need it on the home manager side as well.
+          port = mkOption {
+            type = types.port;
+            default = 22000;
+          };
+          discoveryPort = mkOption {
+            type = types.port;
+            default = 21027;
+          };
+        };
+      };
+      default = import ./sync.nix;
+      readOnly = true;
+      description = "Centralized Syncthing folder registry. See prefs/sync.nix.";
     };
 
     hosted = {
@@ -180,9 +228,31 @@ in
         };
 
         feishin.enable = mkEnableOption ''
-          the Feishin web player as an alternative front-end for the music
+          The Feishin web player as an alternative front-end for the music
           server, on its own vhost behind the shared nginx. Requires
           music.enable'';
+      };
+
+      sync = {
+        enable = mkEnableOption ''
+          Syncthing as an always-on sync hub: an unattended system service
+          peering with the other Syncthing devices in the network topology, so
+          they can sync through this host even when no two of them are online
+          at the same time'';
+
+        folders = mkOption {
+          type = types.attrsOf types.path;
+          default = { };
+          example = {
+            photos = "/srv/nas/photos/phone";
+          };
+          description = ''
+            Folders this host participates in, as local paths keyed by their
+            prefs.sync.folders name. This host must also be listed in the
+            folder's hosts there, or the other participants will not share
+            the folder back.
+          '';
+        };
       };
 
       photos = {

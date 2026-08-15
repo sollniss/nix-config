@@ -36,6 +36,8 @@
       # sudo nix-store --generate-binary-cache-key nixos-desktop /etc/nix/signing-key.private /etc/nix/signing-key.public
       signingKey = "nixos-desktop:Zc1ZNwDzEr/fBkktS9yrdDCDavc/koH16xOawRnAEMo=";
       userPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd";
+      # syncthing device-id --home ~/.local/state/syncthing
+      syncthingId = "VJ6CEOF-OEWHVQD-Z4BBDHT-FRJLUJ5-E6BBQA2-DVERJR3-5C3R44E-7JLYWAF";
       platform = "x86_64-linux";
     };
     raspberrypi = {
@@ -54,12 +56,15 @@
       builder = "nixos";
       # cat /var/lib/ssh/ssh_host_ed25519_key.pub
       hostPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK5cYk2HDFfgR2OEURV/0YVBptASpddYrD2ciybCLh1R";
+      # syncthing device-id --home /var/lib/syncthing/.config/syncthing
+      syncthingId = "TL7KH2Z-L5JIM6M-TXIXAU2-L32QKUG-CSL5HBT-VRDJITJ-OHSWJAV-AV6GBAN";
     };
     phone-d = {
       ip = "10.100.0.2";
       ip6 = "fd10:100::2";
       subnet = "vpn";
       wgPubKey = "dVxRwJMIRkR5UmHnGT4V7rpEst2MfqJQ+qrY7LyNA1U=";
+      syncthingId = "WMPYVNZ-MMUZJ2Y-NZ7MT2A-ERJIHMU-3OO3TCM-WJPZYVO-PT2BGED-5WMIRQZ";
     };
     phone-m = {
       ip = "10.100.0.3";

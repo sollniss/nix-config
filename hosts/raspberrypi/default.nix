@@ -34,6 +34,21 @@
         enable = true;
         path = "/srv/nas";
       };
+      sync = {
+        enable = true;
+        folders = {
+          # Sync the phone's camera inbox directly onto the NAS and into immich.
+          # Deletes propagate up.
+          photos = "/srv/nas/photos/phone";
+          # Ciphertext-only replicas
+          keepass = "/mnt/pool/sync/keepass";
+          memos = "/mnt/pool/sync/memos";
+          # NAS media trees, backed up onto the desktop. The photos folder
+          # above is nested in nas-photos and automatically excluded from it.
+          nas-photos = "/srv/nas/photos";
+          nas-music = "/srv/nas/music";
+        };
+      };
     };
 
     secrets = {

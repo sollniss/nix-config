@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   config,
+  lib,
   ...
 }:
 let
@@ -42,6 +43,11 @@ in
   prefs.secrets = {
     ankiSollniss = "${config.home.homeDirectory}/.anki-logins/sollniss.txt";
     ankiMzh = "${config.home.homeDirectory}/.anki-logins/mzh.txt";
+    # mkdir -m 0700 ~/.syncthing-keys
+    # tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | install -m 0600 /dev/stdin ~/.syncthing-keys/keepass
+    # tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32 | install -m 0600 /dev/stdin ~/.syncthing-keys/memos
+    syncthingKeepass = "${config.home.homeDirectory}/.syncthing-keys/keepass";
+    syncthingMemos = "${config.home.homeDirectory}/.syncthing-keys/memos";
   };
 
   home.sessionVariables = {
@@ -78,30 +84,56 @@ in
 
   # User specific config for base services.
   services = {
-    syncthing.settings = {
-      devices = {
-        phone = {
-          addresses = [
-            "dynamic"
-          ];
-          id = "WMPYVNZ-MMUZJ2Y-NZ7MT2A-ERJIHMU-3OO3TCM-WJPZYVO-PT2BGED-5WMIRQZ";
+    syncthing.settings =
+      let
+        network = config.prefs.network;
+        self = "nixos";
+        peers = lib.filterAttrs (name: host: name != self && host.syncthingId != null) network.hosts;
+        folderKeys = {
+          keepass = config.prefs.secrets.syncthingKeepass;
+          memos = config.prefs.secrets.syncthingMemos;
+        };
+        folder =
+          name:
+          let
+            f = config.prefs.sync.folders.${name};
+          in
+          {
+            id = f.id;
+            type = if lib.elem self f.receiveOnly then "receiveonly" else "sendreceive";
+            devices = map (
+              h:
+              if lib.elem h f.untrusted then
+                {
+                  name = h;
+                  encryptionPasswordFile = folderKeys.${name};
+                }
+              else
+                h
+            ) (builtins.filter (h: h != self && network.hosts.${h}.syncthingId != null) f.hosts);
+          };
+      in
+      {
+        devices = lib.mapAttrs (name: host: {
+          id = host.syncthingId;
+          # Global discovery and relays are off, so peers with a fixed LAN
+          # address get dialed statically. The phone roams and stays
+          # "dynamic" (local announcements find it on the LAN, and over the
+          # VPN it dials us).
+          addresses =
+            if host.subnet == "lan" then
+              [ "tcp://${host.ip}:${toString config.prefs.sync.port}" ]
+            else
+              [ "dynamic" ];
+        }) peers;
+        folders = {
+          "${config.home.homeDirectory}/sync/keepass" = folder "keepass";
+          "${config.home.homeDirectory}/sync/photos" = folder "photos";
+          "${config.home.homeDirectory}/sync/memos" = folder "memos";
+          "${config.home.homeDirectory}/backup/photos" = folder "nas-photos";
+          "${config.home.homeDirectory}/backup/music" = folder "nas-music";
         };
       };
-      folders = {
-        "${config.home.homeDirectory}/sync/keepass" = {
-          id = "crijs-3d7pa";
-          devices = [ "phone" ];
-        };
-        "${config.home.homeDirectory}/sync/photos" = {
-          id = "0zloo-2xerr";
-          devices = [ "phone" ];
-        };
-        "${config.home.homeDirectory}/sync/memos" = {
-          id = "p7pmi-8794o";
-          devices = [ "phone" ];
-        };
-      };
-    };
   };
 
   # User specific config for base programs.

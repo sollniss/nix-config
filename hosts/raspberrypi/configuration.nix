@@ -19,6 +19,7 @@ let
     services.navidrome
     services.feishin
     services.nas
+    services.syncthing
   ];
 in
 {

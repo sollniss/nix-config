@@ -15,6 +15,7 @@
   slaac = import ./slaac.nix;
   sogo = import ./sogo.nix;
   ssh = import ./ssh.nix;
+  syncthing = import ./syncthing.nix;
   unbound = import ./unbound.nix;
   wireguard = import ./wireguard.nix;
 }
