@@ -3,6 +3,7 @@
   imports = [
     inputs.self.modules.nixos.prefs
     ./hardware-configuration.nix
+    ./storage.nix
     ./configuration.nix
   ];
 

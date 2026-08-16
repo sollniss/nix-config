@@ -50,6 +50,14 @@ in
     syncthingMemos = "${config.home.homeDirectory}/.syncthing-keys/memos";
   };
 
+  # SSH public keys.
+  home.file = {
+    ".ssh/github.pub".text =
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHnxLOVT5SkxM5LmQ26ZOfQVyttI0K++U0DD1BzLnsV2\n";
+    ".ssh/pi.pub".text =
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd\n";
+  };
+
   home.sessionVariables = {
     EDITOR = "hx";
     VISUAL = "zeditor";
@@ -130,8 +138,8 @@ in
           "${config.home.homeDirectory}/sync/keepass" = folder "keepass";
           "${config.home.homeDirectory}/sync/photos" = folder "photos";
           "${config.home.homeDirectory}/sync/memos" = folder "memos";
-          "${config.home.homeDirectory}/backup/photos" = folder "nas-photos";
-          "${config.home.homeDirectory}/backup/music" = folder "nas-music";
+          "/backup/photos" = folder "nas-photos";
+          "/backup/music" = folder "nas-music";
         };
       };
   };

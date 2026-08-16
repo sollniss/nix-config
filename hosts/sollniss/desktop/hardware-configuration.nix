@@ -5,6 +5,20 @@
   modulesPath,
   ...
 }:
+let
+  # Every subvolume of the root pool mounts the same decrypted device. zstd
+  # reclaims a third or more of the nix store and costs nothing noticeable on
+  # NVMe.
+  subvol = name: {
+    device = "/dev/mapper/cryptroot";
+    fsType = "btrfs";
+    options = [
+      "subvol=${name}"
+      "compress=zstd"
+      "noatime"
+    ];
+  };
+in
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -23,11 +37,21 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/d7e82b24-5c18-4080-8e38-9f7e1c0719a0";
-    fsType = "ext4";
+  # A passphrase prompt in the initrd unlocks the root pool; everything but the
+  # ESP lives behind it. allowDiscards lets TRIM through to the SSD, and
+  # bypassWorkqueues skips dm-crypt's queueing, which only ever slows NVMe down.
+  boot.initrd.luks.devices.cryptroot = {
+    # blkid -s UUID -o value /dev/nvme0n1p4
+    device = "/dev/disk/by-uuid/e2ef8739-a66e-4363-8904-b00e2add48ca";
+    allowDiscards = true;
+    bypassWorkqueues = true;
   };
 
+  fileSystems."/" = subvol "@";
+  fileSystems."/nix" = subvol "@nix";
+  fileSystems."/home" = subvol "@home";
+
+  # The ESP is cleartext.
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/8AED-62DC";
     fsType = "vfat";
@@ -37,8 +61,14 @@
     ];
   };
 
+  # Encrypted swap under a fresh random key each boot.
+  # Costs hibernation, which this machine does not use.
   swapDevices = [
-    { device = "/dev/disk/by-uuid/77fd754b-1f5d-4a15-bf3e-bb9f8f78276d"; }
+    {
+      # blkid -s PARTUUID -o value /dev/nvme0n1p3
+      device = "/dev/disk/by-partuuid/2044eccf-f5a0-4bc6-9935-0c98d3f1e516";
+      randomEncryption = true;
+    }
   ];
 
   prefs.nixos.interface = "enp34s0";
