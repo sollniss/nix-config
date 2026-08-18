@@ -55,12 +55,45 @@ let
     fi
     exec ${lib.getExe' pkgs.openssh "ssh-keygen"} "$@"
   '';
+
+  cfg = config.programs.keepassxc;
+
+  keepassxcDesktop = "${cfg.package}/share/applications/org.keepassxc.KeePassXC.desktop";
+
+  # KeePassXC reads the database to reopen from LastOpenedDatabases, which
+  # Config.cpp marks as a *Local* setting: it lives in
+  # $XDG_CACHE_HOME/keepassxc/keepassxc.ini, and Config::get() has no fallback
+  # to the roaming config Home Manager writes. Putting it in `settings` is
+  # therefore a no-op. Pass the database on the command line instead, which
+  # main.cpp accepts as a positional argument.
+  autostartDesktop = pkgs.runCommandLocal "keepassxc-autostart" { } ''
+    mkdir -p $out
+    substitute ${keepassxcDesktop} $out/org.keepassxc.KeePassXC.desktop \
+      --replace-fail 'Exec=keepassxc %f' 'Exec=keepassxc "${toString cfg.database}"'
+  '';
 in
 {
+  options.programs.keepassxc.database = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    example = "/home/alice/sync/keepass/Passwords.kdbx";
+    description = ''
+      Database to open on autostart, passed on KeePassXC's command line.
+
+      Prefer this over
+      {option}`programs.keepassxc.settings.General.LastOpenedDatabases`, which
+      KeePassXC only ever reads from its local config in
+      {file}`$XDG_CACHE_HOME/keepassxc/keepassxc.ini` and never from the
+      Home Manager managed one.
+    '';
+  };
+
   config = {
     programs.keepassxc = {
       enable = true;
-      autostart = true;
+      # The autostart entry is built below so the database can be passed on the
+      # command line; Home Manager's own entry would not carry it.
+      autostart = false;
       # Options
       # https://github.com/keepassxreboot/keepassxc/blob/develop/src/core/Config.cpp
       settings = {
@@ -111,7 +144,17 @@ in
         Security.IconDownloadFallback = true;
       };
     };
-    xdg.autostart.enable = config.programs.keepassxc.autostart;
+    xdg.autostart = {
+      enable = true;
+      entries = [
+        (
+          if cfg.database == null then
+            keepassxcDesktop
+          else
+            "${autostartDesktop}/org.keepassxc.KeePassXC.desktop"
+        )
+      ];
+    };
 
     # Disable gnome keyring service
     #services.gnome-keyring.enable = lib.mkForce false; # Does not work.

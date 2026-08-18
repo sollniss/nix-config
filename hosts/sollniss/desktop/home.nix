@@ -193,7 +193,7 @@ in
       };
     };
 
-    keepassxc.settings.General.LastOpenedDatabases = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
+    keepassxc.database = "${config.home.homeDirectory}/sync/keepass/Passwords.kdbx";
 
     ssh.settings = {
       "github.com" = {
