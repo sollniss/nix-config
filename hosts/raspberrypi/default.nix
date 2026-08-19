@@ -15,7 +15,7 @@
       vpn.enable = true;
       dns.enable = true;
       dhcp.enable = true;
-      slaac.enable = false;
+      slaac.enable = true;
       calendar.enable = true;
       photos = {
         enable = true;
