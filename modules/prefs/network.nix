@@ -43,9 +43,7 @@
     raspberrypi = {
       ip = "192.168.1.101";
       # Static LAN ULA. This is the address the pi answers DNS on over IPv6
-      # and advertises as the IPv6 resolver (via RA RDNSS, and via the
-      # router's DHCPv6 once its WAN "Use the following DNS Addresses" is
-      # pointed here). Stable across ISP prefix rotations.
+      # and advertises as the IPv6 resolver. Stable across ISP prefix rotations.
       ip6 = "fdca:6321:8b7e::101";
       subnet = "lan";
       dns = [
