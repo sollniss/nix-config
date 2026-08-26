@@ -54,8 +54,7 @@ in
   home.file = {
     ".ssh/github.pub".text =
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHnxLOVT5SkxM5LmQ26ZOfQVyttI0K++U0DD1BzLnsV2\n";
-    ".ssh/pi.pub".text =
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/3EVlnhOuYLxus+1lG83Vto2kv7nAt/XbnYoXtldNd\n";
+    ".ssh/infra.pub".text = "${config.prefs.network.hosts.nixos.userPubKey}\n";
   };
 
   home.sessionVariables = {
@@ -203,8 +202,15 @@ in
       "raspberrypi ${config.prefs.network.hosts.raspberrypi.ip}" = {
         HostName = config.prefs.network.hosts.raspberrypi.ip;
         User = "root";
-        IdentityFile = "${config.home.homeDirectory}/.ssh/pi.pub";
+        IdentityFile = "${config.home.homeDirectory}/.ssh/infra.pub";
         IdentitiesOnly = true;
+      };
+      "router ${config.prefs.network.subnets.lan.gateway}" = {
+        HostName = config.prefs.network.subnets.lan.gateway;
+        User = "root";
+        IdentityFile = "${config.home.homeDirectory}/.ssh/infra.pub";
+        IdentitiesOnly = true;
+        ProxyCommand = "none";
       };
     };
   };

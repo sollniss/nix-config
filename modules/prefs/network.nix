@@ -42,8 +42,17 @@
     };
     raspberrypi = {
       ip = "192.168.1.101";
-      # Static LAN ULA. This is the address the pi answers DNS on over IPv6
-      # and advertises as the IPv6 resolver. Stable across ISP prefix rotations.
+      # Static LAN ULA. The address the pi answers DNS on over IPv6, and the
+      # one the router advertises to clients as their IPv6 resolver. Stable
+      # across ISP prefix rotations, which a GUA is not - hence a ULA.
+      #
+      # The router has to advertise it; the pi cannot reach every client by
+      # itself. RA RDNSS from the pi (services.slaac sendRA) only reaches
+      # clients that honour RDNSS, never DHCPv6-only ones. OpenWrt's odhcpd
+      # covers both from a single `list dns` entry, so sendRA is off there.
+      #
+      # Needs the router's ula_prefix to match subnets.lan.cidr6, so this
+      # address sits inside the prefix it advertises on-link.
       ip6 = "fdca:6321:8b7e::101";
       subnet = "lan";
       dns = [

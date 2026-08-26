@@ -163,12 +163,37 @@ in
         };
       };
       dhcp.enable = mkEnableOption "systemd-networkd DHCP server for the LAN, pointing clients at this host for DNS.";
-      slaac.enable = mkEnableOption ''
-        systemd-networkd IPv6 Router Advertisements for the LAN: announce a
-        stable ULA prefix on-link (SLAAC) and this host as the IPv6 DNS server
-        (RA RDNSS), so IPv6-preferring clients resolve the hosted vhosts too.
-        Android picks up the RDNSS directly; Windows and other DHCPv6 clients
-        need the router's WAN IPv6 DNS pointed at this host's ULA as well.'';
+      slaac = {
+        enable = mkEnableOption ''
+          A stable LAN ULA on this host, so it can be reached at an address
+          that never rotates with the ISP prefix. This is what the resolver
+          binds and what clients are pointed at as their IPv6 DNS server -
+          a GUA would move every time the delegation changes'';
+
+        sendRA = mkOption {
+          type = types.bool;
+          default = true;
+          example = false;
+          description = ''
+            Also emit Router Advertisements from this host, announcing the ULA
+            prefix on-link and this host as the IPv6 resolver (RA RDNSS,
+            RFC 8106), with RouterLifetime 0 so it is never treated as a
+            default router.
+
+            Only needed when the LAN's real router cannot advertise a resolver
+            itself. That was true of the TP-Link Archer AX10, whose DHCPv6 DNS
+            field rejects ULAs (it is a WAN field), leaving RA RDNSS from here
+            as the only way to point clients at this host - and it only ever
+            reached clients that honour RDNSS, so DHCPv6-only clients still
+            leaked to whatever public resolver the router handed out.
+
+            Set false when the router runs OpenWrt: odhcpd advertises the
+            resolver over RA RDNSS *and* DHCPv6, which covers both kinds of
+            client consistently, and one RA sender per link is easier to
+            reason about than two.
+          '';
+        };
+      };
       calendar.enable = mkEnableOption "SOGo web calendar and task manager.";
       nas = {
         enable = mkEnableOption "File share over SMB3 (Windows, reachable from the LAN and the VPN) and NFSv4 (Linux, exported only to the managed hosts in the network topology).";

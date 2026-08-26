@@ -34,6 +34,13 @@ in
   #  raspberrypi-eeprom
   #];
 
+  # Get exactly one global IPv6 address (EUI-64).
+  networking.tempAddresses = "disabled";
+  systemd.network.networks."10-lan" = {
+    networkConfig.IPv6PrivacyExtensions = "no";
+    ipv6AcceptRAConfig.DHCPv6Client = "no";
+  };
+
   services.ddclient = {
     enable = true;
     protocol = "dyndns2";
