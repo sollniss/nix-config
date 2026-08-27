@@ -1,5 +1,8 @@
 { config, ... }:
 {
+  # Flakes only
+  nix.channel.enable = false;
+
   nix.gc = {
     automatic = !config.programs.nh.clean.enable;
     dates = "weekly";

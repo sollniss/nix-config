@@ -32,11 +32,17 @@ let
     dev.go
     dev.nix
   ];
+  # untracked and gitignored.
+  # builtins.pathExists on an absolute path returns false in pure mode.
+  secretModule = /home/sollniss/nix-config/hosts/sollniss/desktop/secret.nix;
 in
 {
-  imports = homeManagerModules ++ [
-    #../../../modules/home-manager/programs/something
-  ];
+  imports =
+    homeManagerModules
+    ++ [
+      #../../../modules/home-manager/programs/something
+    ]
+    ++ lib.optional (builtins.pathExists secretModule) (import secretModule);
 
   home.stateVersion = "25.05";
 

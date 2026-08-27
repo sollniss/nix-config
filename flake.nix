@@ -62,7 +62,7 @@
           };
         }
       );
-      # sudo nixos-rebuild switch --flake .#nixos
+      # sudo nixos-rebuild switch --flake .#nixos --impure
       # sudo nixos-rebuild switch --flake github:sollniss/nix-config#nixos
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = {
