@@ -309,9 +309,9 @@ in
           "trailhead.firstrun.didSeeAboutWelcome" = true;
 
           # Hardware acceleration
-          "media.hardware-video-decoding.force-enabled" = true;
-          "gfx.x11-egl.force-enabled" = true;
-          "widget.dmabuf.force-enabled" = true;
+          #"media.hardware-video-decoding.force-enabled" = true;
+          #"gfx.x11-egl.force-enabled" = true;
+          #"widget.dmabuf.force-enabled" = true;
 
           # Hardening
 

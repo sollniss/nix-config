@@ -79,17 +79,17 @@ in
   # Enable OpenGL
   hardware.graphics = {
     enable = true;
-    extraPackages = [ pkgs.nvidia-vaapi-driver ];
+    #extraPackages = [ pkgs.nvidia-vaapi-driver ];
   };
 
-  environment = {
-    systemPackages = [ pkgs.libva-utils ];
-    variables = {
-      MOZ_DISABLE_RDD_SANDBOX = "1";
-      NVD_BACKEND = "direct";
-      LIBVA_DRIVER_NAME = "nvidia";
-    };
-  };
+  #environment = {
+  #  systemPackages = [ pkgs.libva-utils ];
+  #  variables = {
+  #    MOZ_DISABLE_RDD_SANDBOX = "1";
+  #    NVD_BACKEND = "direct";
+  #    LIBVA_DRIVER_NAME = "nvidia";
+  #  };
+  #};
 
   # Load nvidia driver for Xorg and Wayland
   # For offloading `amdgpu` (AMD iGPU) or `modesetting` (Intel iGPU)  is also required,
