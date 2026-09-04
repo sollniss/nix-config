@@ -79,6 +79,8 @@ in
     whipper
     spek
 
+    digikam
+
     #google-chrome
 
     # minecraft
