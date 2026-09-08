@@ -86,20 +86,32 @@
       };
 
       # nixos-rebuild switch --flake .#raspberrypi --target-host root@192.168.1.101
-      #
-      # Build SD image:
-      # nix build .#nixosConfigurations.raspberrypi.config.system.build.sdImage
-      # lsblk  ---------------------------------------------------------
-      # sudo umount /run/media/XXXXXXX                               ↓↓↓
-      # zstd -d result/sd-image/*.img.zst --stdout | sudo dd of=/dev/sda bs=4M status=progress conv=fsync
-      # sudo umount /dev/sda1 /dev/sda2
-      # sudo eject /dev/sda
+      # nh os switch -H raspberrypi --target-host root@192.168.1.101
       nixosConfigurations.raspberrypi = nixpkgs.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
         };
         modules = [
           ./hosts/raspberrypi
+        ];
+      };
+
+      # The same host plus nixpkgs' SD card image builder.
+      #
+      # Build SD image:
+      # nix build .#nixosConfigurations.raspberrypi-sd-image.config.system.build.sdImage
+      # lsblk  ---------------------------------------------------------
+      # sudo umount /run/media/XXXXXXX                               ↓↓↓
+      # zstd -d result/sd-image/*.img.zst --stdout | sudo dd of=/dev/sda bs=4M status=progress conv=fsync
+      # sudo umount /dev/sda1 /dev/sda2
+      # sudo eject /dev/sda
+      nixosConfigurations.raspberrypi-sd-image = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/raspberrypi
+          ./hosts/raspberrypi/sd-image.nix
         ];
       };
 

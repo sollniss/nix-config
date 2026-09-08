@@ -7,6 +7,13 @@
   # Device tree for Pi 4.
   hardware.deviceTree.filter = "bcm2711-rpi-*.dtb";
 
+  # Serial console on the PL011 UART (GPIO 14/15) plus the HDMI console.
+  # These values are from nixpkgs' sd-image-aarch64.nix and seem useful.
+  boot.kernelParams = [
+    "console=ttyAMA0,115200n8"
+    "console=tty0"
+  ];
+
   # Essential kernel modules for Pi 4.
   boot.initrd.availableKernelModules = [
     "pcie-brcmstb"
@@ -20,18 +27,38 @@
   nixpkgs.hostPlatform = "aarch64-linux";
 
   # Broadcom WiFi/Bluetooth firmware, for this board only.
-  # mkForce because hardware/all-hardware.nix, pulled in by the sd-image
-  # profile this host is built from, turns it on unconditionally.
+  # mkForce because hardware.enableAllHardware turns it on unconditionally,
+  # and ./sd-image.nix sets that for the image build.
   hardware.enableRedistributableFirmware = lib.mkForce false;
   hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
 
-  fileSystems."/".options = [ "noatime" ];
+  # The two partitions the image builder writes, addressed by the labels it
+  # gives them (sdImage.rootVolumeLabel / sdImage.firmwarePartitionName).
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/NIXOS_SD";
+    fsType = "ext4";
+    options = [ "noatime" ];
+  };
+
+  # Holds config.txt, u-boot and the .dtb files the firmware reads before the
+  # kernel exists. noauto because nothing at runtime needs it: extlinux writes
+  # its config to /boot on the root partition. Mount it by hand to change
+  # anything the GPU firmware reads at power-on.
+  fileSystems."/boot/firmware" = {
+    device = "/dev/disk/by-label/FIRMWARE";
+    fsType = "vfat";
+    options = [
+      "nofail"
+      "noauto"
+    ];
+  };
 
   boot.supportedFilesystems = {
     # External SSD.
     btrfs = true;
 
-    # Enabled by sdcard image builder for some reason.
+    # profiles/base.nix, which ./sd-image.nix drags in for the image build,
+    # defaults this on. Nothing here uses ZFS.
     zfs = false;
   };
 

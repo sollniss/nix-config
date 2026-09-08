@@ -47,6 +47,9 @@ in
       nixpkgs.flake.setFlakeRegistry = false;
       nixpkgs.flake.setNixPath = false;
 
+      # Same for nixos-install/enter/generate-config/build-vms/option/rebuild.
+      system.disableInstallerTools = true;
+
       # The builder pushes the closure over SSH, so sshd must be up.
       assertions = [
         {

@@ -157,10 +157,10 @@ in
   };
 
   # Minimize SD card writes by keeping logs in memory only.
-  services.journald.storage = "volatile";
-  services.journald.extraConfig = ''
-    RuntimeMaxUse=32M
-  '';
+  services.journald.settings.Journal = {
+    Storage = "volatile";
+    RuntimeMaxUse = "32M";
+  };
 
   # Suppress all but error-level kernel messages from being logged.
   boot.kernel.sysctl."kernel.printk" = "3 3 3 3";
