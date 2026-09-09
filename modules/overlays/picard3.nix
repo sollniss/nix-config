@@ -1,4 +1,4 @@
-# Picard 3.0 beta, ported from the nixpkgs 2.x derivation
+# Picard 3.0 release candidate, ported from the nixpkgs 2.x derivation
 # (pkgs/by-name/pi/picard/package.nix). Main differences in 3.0:
 # Qt5 -> Qt6 (PyQt6), new pygit2/tomlkit deps, dropped fasteners and
 # python-dateutil, and locales are built into the package so the
@@ -25,7 +25,7 @@ let
 in
 pythonPackages.buildPythonApplication (finalAttrs: {
   pname = "picard";
-  version = "3.0.0b7";
+  version = "3.0.0rc1";
   pyproject = true;
   strictDeps = true;
   __structuredAttrs = true;
@@ -34,7 +34,7 @@ pythonPackages.buildPythonApplication (finalAttrs: {
     owner = "metabrainz";
     repo = "picard";
     tag = "release-${finalAttrs.version}";
-    hash = "sha256-kKRYiIZUaqvoqWQbKmtvleOtR+raMcKCFxBG5mtVTXA=";
+    hash = "sha256-iNr7+TWuwjo7mx0fgYvRcfRAJ/qBqaC0cT0cx6qku8g=";
   };
 
   nativeBuildInputs = [
@@ -102,7 +102,7 @@ pythonPackages.buildPythonApplication (finalAttrs: {
   meta = {
     homepage = "https://picard.musicbrainz.org";
     changelog = "https://picard.musicbrainz.org/changelog";
-    description = "Official MusicBrainz tagger (3.0 beta)";
+    description = "Official MusicBrainz tagger (3.0 release candidate)";
     mainProgram = "picard";
     license = lib.licenses.gpl2Plus;
     platforms = lib.platforms.all;
