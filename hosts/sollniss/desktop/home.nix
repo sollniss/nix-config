@@ -99,6 +99,15 @@ in
 
   # User specific config for base services.
   services = {
+    flameshot = {
+      enable = true;
+      settings = {
+        General = {
+          useGrimAdapter = false;
+        };
+      };
+    };
+
     syncthing.settings =
       let
         network = config.prefs.network;
@@ -184,6 +193,8 @@ in
       gpg.format = "ssh";
       commit.gpgsign = true;
       tag.gpgsign = true;
+
+      http.cookiefile = "~/.gitcookies";
       # Force SSH auth over HTTPS.
       #url."git@github.com:".insteadOf = "https://github.com/";
     };
