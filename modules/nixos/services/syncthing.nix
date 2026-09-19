@@ -16,8 +16,21 @@ let
 
   peers = lib.filterAttrs (name: host: name != hostname && host.syncthingId != null) network.hosts;
 
+  # A LAN peer always answers at its static address. A VPN peer only answers
+  # at its tunnel address while its tunnel is up, and is back on the LAN under
+  # a DHCP address the rest of the time, so it needs both.
   addressesFor =
-    host: if host.subnet == "lan" then [ "tcp://${host.ip}:${toString syncPort}" ] else [ "dynamic" ];
+    host:
+    let
+      static = "tcp://${host.ip}:${toString syncPort}";
+    in
+    if host.subnet == "lan" then
+      [ static ]
+    else
+      [
+        static
+        "dynamic"
+      ];
 
   # A folder's device list.
   folderDevices =

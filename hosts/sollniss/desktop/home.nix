@@ -80,6 +80,7 @@ in
     spek
 
     digikam
+    czkawka
 
     #google-chrome
 
