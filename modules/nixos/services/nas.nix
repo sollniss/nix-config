@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -63,6 +64,7 @@ let
   ];
   exports = builtins.concatStringsSep " " (map (a: "${a}(${exportOptions})") nfsAddrs);
 
+  sandbox = inputs.self.lib.sandbox;
 in
 {
   imports = [ ./firewall.nix ];
@@ -298,6 +300,7 @@ in
 
       # NFSv4 only.
       settings.nfsd = {
+        vers2 = false;
         vers3 = false;
         vers4 = true;
         "vers4.0" = false;
@@ -305,8 +308,27 @@ in
         "vers4.2" = true;
         udp = false;
         tcp = true;
+
+        # The LAN address only, for the same reason as Samba's `interfaces`
+        # above: without this nfsd listens on every address the host holds.
+        # The ULA only joins once a pinned client has an IPv6 address to come
+        # from.
+        host = builtins.concatStringsSep "," (
+          [ self.ip ]
+          ++ lib.optional (nfsAddrs6 != [ ] && config.prefs.hosted.slaac.enable && self.ip6 != null) self.ip6
+        );
       };
     };
+
+    # The rest of the NFSv3 machinery, which both upstream NFS modules switch
+    # on regardless of the versions served: the portmapper (port 111), and the
+    # lock status daemon with its reboot notifier. NFSv4 has a single fixed
+    # port and does its locking in-protocol, so neither has a job here, and
+    # both run as root. nfs-server.service only Wants= them, and registering
+    # with the portmapper is optional for v4, so it starts without.
+    services.rpcbind.enable = lib.mkForce false;
+    systemd.services.rpc-statd.enable = false;
+    systemd.services.rpc-statd-notify.enable = false;
 
     # Setup for account, directory, and firewall.
 
@@ -353,7 +375,7 @@ in
         pkgs.findutils
         pkgs.coreutils
       ];
-      serviceConfig = {
+      serviceConfig = sandbox // {
         Type = "oneshot";
 
         # Runs as root: it has to chown and chmod files it does not own, and set
@@ -367,17 +389,13 @@ in
           "CAP_FOWNER"
           "CAP_FSETID"
         ];
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
         ReadWritePaths = [ cfg.path ];
-        RestrictAddressFamilies = [ "AF_UNIX" ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        # RestrictSUIDSGID must stay off (its default): it seccomp-blocks the
-        # `chmod 2770` — setgid on a directory — that this service exists to do.
-        UMask = "0077";
+        # RestrictSUIDSGID must be off: it seccomp-blocks the `chmod 2770`
+        # setgid on a directory that this service exists to do.
+        RestrictSUIDSGID = false;
+        # The baseline filter drops @privileged, which holds the chown calls:
+        # take those back, and only those.
+        SystemCallFilter = sandbox.SystemCallFilter ++ [ "@chown" ];
       };
       script = ''
         set -euo pipefail
@@ -425,27 +443,17 @@ in
         pkgs.coreutils
         pkgs.gnugrep
       ];
-      serviceConfig = {
+      serviceConfig = sandbox // {
         Type = "oneshot";
         RemainAfterExit = true;
 
-        # Runs as root: it reads a root-only secret and writes the passdb.
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        PrivateTmp = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
+        # Runs as root, but with no capabilities: it only reads a root-only
+        # secret and writes the passdb, both of which root owns.
         ReadWritePaths = [
           "/var/lib/samba"
           "/var/cache/samba"
           "/var/lock/samba"
         ];
-        RestrictAddressFamilies = [ "AF_UNIX" ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        UMask = "0077";
       };
       script = ''
         set -euo pipefail

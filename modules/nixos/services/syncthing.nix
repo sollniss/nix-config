@@ -135,6 +135,66 @@ in
     # don't start and quietly resync everything onto the SD card underneath the mountpoint.
     systemd.services.syncthing.unitConfig.RequiresMountsFor = lib.attrValues cfg.folders;
 
+    # Upstream confines syncthing's capabilities and namespaces, but leaves it
+    # the whole filesystem its user can write, every syscall, and the internet.
+    # It takes files from other devices (the phone above all), so pin all three
+    # down to what the options above already promise:
+    #
+    # - Writable only where it syncs and where it keeps its own state.
+    # - Talking only to the known subnets, with the kernel enforcing what
+    #   globalAnnounce/relays/NAT off only ask for. localhost is its GUI and
+    #   API (syncthing-init), link-local and multicast its IPv6 local
+    #   discovery, 255.255.255.255 its IPv4 one.
+    # - Syscalls limited to @system-service, failing with EPERM rather than
+    #   killing the daemon should a code path need something else.
+    #
+    # Deliberately not ProcSubset=pid: nothing here needs the rest of /proc, but
+    # it is not worth finding out the hard way which Go library reads it.
+    systemd.services.syncthing.serviceConfig =
+      let
+        subnets = builtins.attrValues network.subnets;
+      in
+      {
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        ReadWritePaths = lib.unique (
+          lib.attrValues cfg.folders
+          ++ [
+            config.services.syncthing.dataDir
+            config.services.syncthing.configDir
+            config.services.syncthing.databaseDir
+          ]
+        );
+
+        # Upstream subtracts a handful; a non-root daemon needs none at all.
+        CapabilityBoundingSet = lib.mkForce "";
+
+        IPAddressDeny = "any";
+        IPAddressAllow = [
+          "localhost"
+          "link-local"
+          "multicast"
+          "255.255.255.255/32"
+        ]
+        ++ map (s: s.cidr) subnets
+        ++ builtins.filter (c: c != null) (map (s: s.cidr6) subnets);
+        # AF_NETLINK to enumerate interfaces for local discovery.
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+          "AF_NETLINK"
+          "AF_UNIX"
+        ];
+
+        ProtectClock = true;
+        ProtectKernelLogs = true;
+        ProtectProc = "invisible";
+        LockPersonality = true;
+        SystemCallArchitectures = "native";
+        SystemCallFilter = [ "@system-service" ];
+        SystemCallErrorNumber = "EPERM";
+      };
+
     # Sync traffic and discovery from the known subnets only.
     prefs.hosted.subnetOnlyPorts = {
       tcp = [ syncPort ];

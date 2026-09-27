@@ -5,6 +5,7 @@
 # but is otherwise self-contained: enabling prefs.hosted.photos is enough, with
 # or without any other hosted service.
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -26,24 +27,17 @@ let
 
   keyFile = config.prefs.secrets.immichApiKey;
 
-  # Sandbox settings shared by every provisioning unit below.
-  # Each service merges its own settings (and any deviations) on top with //.
-  hardening = {
-    CapabilityBoundingSet = "";
-    IPAddressDeny = "any";
-    IPAddressAllow = "localhost";
-    NoNewPrivileges = true;
-    PrivateDevices = true;
-    ProtectHome = true;
-    ProtectSystem = "strict";
+  # Sandbox settings shared by every provisioning unit below: the common
+  # baseline, plus loopback-only networking, as they only ever talk to
+  # immich-server. Each service merges its own settings (and any deviations) on
+  # top with //.
+  hardening = inputs.self.lib.sandbox // {
     RestrictAddressFamilies = [
       "AF_INET"
       "AF_UNIX"
     ];
-    RestrictNamespaces = true;
-    RestrictRealtime = true;
-    RestrictSUIDSGID = true;
-    UMask = "0077";
+    IPAddressDeny = "any";
+    IPAddressAllow = "localhost";
   };
 in
 {
@@ -112,6 +106,47 @@ in
     # it connects over the unix socket, so, like SOGo, it needs no TCP listener.
     # Harmless to state twice: both services force the same value.
     services.postgresql.settings.listen_addresses = lib.mkForce "";
+    # With no TCP listener, the cluster needs no network stack at all. Clients
+    # still reach it: a unix socket in the filesystem works across network
+    # namespaces. Stated twice for the same reason as above.
+    systemd.services.postgresql.serviceConfig.PrivateNetwork = true;
+
+    # The same for Immich's Redis, as long as it is on its unix socket (the
+    # upstream default, which also sets its TCP port to 0).
+    systemd.services.redis-immich.serviceConfig.PrivateNetwork =
+      lib.mkIf (lib.hasPrefix "/" config.services.immich.redis.host) true;
+
+    # Upstream confines immich-server's capabilities and namespaces, but leaves
+    # it the whole filesystem, every syscall and the internet. It is the
+    # largest parser of untrusted input on this host (every photo and video
+    # goes through sharp and ffmpeg), so close those too:
+    #
+    # - Writable only where it keeps state: its media location, and the
+    #   external library for the XMP sidecars (see the nas group above).
+    #   StateDirectory, RuntimeDirectory and PrivateTmp stay writable anyway.
+    # - Loopback only. Nothing server-side goes out: the browser fetches the
+    #   map tiles, reverse geocoding is a local database, and the version check
+    #   and machine learning are off. Postgres and Redis are unix sockets.
+    # - Syscalls limited to @system-service, failing with EPERM rather than
+    #   killing the server should a code path need something else.
+    #
+    # Deliberately not MemoryDenyWriteExecute (V8 needs a JIT) nor
+    # ProcSubset=pid (Node's os.cpus() reads /proc/stat, and sharp and Immich
+    # size their worker pools from it).
+    systemd.services.immich-server.serviceConfig = {
+      ProtectSystem = "strict";
+      ReadWritePaths = [
+        cfg.mediaLocation
+      ]
+      ++ lib.optional (cfg.externalLibrary != null) cfg.externalLibrary;
+      IPAddressDeny = "any";
+      IPAddressAllow = "localhost";
+      ProtectProc = "invisible";
+      LockPersonality = true;
+      SystemCallArchitectures = "native";
+      SystemCallFilter = [ "@system-service" ];
+      SystemCallErrorNumber = "EPERM";
+    };
 
     # The upstream module only tightens the permissions of an existing media
     # directory ("e"), which is enough for the default location because systemd
@@ -130,7 +165,9 @@ in
 
     # immich-account's ReadWritePaths refuses to start the unit while the
     # secrets directory is missing, which it is on a first boot.
-    systemd.tmpfiles.settings.immich.${dirOf keyFile}.d = {
+    # ./wireguard.nix states the identical rule under the same name, so the two
+    # merge into one line instead of colliding.
+    systemd.tmpfiles.settings.secrets.${dirOf keyFile}.d = {
       user = "root";
       group = "root";
       mode = "0755";
@@ -392,7 +429,6 @@ in
         Type = "oneshot";
         DynamicUser = true;
         LoadCredential = [ "api-key:${keyFile}" ];
-        PrivateTmp = true;
       };
       script = ''
         set -euo pipefail

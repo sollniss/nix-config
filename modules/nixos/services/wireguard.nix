@@ -1,4 +1,5 @@
 {
+  inputs,
   lib,
   config,
   pkgs,
@@ -30,6 +31,8 @@ let
   # MSS must fit both IPv4 (MTU − 40) and IPv6 (MTU − 60) inner packets.
   # Use the smaller value (1360) so a single clamp covers both.
   mss = 1360;
+
+  sandbox = inputs.self.lib.sandbox;
 in
 {
   config = lib.mkIf config.prefs.hosted.vpn.enable {
@@ -39,9 +42,20 @@ in
       description = "Generate WireGuard key pair if missing";
       wantedBy = [ "systemd-networkd.service" ];
       before = [ "systemd-networkd.service" ];
-      serviceConfig = {
+      serviceConfig = sandbox // {
         Type = "oneshot";
         RemainAfterExit = true;
+
+        # Runs as root, but only ever needs to hand the key to systemd-network.
+        CapabilityBoundingSet = [ "CAP_CHOWN" ];
+        ReadWritePaths = [ (dirOf keyPath) ];
+        PrivateNetwork = true;
+        # The baseline filter drops @privileged, which holds the chown calls:
+        # take those back, and only those.
+        SystemCallFilter = sandbox.SystemCallFilter ++ [ "@chown" ];
+        # The private key gets its own umask in the script; keep the public key
+        # world-readable as before.
+        UMask = "0022";
       };
       path = [ pkgs.wireguard-tools ];
       script = ''
@@ -56,6 +70,16 @@ in
         # Re-derived on every run.
         wg pubkey < "${keyPath}" > "${keyPath}.pub"
       '';
+    };
+
+    # ReadWritePaths above refuses to start the unit while the secrets directory
+    # is missing, which it is on a first boot. ./immich.nix states the
+    # identical rule under the same name, so the two merge into one line
+    # instead of colliding.
+    systemd.tmpfiles.settings.secrets.${dirOf keyPath}.d = {
+      user = "root";
+      group = "root";
+      mode = "0755";
     };
 
     systemd.network = {

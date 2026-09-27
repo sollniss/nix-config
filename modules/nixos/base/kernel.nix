@@ -135,5 +135,21 @@ in
     "net.ipv4.conf.default.accept_redirects" = 0;
     "net.ipv6.conf.all.accept_redirects" = 0;
     "net.ipv6.conf.default.accept_redirects" = 0;
+    # Only root reads the kernel log, which can leak kernel addresses
+    "kernel.dmesg_restrict" = 1;
+    # No eBPF for unprivileged users (a recurring privilege-escalation vector),
+    # and constant blinding for every JIT-compiled BPF program
+    "kernel.unprivileged_bpf_disabled" = 1;
+    "net.core.bpf_jit_harden" = 2;
+    # userfaultfd only for privileged users; it is a common exploit primitive
+    "vm.unprivileged_userfaultfd" = 0;
+    # Don't let unprivileged users autoload TTY line disciplines
+    "dev.tty.ldisc_autoload" = 0;
+    # Extend the symlink/hardlink protection above to FIFOs and regular files
+    # in world-writable sticky directories such as /tmp
+    "fs.protected_fifos" = 2;
+    "fs.protected_regular" = 2;
+    # No core dumps from setuid processes
+    "fs.suid_dumpable" = 0;
   };
 }

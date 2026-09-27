@@ -21,6 +21,8 @@ let
     services.nas
     services.syncthing
   ];
+
+  sandbox = inputs.self.lib.sandbox;
 in
 {
   imports = nixosModules;
@@ -63,15 +65,43 @@ in
       "nscd.service"
     ];
     wants = [ "network-online.target" ];
-    # Wait for a routable ipv6 address.
-    serviceConfig.ExecStartPre = [
-      (lib.concatStringsSep " " [
-        "!-${config.systemd.package}/lib/systemd/systemd-networkd-wait-online"
-        "--ipv6"
-        "--interface=${config.prefs.nixos.interface}:routable"
-        "--timeout=60"
-      ])
-    ];
+    # Upstream only sets DynamicUser (which already implies a read-only
+    # system, no setuid and no new privileges). ddclient talks to the internet
+    # and holds the dynv6 secret, so put it in the shared sandbox too, with the
+    # network it needs. AF_NETLINK is how `ip` reads the interface's address
+    # for usev6.
+    #
+    # The "!" ExecStartPre steps (upstream's prestart, and the wait below) run
+    # as root but stay inside this sandbox: "!" only drops User=, unlike "+".
+    # The prestart copies the config into the dynamic user's 0700
+    # /run/ddclient, chowns it over and splices the secret in, so the bounding
+    # set keeps exactly that, and the syscall filter takes @chown back.
+    # ddclient itself runs as the unprivileged dynamic user under
+    # NoNewPrivileges, so it can never hold any of these.
+    serviceConfig = sandbox // {
+      # Wait for a routable ipv6 address.
+      ExecStartPre = [
+        (lib.concatStringsSep " " [
+          "!-${config.systemd.package}/lib/systemd/systemd-networkd-wait-online"
+          "--ipv6"
+          "--interface=${config.prefs.nixos.interface}:routable"
+          "--timeout=60"
+        ])
+      ];
+
+      CapabilityBoundingSet = [
+        "CAP_CHOWN"
+        "CAP_DAC_OVERRIDE"
+        "CAP_FOWNER"
+      ];
+      RestrictAddressFamilies = [
+        "AF_INET"
+        "AF_INET6"
+        "AF_NETLINK"
+        "AF_UNIX"
+      ];
+      SystemCallFilter = sandbox.SystemCallFilter ++ [ "@chown" ];
+    };
   };
 
   # Navidrome and Immich read their libraries out of the NAS share, whose files
@@ -100,7 +130,7 @@ in
     # instead of looking at an empty mountpoint on the SD card.
     unitConfig.RequiresMountsFor = [ "/mnt/pool" ];
     path = [ pkgs.btrfs-progs ];
-    serviceConfig = {
+    serviceConfig = sandbox // {
       Type = "oneshot";
 
       ExecStartPre = "${pkgs.coreutils}/bin/install -d -m 0700 -o root -g root /mnt/pool/snapshots";
@@ -121,10 +151,29 @@ in
       # Snapshotting needs root and CAP_SYS_ADMIN, so the sandbox can only
       # fence in everything else: no network, nothing writable but the pool.
       PrivateNetwork = true;
-      ProtectHome = true;
-      ProtectSystem = "strict";
       ReadWritePaths = [ "/mnt/pool" ];
       IOSchedulingClass = "idle";
+
+      # Of root's capabilities, keep what the btrfs ioctls check (SYS_ADMIN
+      # for listing and deleting subvolumes, FOWNER for snapshotting one it
+      # does not own), plain root file access, and the chown of the install
+      # above. No module loading, ptrace, raw I/O or network admin.
+      CapabilityBoundingSet = [
+        "CAP_SYS_ADMIN"
+        "CAP_FOWNER"
+        "CAP_DAC_OVERRIDE"
+        "CAP_DAC_READ_SEARCH"
+        "CAP_CHOWN"
+      ];
+      # PrivateDevices stays off: btrfs-progs may look at the block devices.
+      # ProtectClock has to follow, as it implies DeviceAllow=char-rtc, and
+      # any DeviceAllow turns /dev into an allow-list of just that. The clock
+      # is out of reach regardless, with no CAP_SYS_TIME in the bounding set.
+      PrivateDevices = false;
+      ProtectClock = false;
+      # Not the baseline's narrower filter: which calls btrfs-progs makes
+      # beyond its ioctls is unconfirmed.
+      SystemCallFilter = [ "@system-service" ];
     };
   };
   systemd.timers.btrbk-nas = {
@@ -162,6 +211,29 @@ in
     RuntimeMaxUse = "32M";
   };
 
-  # Suppress all but error-level kernel messages from being logged.
-  boot.kernel.sysctl."kernel.printk" = "3 3 3 3";
+  boot.kernel.sysctl = {
+    # Suppress all but error-level kernel messages from being logged.
+    "kernel.printk" = "3 3 3 3";
+
+    # Yama: only CAP_SYS_PTRACE (root over ssh) may ptrace another process or
+    # read its memory. A compromised service account can no longer attach to
+    # its own sibling processes, say to lift the Immich API key out of a
+    # running curl. There are no interactive users here to debug their own.
+    "kernel.yama.ptrace_scope" = 2;
+
+    # io_uring has been a steady source of kernel privilege escalations, and
+    # nothing here uses it: Postgres defaults to io_method=worker, libuv's
+    # io_uring path is off by default, Samba has no vfs_io_uring configured.
+    # Callers get EPERM and fall back to plain syscalls.
+    "kernel.io_uring_disabled" = 2;
+  };
+
+  # No kexec, no hibernation: the running kernel can only change through a
+  # reboot (deploys only add a boot entry). A remote reinstall that kexecs into
+  # an installer (nixos-anywhere) needs this off and a reboot first.
+  security.protectKernelImage = true;
+
+  # Only root may talk to the nix daemon. Deploys come in as root, and none of
+  # the service accounts (immich, nas, sogo, ...) has any business building.
+  nix.settings.allowed-users = [ "root" ];
 }

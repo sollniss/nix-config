@@ -131,6 +131,8 @@
         ];
       };
 
+      lib.sandbox = import ./modules/nixos/sandbox.nix;
+
       modules = {
         nixos = import ./modules/nixos // {
           prefs = ./modules/prefs;

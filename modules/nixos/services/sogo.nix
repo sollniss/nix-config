@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -15,6 +16,11 @@ let
   db = "postgresql://sogo@%2Frun%2Fpostgresql/sogo";
 
   psql = "${config.services.postgresql.package}/bin/psql";
+
+  # Fixed by services.memcached.enableUnixSocket.
+  memcachedSocket = "/run/memcached/memcached.sock";
+
+  sandbox = inputs.self.lib.sandbox;
 
   # Accounts, managed entirely by this config. The login form rejects
   # empty passwords (the backend would accept them), so the password
@@ -118,7 +124,7 @@ in
       timezone = config.time.timeZone;
       extraConfig = ''
         WOWorkersCount = 2;
-        SOGoMemcachedHost = "127.0.0.1";
+        SOGoMemcachedHost = "${memcachedSocket}";
 
         // Calendar and tasks only. Tasks live inside the Calendar
         // module; Mail is hidden by a constraint no user row matches.
@@ -190,7 +196,35 @@ in
     # Email alarms are disabled above, so the minutely notifier is useless.
     systemd.services.sogo-ealarms.startAt = lib.mkForce [ ];
 
-    services.memcached.enable = true;
+    # memcached has no authentication, and it holds SOGo's sessions: on a TCP
+    # port, even a loopback one, every local process that can open a socket
+    # gets to read them. So it listens on a unix socket instead
+    # (${memcachedSocket}), 0660 (memcached's own default is 0700) in a 0750
+    # directory, and membership in the memcached group is what grants access.
+    services.memcached = {
+      enable = true;
+      enableUnixSocket = true;
+      extraOptions = [
+        "-a"
+        "0660"
+      ];
+    };
+    # sogod runs under PrivateUsers, where this group shows up as nogroup. It
+    # still counts for the permission check.
+    users.users.sogo.extraGroups = [ "memcached" ];
+
+    # With the socket in the filesystem, memcached needs no network stack at
+    # all. Upstream's confinement and the baseline overlap, with equal values.
+    systemd.services.memcached.serviceConfig = sandbox // {
+      PrivateNetwork = true;
+      RuntimeDirectoryMode = "0750";
+    };
+    # nginx reaches sogod over loopback TCP, and sogod has no business beyond
+    # it.
+    systemd.services.sogo.serviceConfig = {
+      IPAddressDeny = "any";
+      IPAddressAllow = "localhost";
+    };
 
     services.postgresql = {
       enable = true;
@@ -204,6 +238,9 @@ in
         }
       ];
     };
+    # With no TCP listener, the cluster needs no network stack at all; the unix
+    # socket works across network namespaces. ./immich.nix states the same.
+    systemd.services.postgresql.serviceConfig.PrivateNetwork = true;
 
     systemd.services.sogo-users-table = {
       description = "SOGo users table setup";
@@ -217,7 +254,7 @@ in
       ];
       before = [ "sogo.service" ];
       requiredBy = [ "sogo.service" ];
-      serviceConfig = {
+      serviceConfig = sandbox // {
         Type = "oneshot";
         # Stay "active (exited)" so nixos-rebuild switch re-runs this whenever
         # the user list changes: a plain oneshot goes inactive after its first
@@ -225,6 +262,8 @@ in
         RemainAfterExit = true;
         User = "sogo";
         Group = "sogo";
+        # Talks to nothing but the Postgres unix socket.
+        PrivateNetwork = true;
       };
       script = ''
         ${psql} -v ON_ERROR_STOP=1 -d sogo -f ${usersTable}
@@ -249,10 +288,12 @@ in
       wantedBy = [ "multi-user.target" ];
       startAt = [ "*:0/15" ];
       path = [ pkgs.sogo ];
-      serviceConfig = {
+      serviceConfig = sandbox // {
         Type = "oneshot";
         User = "sogo";
         Group = "sogo";
+        # Postgres and memcached, both over their unix sockets.
+        PrivateNetwork = true;
       };
       # Subscribe, then clear the label snapshots so the %{UserName} format
       # applies live instead of a stale name captured at subscribe time.
