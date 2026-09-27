@@ -4,6 +4,7 @@
     extraPackages = config.dev.nix.neededPackages;
     extensions = [ "nix" ];
     userSettings = {
+      lsp.nixd.settings = config.dev.nix.nixdSettings;
       languages = {
         Nix = {
           language_servers = [ "nixd" ];
