@@ -1,7 +1,12 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
   services.displayManager.cosmic-greeter.enable = true;
   services.desktopManager.cosmic.enable = true;
+
+  # cosmic-osk claims the seat's Wayland input method at login, which leaves
+  # fcitx5 without one. cosmic-session just logs an error if it is missing.
+  # https://github.com/pop-os/cosmic-osk/issues/44
+  environment.cosmic.excludePackages = [ pkgs.cosmic-osk ];
 
   # COSMIC turns both of these on by default. The scheduler drags in
   # bcc -> clang (~1GB) for execsnoop, and system76-power only does anything
