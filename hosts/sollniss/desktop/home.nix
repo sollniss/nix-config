@@ -41,6 +41,8 @@ in
     homeManagerModules
     ++ [
       #../../../modules/home-manager/programs/something
+      # Draft for upstreaming to home-manager.
+      ../../../modules/home-manager/upstream/picard
     ]
     ++ lib.optional (builtins.pathExists secretModule) (import secretModule);
 
@@ -70,12 +72,16 @@ in
     KOOHA_EXPERIMENTAL = "window-recording";
   };
 
+  programs.picard = {
+    enable = true;
+    # settings = { rename_files = true; };
+  };
+
   # Extra packages.
   home.packages = with pkgs; [
     inkscape
     kooha
 
-    picard
     whipper
     spek
 

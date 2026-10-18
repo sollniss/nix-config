@@ -1,7 +1,9 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
   services.displayManager.cosmic-greeter.enable = true;
   services.desktopManager.cosmic.enable = true;
+
+  environment.cosmic.excludePackages = [ pkgs.cosmic-osk ];
 
   # COSMIC turns both of these on by default. The scheduler drags in
   # bcc -> clang (~1GB) for execsnoop, and system76-power only does anything
