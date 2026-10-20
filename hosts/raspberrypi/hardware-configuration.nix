@@ -112,17 +112,21 @@ in
   # nodatacow here would be silently ignored. Only the VFS options below
   # (nosuid/nodev/noexec/noatime) are genuinely per-mount.
   #
-  # NOCOW is therefore set with `chattr +C` on the empty subvolume root before
-  # any data is copied in; files created inside inherit it, and NOCOW files are
-  # never compressed, which also sidesteps the inherited zstd. The inheritance
-  # is the reason ordering matters: the cluster must be copied in *after* the
-  # +C flag is set, never moved in beside it.
+  # NOCOW is therefore the +C attribute on the subvolume root, set by the
+  # tmpfiles rule below (the `h` type is chattr). Files created inside inherit
+  # it, and NOCOW files are never compressed, which also sidesteps the inherited
+  # zstd. tmpfiles-setup is part of sysinit.target, so on a fresh install the
+  # flag is in place before postgresql.service runs initdb. It does not convert
+  # files that already exist, which is why ordering matters for a manual
+  # restore: the cluster must be copied in *after* the flag is set, never moved
+  # in beside it.
   #
   # nofail is safe here despite the usual worry that Postgres would initdb a
   # blank cluster onto the bare SD-card directory: the upstream module already
   # sets RequiresMountsFor on its dataDir, which systemd resolves to this mount
   # unit, so postgresql.service refuses to start rather than start empty.
   fileSystems."/var/lib/postgresql" = ssd "postgresql" [ "noexec" ];
+  systemd.tmpfiles.settings.postgresql-nocow."/var/lib/postgresql".h.argument = "+C";
 
   # Immich's Redis.
   # No chattr +C here, unlike the Postgres subvolume above. Redis does not
