@@ -1,4 +1,24 @@
 { lib, pkgs, ... }:
+let
+  # Every subvolume of the external SSD mounts the same device. nofail plus a
+  # short device timeout: a USB disk never holds up the boot, and if it is
+  # missing the mount fails, which the services gated on it (RequiresMountsFor)
+  # turn into a loud refusal to start rather than writing to the SD card.
+  # nosuid/nodev everywhere; noexec and compression are per subvolume.
+  ssd = subvol: extraOptions: {
+    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
+    fsType = "btrfs";
+    options = [
+      "subvol=${subvol}"
+      "noatime"
+      "nosuid"
+      "nodev"
+      "nofail"
+      "x-systemd.device-timeout=10"
+    ]
+    ++ extraOptions;
+  };
+in
 {
   # Use extlinux as bootloader since there is no GRUB on the Pi.
   boot.loader.grub.enable = false;
@@ -62,76 +82,27 @@
     zfs = false;
   };
 
-  fileSystems."/srv/nas" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=nas"
-      "compress=zstd"
-      "noatime"
-
-      # Clients write whatever they like into this share, over a protocol with no
-      # notion of unix permissions. None of it may ever become a setuid binary, a
-      # device node, or something this host will execute. Drop noexec if the share
-      # ever needs to hold something runnable.
-      "nosuid"
-      "nodev"
-      "noexec"
-
-      # Never hold up the boot for a USB disk.
-      # If it is missing, the mount fails.
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  # Clients write whatever they like into this share, over a protocol with no
+  # notion of unix permissions. None of it may ever become something this host
+  # will execute. Drop noexec if the share ever needs to hold something runnable.
+  fileSystems."/srv/nas" = ssd "nas" [
+    "compress=zstd"
+    "noexec"
+  ];
 
   # The SSD's top level, holding the subvolumes above plus btrbk's snapshot
   # directory. Mounted outside /srv/nas so snapshots never appear in the SMB
   # share (and cannot be touched over it).
-  fileSystems."/mnt/pool" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=/"
-      "compress=zstd"
-      "noatime"
-      "nosuid"
-      "nodev"
-      "noexec"
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  fileSystems."/mnt/pool" = ssd "/" [
+    "compress=zstd"
+    "noexec"
+  ];
 
   # Immich's own storage (thumbnails, transcoded video, database backups, etc)
-  fileSystems."/var/lib/immich" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=immich"
-      "compress=zstd"
-      "noatime"
-      "nosuid"
-      "nodev"
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  fileSystems."/var/lib/immich" = ssd "immich" [ "compress=zstd" ];
 
   # Navidrome's own storage (SQLite database plus cover-art and transcode cache).
-  fileSystems."/var/lib/navidrome" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=navidrome"
-      "compress=zstd"
-      "noatime"
-      "nosuid"
-      "nodev"
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  fileSystems."/var/lib/navidrome" = ssd "navidrome" [ "compress=zstd" ];
 
   # A copy-on-write filesystem and a database that rewrites pages in place
   # fragment each other badly, so this cluster wants NOCOW. Deliberately NOT
@@ -151,39 +122,17 @@
   # blank cluster onto the bare SD-card directory: the upstream module already
   # sets RequiresMountsFor on its dataDir, which systemd resolves to this mount
   # unit, so postgresql.service refuses to start rather than start empty.
-  fileSystems."/var/lib/postgresql" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=postgresql"
-      "noatime"
-      "nosuid"
-      "nodev"
-      "noexec"
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  fileSystems."/var/lib/postgresql" = ssd "postgresql" [ "noexec" ];
 
   # Immich's Redis.
   # No chattr +C here, unlike the Postgres subvolume above. Redis does not
   # rewrite pages in place — BGSAVE writes a fresh temp file and renames it over
   # dump.rdb — so every save allocates new extents anyway. That is exactly the
   # pattern copy-on-write and compression handle well.
-  fileSystems."/var/lib/redis-immich" = {
-    device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
-    fsType = "btrfs";
-    options = [
-      "subvol=redis-immich"
-      "compress=zstd"
-      "noatime"
-      "nosuid"
-      "nodev"
-      "noexec"
-      "nofail"
-      "x-systemd.device-timeout=10"
-    ];
-  };
+  fileSystems."/var/lib/redis-immich" = ssd "redis-immich" [
+    "compress=zstd"
+    "noexec"
+  ];
 
   # Postgres gets this guard for free from the upstream module; Redis does not,
   # and without it a missing SSD is silent rather than loud: StateDirectory=

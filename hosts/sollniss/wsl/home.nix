@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ inputs, ... }:
 let
   homeManagerModules = with inputs.self.modules.homeManager; [
     base
@@ -22,19 +22,7 @@ in
   #home.packages = with pkgs; [
   #];
 
-  programs = {
-    zed-editor = {
-      installRemoteServer = true;
-    };
-
-    git.settings.user = {
-      name = config.prefs.user.name;
-      email = config.prefs.user.email;
-    };
-
-    jujutsu.settings.user = {
-      name = config.prefs.user.name;
-      email = config.prefs.user.email;
-    };
+  programs.zed-editor = {
+    installRemoteServer = true;
   };
 }

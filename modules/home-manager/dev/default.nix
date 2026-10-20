@@ -1,4 +1,4 @@
 {
-  go = import ./go;
-  nix = import ./nix;
+  go = ./go;
+  nix = ./nix;
 }

@@ -1,3 +1,3 @@
 {
-  protonvpn = import ./protonvpn.nix;
+  protonvpn = ./protonvpn.nix;
 }

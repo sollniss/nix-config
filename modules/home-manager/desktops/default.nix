@@ -1,4 +1,4 @@
 {
-  cosmic = import ./cosmic.nix;
-  gnome = import ./gnome.nix;
+  cosmic = ./cosmic.nix;
+  gnome = ./gnome.nix;
 }

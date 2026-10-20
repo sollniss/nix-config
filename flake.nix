@@ -3,10 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -15,6 +11,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # catppuccin, claude-code and helix deliberately keep their own nixpkgs:
+    # their packages (catppuccin.sources.cursors, claude-code, helix) are only
+    # in their cachix caches as built against that nixpkgs. With a follows the
+    # hashes change and all of them compile locally.
     catppuccin = {
       url = "github:catppuccin/nix";
     };

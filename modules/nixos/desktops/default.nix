@@ -1,5 +1,5 @@
 {
-  cosmic = import ./cosmic.nix;
-  gnome = import ./gnome.nix;
-  plasma6 = import ./plasma6.nix;
+  cosmic = ./cosmic.nix;
+  gnome = ./gnome.nix;
+  plasma6 = ./plasma6.nix;
 }

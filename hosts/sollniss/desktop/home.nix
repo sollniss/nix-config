@@ -192,11 +192,7 @@ in
     };
 
     git.settings = {
-      user = {
-        name = config.prefs.user.name;
-        email = config.prefs.user.email;
-        signingkey = "${config.home.homeDirectory}/.ssh/github.pub";
-      };
+      user.signingkey = "${config.home.homeDirectory}/.ssh/github.pub";
       gpg.format = "ssh";
       commit.gpgsign = true;
       tag.gpgsign = true;
@@ -207,10 +203,6 @@ in
     };
 
     jujutsu.settings = {
-      user = {
-        name = config.prefs.user.name;
-        email = config.prefs.user.email;
-      };
       signing = {
         behavior = "own";
         backend = "ssh";

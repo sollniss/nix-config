@@ -104,14 +104,6 @@ in
     };
   };
 
-  # Navidrome and Immich read their libraries out of the NAS share, whose files
-  # are owned by the `nas` user and group (files 0660, dirs setgid 2770). Adding
-  # both service users to the `nas` group gives them the read access those
-  # setgid directories grant the group, and nothing more: neither service ever
-  # writes to the share.
-  users.users.navidrome.extraGroups = [ "nas" ];
-  users.users.immich.extraGroups = [ "nas" ];
-
   # Daily read-only snapshots of the NAS pool: 14 dailies plus 4 weeklies.
   # A deletion on the share - a client over SMB, Immich emptying its trash -
   # only becomes permanent once the last snapshot holding the file is pruned;

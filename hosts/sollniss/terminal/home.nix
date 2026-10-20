@@ -1,7 +1,6 @@
 {
   inputs,
   pkgs,
-  config,
   ...
 }:
 let
@@ -32,13 +31,5 @@ in
   programs.go = {
     enable = true;
     env.GOPATH = "code/go";
-  };
-
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = config.prefs.user.name;
-      email = config.prefs.user.email;
-    };
   };
 }

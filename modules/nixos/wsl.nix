@@ -50,6 +50,9 @@
     firewall.enable = lib.mkForce false;
     # Wait online service can cause issues in WSL
     networkmanager.enable = lib.mkForce false;
+    # base/networking/dns.nix sets a public fallback; WSL writes resolv.conf
+    # itself and warns about them.
+    nameservers = lib.mkForce [ ];
     # wpa_supplicant is not needed in WSL and can cause activation failures.
     wireless.enable = lib.mkForce false;
   };

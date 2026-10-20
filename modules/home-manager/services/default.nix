@@ -1,3 +1,3 @@
 {
-  syncthing = import ./syncthing.nix;
+  syncthing = ./syncthing.nix;
 }

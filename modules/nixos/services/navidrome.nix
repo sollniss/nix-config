@@ -87,6 +87,10 @@ in
     # Lets nginx connect to the 0660 socket.
     users.users.nginx.extraGroups = [ "navidrome" ];
 
+    # A library on the NAS share is owned nas:nas (files 0660, dirs setgid
+    # 2770); the group grants the read access navidrome needs, and nothing more.
+    users.users.navidrome.extraGroups = lib.optional config.prefs.hosted.nas.enable "nas";
+
     services.nginx = {
       enable = true;
       virtualHosts.${domain} = {

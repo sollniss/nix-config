@@ -1,16 +1,16 @@
 {
-  anki = import ./anki.nix;
-  fish = import ./fish.nix;
-  firefox = import ./firefox.nix;
-  helix = import ./helix.nix;
-  keepassxc = import ./keepassxc.nix;
-  ssh = import ./ssh.nix;
-  thunderbird = import ./thunderbird.nix;
-  vscode = import ./vscode.nix;
-  wezterm = import ./wezterm.nix;
-  zed = import ./zed.nix;
+  anki = ./anki.nix;
+  fish = ./fish.nix;
+  firefox = ./firefox.nix;
+  helix = ./helix.nix;
+  keepassxc = ./keepassxc.nix;
+  ssh = ./ssh.nix;
+  thunderbird = ./thunderbird.nix;
+  vscode = ./vscode.nix;
+  wezterm = ./wezterm.nix;
+  zed = ./zed.nix;
 
   # preset
-  devtools = import ./devtools.nix;
-  shelltools = import ./shelltools.nix;
+  devtools = ./devtools.nix;
+  shelltools = ./shelltools.nix;
 }

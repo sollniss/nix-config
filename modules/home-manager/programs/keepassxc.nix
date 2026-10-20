@@ -10,7 +10,7 @@ let
   # Avoids repeated confirmation dialogs for back-to-back operations
   # (e.g., sign + push).
   ssh-askpass-cached = pkgs.writeShellScript "ssh-askpass-cached" ''
-    CACHE_FILE="/tmp/.ssh-askpass-cache-$(id -u)"
+    CACHE_FILE="''${XDG_RUNTIME_DIR:-/tmp}/ssh-askpass-cache-$(id -u)"
     CACHE_SECONDS=60
 
     if [ -f "$CACHE_FILE" ]; then

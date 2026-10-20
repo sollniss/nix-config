@@ -109,13 +109,10 @@ let
   };
 in
 {
-  # Only ./nginx.nix, NOT ./navidrome.nix: the hosts list service modules
-  # explicitly (see hosts/*/configuration.nix), and importing navidrome.nix by
-  # path here while configuration.nix pulls it in as a value via
-  # services/default.nix would apply that module twice — the module system
-  # cannot tell the two are the same file, and every types.lines option in it
-  # (nginx extraConfig) came out duplicated, failing nginx config validation.
-  imports = [ ./nginx.nix ];
+  imports = [
+    ./nginx.nix
+    ./navidrome.nix
+  ];
 
   config = lib.mkIf cfg.feishin.enable {
     assertions = [
