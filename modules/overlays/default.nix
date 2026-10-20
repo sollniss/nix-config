@@ -8,4 +8,15 @@
   (final: prev: {
     helix = inputs.helix.packages.${prev.stdenv.hostPlatform.system}.default;
   })
+
+  # Qt 6.12's uic rejects class names with a leading "::" in .ui files,
+  # which breaks the mozc build. Remove once nixpkgs/upstream fixes it.
+  (final: prev: {
+    mozc = prev.mozc.overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+        substituteInPlace src/gui/dictionary_tool/dictionary_tool.ui \
+          --replace-fail '::mozc::gui::DictionaryContentTableWidget' 'mozc::gui::DictionaryContentTableWidget'
+      '';
+    });
+  })
 ]
