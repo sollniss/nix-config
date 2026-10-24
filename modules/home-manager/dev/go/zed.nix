@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   # Zed's built-in Go debugger always launches its own `delve-shim-dap` adapter
   # (a stdio DAP server that spawns `dlv` in a terminal and proxies to it), and
@@ -58,7 +63,16 @@ in
         #    gofumpt = true;
         #  };
         #};
+        # Pinned so the extensions don't download their own (see programs/zed.nix).
+        templ.binary = {
+          path = lib.getExe pkgs.templ;
+          arguments = [ "lsp" ];
+        };
         golangci-lint = {
+          binary = {
+            path = lib.getExe pkgs.golangci-lint-langserver;
+            arguments = [ ];
+          };
           initialization_options = {
             command = [
               "golangci-lint"
