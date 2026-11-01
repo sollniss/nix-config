@@ -20,6 +20,11 @@
     };
   };
 
+  # A switch remounts the /etc overlay, and the subuid bind mount only comes
+  # back after user units have been restarted. Restarting rootless docker in
+  # that window fails, so leave it running and pick up changes on next restart.
+  systemd.user.services.docker.restartIfChanged = false;
+
   # The daemon is a user unit, so it and its containers would stop at logout.
   # Lingering keeps the user's systemd instance, and so the daemon, running
   # from boot on.

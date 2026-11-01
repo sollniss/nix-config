@@ -85,7 +85,7 @@ in
     whipper
     spek
 
-    digikam
+    #digikam
     czkawka
 
     #google-chrome
