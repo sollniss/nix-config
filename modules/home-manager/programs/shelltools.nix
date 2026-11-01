@@ -69,13 +69,19 @@
     keymap.mgr.prepend_keymap = [
       {
         on = "o";
-        run = ''shell '$EDITOR "$@"' --block'';
+        run = ''shell '$EDITOR %s' --block'';
         desc = "Open with $EDITOR";
       }
       {
-        on = "<Enter>";
-        run = ''shell '$VISUAL "$@"' --orphan'';
+        on = "e";
+        run = ''shell '$VISUAL %s' --orphan'';
         desc = "Open with $VISUAL";
+      }
+      {
+        on = "<Enter>";
+        # xdg-open takes ~800ms on COSMIC, gio ~60ms.
+        run = ''shell '${lib.getExe' pkgs.glib "gio"} open %s' --orphan'';
+        desc = "Open with default application";
       }
       {
         on = "S";
