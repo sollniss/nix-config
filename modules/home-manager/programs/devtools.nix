@@ -22,7 +22,8 @@
 
   programs.difftastic = {
     enable = true;
-    git.enable = true;
+    git.enable = true; # For some reason this enables git.
+    jujutsu.enable = config.programs.jujutsu.enable;
   };
 
   programs.mergiraf = {
@@ -35,12 +36,12 @@
     enable = true;
     settings = {
       ui = {
-        diff-formatter = [
-          (lib.getExe config.programs.difftastic.package)
-          "--color=always"
-          "$left"
-          "$right"
-        ];
+        #diff-formatter = [
+        #  (lib.getExe config.programs.difftastic.package)
+        #  "--color=always"
+        #  "$left"
+        #  "$right"
+        #];
         # On graphical hosts override mergiraf (set by programs.mergiraf) with
         # the interactive meld GUI; headless hosts keep mergiraf.
         merge-editor = lib.mkIf config.prefs.profile.graphical.enable (

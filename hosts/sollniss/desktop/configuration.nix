@@ -31,6 +31,19 @@ in
         # Work around nixpkgs#513245: the failing tests are on i686 only.
         doCheck = !prev.stdenv.hostPlatform.isi686;
       });
+
+      # lutris's FHS env still lists gtk2 in multiPkgs, which now fails to
+      # evaluate because gtk2 is marked broken (nixpkgs#410814).
+      lutris = prev.lutris.override {
+        buildFHSEnv =
+          args:
+          prev.buildFHSEnv (
+            args
+            // {
+              multiPkgs = p: builtins.filter (x: x != null) (args.multiPkgs (p // { gtk2 = null; }));
+            }
+          );
+      };
     })
   ];
 
