@@ -44,11 +44,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780326537,
-        "narHash": "sha256-0VNMYz8djWTcgYGOH7tmlQYacBXnB3nerpXN8AQFMu0=",
+        "lastModified": 1793802690,
+        "narHash": "sha256-czTQxM1xBBKakM9zGMWwAQJtAJ+pErOfksZJC7LfCHg=",
         "owner": "sollniss",
         "repo": "cosmic-secret-unlock",
-        "rev": "e2c0d8e3bde9192c4c2260b7c0771799440dc594",
+        "rev": "1cc9615bbde708cff9ca808d555b331b8f0821d8",
         "type": "github"
       },
       "original": {

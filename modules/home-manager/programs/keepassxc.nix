@@ -33,39 +33,19 @@ let
   cosmic-secret-unlock =
     inputs.cosmic-secret-unlock.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-  keepassxc-unlock = pkgs.writeShellScript "keepassxc-unlock" ''
-    # Trigger KeePassXC's Secret Service unlock via D-Bus.
-    # If the unlock dialog blocks, force-focus the KeePassXC window
-    # using COSMIC's toplevel management protocol.
-    ${lib.getExe cosmic-secret-unlock} org.keepassxc.KeePassXC
-  '';
-
-  keepassxc-proxy = pkgs.writeShellScript "keepassxc-proxy" ''
-    if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
-      ${keepassxc-unlock}
-    fi
-    exec ${lib.getExe' pkgs.libressl.nc "nc"} "$1" "$2"
-  '';
-
-  # Wrapper around ssh-keygen that triggers KeePassXC unlock before signing
-  # if the signing key isn't in the agent yet.
-  ssh-keygen-sign = pkgs.writeShellScript "ssh-keygen-sign" ''
-    if ! ${lib.getExe' pkgs.openssh "ssh-add"} -l &> /dev/null; then
-      ${keepassxc-unlock}
-    fi
-    exec ${lib.getExe' pkgs.openssh "ssh-keygen"} "$@"
-  '';
+  # Socket of the unlocking agent proxy, relative to $XDG_RUNTIME_DIR.
+  unlockAgentSocket = "ssh-agent-unlock";
 
   cfg = config.programs.keepassxc;
 
   keepassxcDesktop = "${cfg.package}/share/applications/org.keepassxc.KeePassXC.desktop";
 
   # KeePassXC reads the database to reopen from LastOpenedDatabases, which
-  # Config.cpp marks as a *Local* setting: it lives in
-  # $XDG_CACHE_HOME/keepassxc/keepassxc.ini, and Config::get() has no fallback
-  # to the roaming config Home Manager writes. Putting it in `settings` is
-  # therefore a no-op. Pass the database on the command line instead, which
-  # main.cpp accepts as a positional argument.
+  # Config.cpp marks as a *Local* setting: since 2.8 it lives in
+  # $XDG_STATE_HOME/keepassxc/keepassxc.ini (previously $XDG_CACHE_HOME), and
+  # Config::get() has no fallback to the roaming config Home Manager writes.
+  # Putting it in `settings` is therefore a no-op. Pass the database on the
+  # command line instead, which main.cpp accepts as a positional argument.
   autostartDesktop = pkgs.runCommandLocal "keepassxc-autostart" { } ''
     mkdir -p $out
     substitute ${keepassxcDesktop} $out/org.keepassxc.KeePassXC.desktop \
@@ -83,7 +63,7 @@ in
       Prefer this over
       {option}`programs.keepassxc.settings.General.LastOpenedDatabases`, which
       KeePassXC only ever reads from its local config in
-      {file}`$XDG_CACHE_HOME/keepassxc/keepassxc.ini` and never from the
+      {file}`$XDG_STATE_HOME/keepassxc/keepassxc.ini` and never from the
       Home Manager managed one.
     '';
   };
@@ -209,25 +189,60 @@ in
       ];
     };
 
-    # Prompt to unlock KeePassXC when SSH needs a key that isn't in the agent.
-    # The script launches KeePassXC (which prompts for the master password),
-    # waits for the key to appear in the agent, then connects via netcat.
-    programs.ssh.settings."*".ProxyCommand = lib.mkIf (
-      config.programs.keepassxc.settings.SSHAgent.Enabled
-      && config.programs.keepassxc.settings.FdoSecrets.Enabled
-    ) "${keepassxc-proxy} %h %p";
+    # Unlock KeePassXC on demand when an SSH client needs a key.
+    # KeePassXC only loads its keys into ssh-agent while the database is
+    # unlocked, and the agent protocol can't ask for a missing key. This proxy
+    # sits in front of ssh-agent: when a request finds no key, it triggers
+    # KeePassXC's Secret Service unlock (focusing the dialog on COSMIC), waits
+    # for the key to reach the agent and retries. Covers every agent client
+    # (ssh, git/jj signing, editors) without per-tool wrappers.
+    # Still needed with 2.8's Quick Unlock: that only changes how the dialog
+    # authenticates; something still has to open it.
+    systemd.user.services.ssh-agent-unlock =
+      lib.mkIf
+        (
+          config.programs.keepassxc.settings.SSHAgent.Enabled
+          && config.programs.keepassxc.settings.FdoSecrets.Enabled
+        )
+        {
+          Unit = {
+            Description = "SSH agent proxy that unlocks KeePassXC on demand";
+            # Needs the Wayland session to focus the unlock dialog.
+            After = [
+              "graphical-session.target"
+              "ssh-agent.service"
+            ];
+            Requires = [ "ssh-agent.service" ];
+            PartOf = [ "graphical-session.target" ];
+          };
+          Service.ExecStart = lib.escapeShellArgs [
+            (lib.getExe cosmic-secret-unlock)
+            "agent"
+            "--app-id"
+            "org.keepassxc.KeePassXC"
+            "--upstream"
+            "%t/${config.services.ssh-agent.socket}"
+            "--listen"
+            "%t/${unlockAgentSocket}"
+          ];
+          Install.WantedBy = [ "graphical-session.target" ];
+        };
 
-    # SSH commit signing: trigger KeePassXC unlock if key isn't in the agent.
-    programs.git.settings.gpg.ssh.program = lib.mkIf (
-      config.programs.keepassxc.settings.SSHAgent.Enabled
-      && config.programs.keepassxc.settings.FdoSecrets.Enabled
-      && (config.programs.git.settings.gpg.format or "") == "ssh"
-    ) (toString ssh-keygen-sign);
-    programs.jujutsu.settings.signing.backends.ssh.program = lib.mkIf (
-      config.programs.keepassxc.settings.SSHAgent.Enabled
-      && config.programs.keepassxc.settings.FdoSecrets.Enabled
-      && config.programs.jujutsu.enable
-      && (config.programs.jujutsu.settings.signing.backend or "") == "ssh"
-    ) (toString ssh-keygen-sign);
+    # Point SSH_AUTH_SOCK at the proxy everywhere Home Manager sets it:
+    # shells, the systemd user environment and D-Bus activated apps.
+    sshAuthSock =
+      lib.mkIf
+        (
+          config.programs.keepassxc.settings.SSHAgent.Enabled
+          && config.programs.keepassxc.settings.FdoSecrets.Enabled
+        )
+        {
+          initialization = lib.mkForce {
+            bash = ''export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/${unlockAgentSocket}"'';
+            fish = ''set -x SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/${unlockAgentSocket}"'';
+            nushell = ''$env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/${unlockAgentSocket}"'';
+          };
+          systemd.socketProviderUnit = lib.mkForce "ssh-agent-unlock.service";
+        };
   };
 }
