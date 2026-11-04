@@ -69,18 +69,18 @@
     keymap.mgr.prepend_keymap = [
       {
         on = "o";
-        run = ''shell '$EDITOR %s' --block'';
+        run = "shell '$EDITOR %s' --block";
         desc = "Open with $EDITOR";
       }
       {
         on = "e";
-        run = ''shell '$VISUAL %s' --orphan'';
+        run = "shell '$VISUAL %s' --orphan";
         desc = "Open with $VISUAL";
       }
       {
         on = "<Enter>";
         # xdg-open takes ~800ms on COSMIC, gio ~60ms.
-        run = ''shell '${lib.getExe' pkgs.glib "gio"} open %s' --orphan'';
+        run = "shell '${lib.getExe' pkgs.glib "gio"} open %s' --orphan";
         desc = "Open with default application";
       }
       {
@@ -89,6 +89,15 @@
         desc = "Search files by content via ripgrep-all";
       }
     ];
+  };
+
+  programs.less = {
+    enable = true;
+    config = ''
+      #command
+      h left-scroll
+      l right-scroll
+    '';
   };
 
   programs.btop = {

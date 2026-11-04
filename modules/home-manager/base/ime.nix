@@ -45,4 +45,11 @@
   };
 
   home.sessionVariables.XMODIFIERS = lib.mkForce "";
+
+  # With waylandFrontend, Qt falls back to text-input-v3, and fcitx5 then grabs the
+  # keyboard via input-method-v2 whenever a Qt text field has focus. cosmic-comp
+  # refuses xdg_popup grabs while any foreign keyboard grab is active and sends
+  # popup_done immediately, so Qt menus (KeePassXC, Picard) won't open. Talking
+  # to fcitx over D-Bus avoids the keyboard grab entirely.
+  home.sessionVariables.QT_IM_MODULE = lib.mkIf config.i18n.inputMethod.enable "fcitx";
 }
