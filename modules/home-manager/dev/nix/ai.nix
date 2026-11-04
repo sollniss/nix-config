@@ -5,11 +5,11 @@
   ...
 }:
 {
-  #programs.mcp = {
-  #  servers.mcp-nixos = {
-  #    command = lib.getExe pkgs.mcp-nixos;
-  #  };
-  #};
+  programs.mcp = {
+    servers.mcp-nixos = {
+      command = lib.getExe pkgs.mcp-nixos;
+    };
+  };
 
   programs.claude-code = {
     lspServers.nix = {
