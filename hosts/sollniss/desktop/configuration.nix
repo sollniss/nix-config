@@ -25,28 +25,6 @@ in
 
   environment.etc."machine-id".text = "221dd93f87d143cdba4f1690f6d4a1f6\n";
 
-  nixpkgs.overlays = [
-    (_: prev: {
-      openldap = prev.openldap.overrideAttrs (_: {
-        # Work around nixpkgs#513245: the failing tests are on i686 only.
-        doCheck = !prev.stdenv.hostPlatform.isi686;
-      });
-
-      # lutris's FHS env still lists gtk2 in multiPkgs, which now fails to
-      # evaluate because gtk2 is marked broken (nixpkgs#410814).
-      lutris = prev.lutris.override {
-        buildFHSEnv =
-          args:
-          prev.buildFHSEnv (
-            args
-            // {
-              multiPkgs = p: builtins.filter (x: x != null) (args.multiPkgs (p // { gtk2 = null; }));
-            }
-          );
-      };
-    })
-  ];
-
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -71,7 +49,7 @@ in
 
   # Syncthing
   # 22000 for the sync protocol (TCP) and QUIC (UDP)
-  # 21027 forlocal discovery
+  # 21027 for local discovery
   prefs.hosted.subnetOnlyPorts = {
     tcp = [ 22000 ];
     udp = [

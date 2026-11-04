@@ -2,42 +2,9 @@
   config,
   pkgs,
   lib,
-  modulesPath,
   ...
 }:
 {
-  # Work around home-manager#10132 until home-manager#10136 is merged:
-  # upstream's i18n.inputMethod unconditionally includes gtk2-immodule.cache in
-  # home.packages, which fails to evaluate now that gtk2 is marked broken.
-  disabledModules = [ "i18n/input-method/default.nix" ];
-  imports = [
-    (
-      let
-        upstream = import "${modulesPath}/i18n/input-method/default.nix" {
-          inherit config pkgs lib;
-        };
-        hasGtk2 = (pkgs ? gtk2) && !(pkgs.gtk2.meta.broken or false);
-        packages = upstream.config.content.home.packages;
-      in
-      upstream
-      // {
-        config = lib.mkIf config.i18n.inputMethod.enable (
-          upstream.config.content
-          // {
-            home.packages =
-              if !hasGtk2 && builtins.length packages == 3 then
-                [
-                  (builtins.elemAt packages 0)
-                  (builtins.elemAt packages 2)
-                ]
-              else
-                packages;
-          }
-        );
-      }
-    )
-  ];
-
   i18n.inputMethod = {
     enable = config.prefs.profile.graphical.enable;
     type = "fcitx5";
