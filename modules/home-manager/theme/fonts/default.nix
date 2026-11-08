@@ -30,6 +30,26 @@ let
     };
   };
 
+  # Gecko (Firefox/Thunderbird) CJK fallback order for untagged text.
+  # Gecko ignores fontconfig for this and defaults to "zh-cn,zh-hk,zh-tw,ja,ko",
+  # so move the default region to the front of that list.
+  geckoCjkFallbackOrder =
+    let
+      # Gecko's CJK lang groups in its default order (a subset of langRegion;
+      # zh-sg/zh-mo aren't groups of their own in Gecko).
+      geckoLangs = [
+        "zh-cn"
+        "zh-hk"
+        "zh-tw"
+        "ja"
+        "ko"
+      ];
+      isDefault = lang: cjk.langRegion.${lang} == cjk.defaultRegion;
+    in
+    lib.concatStringsSep "," (
+      lib.filter isDefault geckoLangs ++ lib.filter (lang: !isDefault lang) geckoLangs
+    );
+
   # CJK family for a generic at the default region, e.g. "Noto Sans CJK JP".
   cjkDefault = generic: "${cjk.base.${generic}} ${cjk.defaultRegion}";
 
@@ -140,6 +160,14 @@ in
         buffer_font_features = {
           calt = false;
         };
+      };
+
+      # Gecko picks the CJK fallback font itself (see geckoCjkFallbackOrder).
+      programs.firefox.profiles.default.settings = lib.mkIf config.programs.firefox.enable {
+        "font.cjk_pref_fallback_order" = geckoCjkFallbackOrder;
+      };
+      programs.thunderbird.profiles.default.settings = lib.mkIf config.programs.thunderbird.enable {
+        "font.cjk_pref_fallback_order" = geckoCjkFallbackOrder;
       };
 
       # CJK language disambiguation rules (see cjkRules above).
