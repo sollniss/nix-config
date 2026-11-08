@@ -36,4 +36,15 @@
       fi
     ''
   ) config.home-manager.users;
+
+  # NixOS restarts polkitd whenever system.path changes, and with the link
+  # above that is any Home Manager package change too. A restarted polkitd
+  # forgets every registered authentication agent, and cosmic-osd registers
+  # only once at session start, so after a rebuild every polkit prompt fails
+  # until the next login. A reload (SIGHUP) rereads actions and rules but
+  # keeps the agents, so reload on system.path changes instead.
+  systemd.services.polkit = {
+    restartTriggers = lib.mkForce [ ];
+    reloadTriggers = [ config.system.path ];
+  };
 }
