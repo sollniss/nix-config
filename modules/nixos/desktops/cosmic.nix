@@ -17,4 +17,30 @@
   # COSMIC used to default this on, then swapped it for system76-power.
   # Without it nothing backs the power profile switcher.
   services.power-profiles-daemon.enable = true;
+
+  # cosmic-osd is the polkit agent and registers only at startup, so after
+  # polkitd restarts (which a rebuild does whenever polkit's package changes)
+  # the new polkitd knows no agent and every polkit prompt fails until
+  # re-login (https://github.com/pop-os/cosmic-osd/issues/233).
+  # cosmic-session respawns cosmic-osd when it is killed, so kill it once
+  # polkitd is down; the respawned process registers with the new instance.
+  # The hook is PartOf polkit.service, so it is stopped and started with it,
+  # and Before= it, so it is stopped only after polkitd has stopped.
+  # Otherwise the respawn could register with the old instance just before
+  # it went away.
+  # (The same trick does not work for cosmic-settings-daemon: it exits
+  # cleanly on SIGTERM, so cosmic-session does not respawn it.)
+  systemd.services.cosmic-osd-polkit-reconnect = {
+    description = "Restart cosmic-osd along with polkit.service";
+    wantedBy = [ "polkit.service" ];
+    partOf = [ "polkit.service" ];
+    before = [ "polkit.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.coreutils}/bin/true";
+      # pkill exits 1 when nothing matched, e.g. at boot or shutdown.
+      ExecStop = "-${pkgs.procps}/bin/pkill --exact --full cosmic-osd";
+    };
+  };
 }
