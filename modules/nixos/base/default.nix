@@ -8,7 +8,7 @@
     ./etc.nix
     ./fonts.nix
     ./i18n.nix
-    ./kernel.nix
+    ./kernel
     ./memory.nix
     ./programs.nix
     ./remote-builder.nix

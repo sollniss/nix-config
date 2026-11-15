@@ -1,12 +1,11 @@
 # Paths, not `import`ed values: the module system deduplicates modules by path,
-# so a service module may import a sibling (./nginx.nix, ./firewall.nix) that a
+# so a service module may import a sibling (./nginx.nix) that a
 # host also lists from here without it being applied twice.
 {
   dhcp = ./dhcp.nix;
   dnscrypt = ./dnscrypt.nix;
   docker = ./docker.nix;
   feishin = ./feishin.nix;
-  firewall = ./firewall.nix;
   immich = ./immich.nix;
   nas = ./nas.nix;
   navidrome = ./navidrome.nix;

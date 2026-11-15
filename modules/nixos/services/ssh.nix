@@ -5,8 +5,6 @@ let
   self = if hostname != null then network.hosts.${hostname} or null else null;
 in
 {
-  imports = [ ./firewall.nix ];
-
   config = lib.mkIf config.prefs.hosted.ssh.enable {
     services.openssh = {
       enable = true;

@@ -13,7 +13,6 @@ let
     desktops.cosmic
 
     services.docker
-    services.firewall
 
     programs.protonvpn
   ];

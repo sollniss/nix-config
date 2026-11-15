@@ -220,11 +220,6 @@ in
     "kernel.io_uring_disabled" = 2;
   };
 
-  # No kexec, no hibernation: the running kernel can only change through a
-  # reboot (deploys only add a boot entry). A remote reinstall that kexecs into
-  # an installer (nixos-anywhere) needs this off and a reboot first.
-  security.protectKernelImage = true;
-
   # Only root may talk to the nix daemon. Deploys come in as root, and none of
   # the service accounts (immich, nas, sogo, ...) has any business building.
   nix.settings.allowed-users = [ "root" ];

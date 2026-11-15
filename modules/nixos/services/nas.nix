@@ -67,8 +67,6 @@ let
   sandbox = inputs.self.lib.sandbox;
 in
 {
-  imports = [ ./firewall.nix ];
-
   config = lib.mkIf cfg.enable {
     # SMB, for Windows.
     services.samba = {

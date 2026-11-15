@@ -103,7 +103,7 @@ in
             TCP ports reachable only from the known subnets.
             Service modules declare their ports here instead of hand-writing
             firewall snippets; the shared renderer
-            (modules/nixos/services/firewall.nix) turns the merged lists into
+            (modules/nixos/base/networking/firewall.nix) turns the merged lists into
             nftables accept-then-drop rules.
           '';
         };

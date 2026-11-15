@@ -24,8 +24,6 @@ let
   allowRules = lib.concatMapStringsSep "\n" (c: "allow ${c};") allowed;
 in
 {
-  imports = [ ./firewall.nix ];
-
   config = lib.mkIf config.services.nginx.enable {
     services.nginx = {
       recommendedOptimisation = true;

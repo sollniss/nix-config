@@ -35,8 +35,6 @@ let
 
 in
 {
-  imports = [ ./firewall.nix ];
-
   config = lib.mkIf config.prefs.hosted.dns.enable {
     services.dnscrypt-proxy = {
       enable = true;

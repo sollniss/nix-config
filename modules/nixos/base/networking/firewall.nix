@@ -77,7 +77,7 @@ in
 
           This usually means a service module was left with openFirewall = true.
           Set it to false and declare the port in prefs.hosted.subnetOnlyPorts
-          instead, which is what every module importing this one does.
+          instead, which is what every service module does.
         '';
       }
     ];

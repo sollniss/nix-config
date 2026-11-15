@@ -32,7 +32,10 @@
       "https://zed.cachix.org"
       "https://claude-code.cachix.org"
       "https://helix.cachix.org"
-      "https://cache.nixos-cuda.org" # dev env only
+    ];
+    # nix develop --option extra-substituters https://cache.nixos-cuda.org
+    trusted-substituters = [
+      "https://cache.nixos-cuda.org"
     ];
     trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
