@@ -130,6 +130,11 @@ in
     # - Syscalls limited to @system-service, failing with EPERM rather than
     #   killing the server should a code path need something else.
     #
+    # - Nothing executable outside the store. Node, sharp's native modules,
+    #   ffmpeg and exiftool all come from there; this keeps a file planted
+    #   anywhere writable (media location, /tmp, /dev/shm, /run) from ever
+    #   being exec'd or mapped as code, whatever the mount options.
+    #
     # Deliberately not MemoryDenyWriteExecute (V8 needs a JIT) nor
     # ProcSubset=pid (Node's os.cpus() reads /proc/stat, and sharp and Immich
     # size their worker pools from it).
@@ -139,6 +144,15 @@ in
         cfg.mediaLocation
       ]
       ++ lib.optional (cfg.externalLibrary != null) cfg.externalLibrary;
+      # / alone misses the private /tmp, /var/tmp and /dev/shm, which systemd
+      # mounts afresh after applying it (verified on systemd 262).
+      NoExecPaths = [
+        "/"
+        "/tmp"
+        "/var/tmp"
+        "/dev/shm"
+      ];
+      ExecPaths = [ "/nix/store" ];
       IPAddressDeny = "any";
       IPAddressAllow = "localhost";
       ProtectProc = "invisible";

@@ -1,10 +1,9 @@
 { lib, pkgs, ... }:
 let
-  # Every subvolume of the external SSD mounts the same device. nofail plus a
-  # short device timeout: a USB disk never holds up the boot, and if it is
-  # missing the mount fails, which the services gated on it (RequiresMountsFor)
-  # turn into a loud refusal to start rather than writing to the SD card.
-  # nosuid/nodev everywhere; noexec and compression are per subvolume.
+  # Every subvolume of the external SSD mounts the same device.
+  # nosuid/nodev/noexec everywhere: every binary on this host comes from
+  # /nix/store, so nothing on this disk ever needs to be executed.
+  # Compression is per subvolume.
   ssd = subvol: extraOptions: {
     device = "/dev/disk/by-uuid/65cf1d59-f7cd-4de2-9b8f-41cfb021c92e";
     fsType = "btrfs";
@@ -13,6 +12,7 @@ let
       "noatime"
       "nosuid"
       "nodev"
+      "noexec"
       "nofail"
       "x-systemd.device-timeout=10"
     ]
@@ -57,21 +57,47 @@ in
   fileSystems."/" = {
     device = "/dev/disk/by-label/NIXOS_SD";
     fsType = "ext4";
-    options = [ "noatime" ];
+    # The store lives here, which rules out noexec. But it never holds setuid
+    # files (the wrappers live on the /run/wrappers tmpfs) or device nodes
+    # (/dev is its own devtmpfs), so nosuid and nodev cost nothing.
+    options = [
+      "noatime"
+      "nosuid"
+      "nodev"
+    ];
   };
 
   # Holds config.txt, u-boot and the .dtb files the firmware reads before the
   # kernel exists. noauto because nothing at runtime needs it: extlinux writes
   # its config to /boot on the root partition. Mount it by hand to change
-  # anything the GPU firmware reads at power-on.
+  # anything the GPU firmware reads at power-on; root-only and nothing on it
+  # executable while it is.
+  #
+  # mkForce because the image builder (./sd-image.nix) defines its own options
+  # for this mount, and the lists would otherwise merge.
+  #
+  # Changing these options breaks the next switch: switch-to-configuration
+  # queues a remount of every fstab entry whose options changed, but an
+  # unmounted noauto mount has no loaded unit, so its lookup fails and the
+  # switch aborts after it has already stopped the changed services (DNS
+  # included). Deploy such a change with `boot` and reboot, or mount the
+  # partition first so its unit is loaded.
   fileSystems."/boot/firmware" = {
     device = "/dev/disk/by-label/FIRMWARE";
     fsType = "vfat";
-    options = [
+    options = lib.mkForce [
       "nofail"
       "noauto"
+      "nosuid"
+      "nodev"
+      "noexec"
+      "umask=0077"
     ];
   };
+
+  # A world-writable tmpfs every service can reach. Postgres keeps its dynamic
+  # shared memory here, which needs no exec; nothing else uses it.
+  boot.specialFileSystems."/dev/shm".options = [ "noexec" ];
 
   boot.supportedFilesystems = {
     # External SSD.
@@ -84,19 +110,13 @@ in
 
   # Clients write whatever they like into this share, over a protocol with no
   # notion of unix permissions. None of it may ever become something this host
-  # will execute. Drop noexec if the share ever needs to hold something runnable.
-  fileSystems."/srv/nas" = ssd "nas" [
-    "compress=zstd"
-    "noexec"
-  ];
+  # will execute: the noexec in the ssd helper above matters most here.
+  fileSystems."/srv/nas" = ssd "nas" [ "compress=zstd" ];
 
   # The SSD's top level, holding the subvolumes above plus btrbk's snapshot
   # directory. Mounted outside /srv/nas so snapshots never appear in the SMB
   # share (and cannot be touched over it).
-  fileSystems."/mnt/pool" = ssd "/" [
-    "compress=zstd"
-    "noexec"
-  ];
+  fileSystems."/mnt/pool" = ssd "/" [ "compress=zstd" ];
 
   # Immich's own storage (thumbnails, transcoded video, database backups, etc)
   fileSystems."/var/lib/immich" = ssd "immich" [ "compress=zstd" ];
@@ -125,7 +145,7 @@ in
   # blank cluster onto the bare SD-card directory: the upstream module already
   # sets RequiresMountsFor on its dataDir, which systemd resolves to this mount
   # unit, so postgresql.service refuses to start rather than start empty.
-  fileSystems."/var/lib/postgresql" = ssd "postgresql" [ "noexec" ];
+  fileSystems."/var/lib/postgresql" = ssd "postgresql" [ ];
   systemd.tmpfiles.settings.postgresql-nocow."/var/lib/postgresql".h.argument = "+C";
 
   # Immich's Redis.
@@ -133,10 +153,7 @@ in
   # rewrite pages in place — BGSAVE writes a fresh temp file and renames it over
   # dump.rdb — so every save allocates new extents anyway. That is exactly the
   # pattern copy-on-write and compression handle well.
-  fileSystems."/var/lib/redis-immich" = ssd "redis-immich" [
-    "compress=zstd"
-    "noexec"
-  ];
+  fileSystems."/var/lib/redis-immich" = ssd "redis-immich" [ "compress=zstd" ];
 
   # Postgres gets this guard for free from the upstream module; Redis does not,
   # and without it a missing SSD is silent rather than loud: StateDirectory=

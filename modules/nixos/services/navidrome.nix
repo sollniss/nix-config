@@ -17,6 +17,9 @@ let
   # this same socket lives at /navidrome.sock.
   socket = "/run/navidrome/navidrome.sock";
 
+  # The chroot itself, read back from the upstream unit.
+  navidromeRoot = config.systemd.services.navidrome.serviceConfig.RootDirectory;
+
   artistImageFolder = "${cfg.musicFolder}/.artist-images";
 in
 {
@@ -66,6 +69,22 @@ in
     # Navidrome is only reachable over the unix socket and, with the external
     # services above disabled, never needs the network itself.
     systemd.services.navidrome.serviceConfig.IPAddressDeny = "any";
+
+    # Nothing executable outside the store (navidrome itself, ffmpeg, taglib),
+    # so nothing it writes — database, caches, /tmp — can ever run as code.
+    #
+    # Two systemd quirks, both verified on systemd 262:
+    # - / alone misses the private /tmp, /var/tmp and /dev/shm, which systemd
+    #   mounts afresh after applying it, so they are listed explicitly.
+    # - Under RootDirectory these are host paths, not paths in the chroot:
+    #   an unprefixed "/" or "/tmp" is silently a no-op.
+    systemd.services.navidrome.serviceConfig.NoExecPaths = map (p: navidromeRoot + p) [
+      ""
+      "/tmp"
+      "/var/tmp"
+      "/dev/shm"
+    ];
+    systemd.services.navidrome.serviceConfig.ExecPaths = [ "${navidromeRoot}/nix/store" ];
 
     # The nixpkgs module runs navidrome in a RootDirectory chroot but provides
     # no /tmp — its taglib helper creates one lazily. The quick scanner writes
