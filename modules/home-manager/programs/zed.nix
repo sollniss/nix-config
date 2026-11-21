@@ -28,6 +28,15 @@ let
       exit 1
     '';
 
+  # A prompt-free fetch needs both a sandbox host grant and a matching tool rule.
+  agentDocsHosts = [
+    "nix.dev"
+    "search.nixos.org"
+    "github.com"
+    "raw.githubusercontent.com"
+    "api.github.com"
+  ];
+
   # Zed's built-in prettier is npm-installed and runs on Zed's Node runtime,
   # which is blocked above. Format with the nixpkgs build instead.
   prettier = {
@@ -95,6 +104,43 @@ in
           ];
         }
       ];
+
+      agent.sandbox_permissions.network_hosts = agentDocsHosts;
+      agent.tool_permissions = {
+        default = "confirm";
+        tools =
+          let
+            fileEdits = {
+              default = "allow";
+              always_confirm = [
+                { pattern = ''(^|/)(\.git|\.zed|\.agents|\.claude|\.ssh|secrets?)(/|$)''; }
+                { pattern = ''(^|/)(\.env(\.[^/]*)?|secrets?\.nix)$|\.(key|pem)$''; }
+              ];
+            };
+          in
+          {
+            edit_file = fileEdits;
+            write_file = fileEdits;
+            create_directory.default = "allow";
+            fetch.always_allow = map (host: {
+              pattern = "^https://${lib.escapeRegex host}(/|[?#]|$)";
+            }) agentDocsHosts;
+            # Match whole commands so extra flags don't silently gain approval.
+            terminal.always_allow =
+              map
+                (pattern: {
+                  inherit pattern;
+                  case_sensitive = true;
+                })
+                [
+                  "^pwd$|^ls( -[alh]+)?$"
+                  "^git( --no-pager)?( --no-optional-locks)? (status( --short)?|diff( --(stat|check|cached))?)$"
+                  ''^nixfmt --check( [\w./-]+\.nix)+$''
+                  "^nix flake check --no-build$"
+                  ''^go (test|vet) \./\.\.\.$''
+                ];
+          };
+      };
 
       agent_servers = lib.mkIf config.programs.claude-code.enable {
         "claude-acp" = {

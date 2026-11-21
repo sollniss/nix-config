@@ -77,8 +77,13 @@ in
   # systemd's cryptsetup generator turns this into a unit that runs after the
   # root is mounted, which is where the keyfile lives. `discard` matches the
   # root pool's allowDiscards.
+  #
+  # vault is noauto, so nothing opens it at boot. The entry is there for
+  # udisks: unlocking from the file manager then uses the same mapper name
+  # (/dev/mapper/vault) as the vault script instead of luks-<uuid>.
   environment.etc.crypttab.text = ''
     backup /dev/disk/by-uuid/${backupUuid} ${backupKeyFile} luks,discard
+    vault /dev/disk/by-uuid/${vaultUuid} none luks,discard,noauto
   '';
 
   # nofail plus a short device timeout: a backup volume that fails to unlock is
@@ -90,6 +95,23 @@ in
     options = btrfsOpts ++ [
       "nofail"
       "x-systemd.device-timeout=10s"
+    ];
+  };
+
+  # Never mounted at boot (noauto). Declared so the file manager shows the
+  # vault while it is open (gvfs hides mounts outside /media, /run/media and
+  # $HOME unless fstab says x-gvfs-show), and so udisks mounts it at /vault
+  # rather than /run/media. x-udisks-auth lets udisks mount a non-`user` fstab
+  # entry after an admin prompt, the same bar as sudo in the vault script.
+  fileSystems.${vaultMount} = {
+    device = "/dev/mapper/vault";
+    fsType = "btrfs";
+    options = btrfsOpts ++ [
+      "noauto"
+      "nofail"
+      "x-gvfs-show"
+      "x-gvfs-name=Vault"
+      "x-udisks-auth"
     ];
   };
 

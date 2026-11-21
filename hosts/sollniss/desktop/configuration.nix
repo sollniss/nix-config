@@ -69,6 +69,8 @@ in
       "x-systemd.automount" # mount on first access, not at boot
       "noauto" # so a missing pi never holds up boot
       "_netdev" # it is a network filesystem
+      "x-gvfs-show" # list it in the file manager sidebar
+      "x-gvfs-name=NAS"
     ];
   };
 

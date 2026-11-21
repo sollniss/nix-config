@@ -14,6 +14,13 @@
   services.system76-scheduler.enable = lib.mkForce false;
   hardware.system76.power-daemon.enable = lib.mkForce false;
 
+  # The /etc image NixOS loop-mounts. After a switch the new image's loop
+  # device carries no mount udisks can see, so the file manager lists it as a
+  # "45 KB Volume".
+  services.udev.extraRules = ''
+    SUBSYSTEM=="block", KERNEL=="loop*", ATTR{loop/backing_file}=="*-etc-metadata.erofs", ENV{UDISKS_IGNORE}="1"
+  '';
+
   # COSMIC used to default this on, then swapped it for system76-power.
   # Without it nothing backs the power profile switcher.
   services.power-profiles-daemon.enable = true;
