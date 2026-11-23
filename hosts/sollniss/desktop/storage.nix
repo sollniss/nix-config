@@ -16,6 +16,8 @@ let
   btrfsOpts = [
     "compress=zstd"
     "noatime"
+    "nosuid"
+    "nodev"
   ];
 
   vault = pkgs.writeShellApplication {
@@ -93,6 +95,7 @@ in
     device = "/dev/mapper/backup";
     fsType = "btrfs";
     options = btrfsOpts ++ [
+      "noexec"
       "nofail"
       "x-systemd.device-timeout=10s"
     ];

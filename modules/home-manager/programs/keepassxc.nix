@@ -136,9 +136,6 @@ in
       ];
     };
 
-    # Disable gnome keyring service
-    #services.gnome-keyring.enable = lib.mkForce false; # Does not work.
-
     # Browser integration
 
     programs.firefox = lib.mkIf config.programs.keepassxc.settings.Browser.Enabled {

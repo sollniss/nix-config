@@ -228,4 +228,11 @@ in
   home.shellAliases = {
     zed = "zeditor";
   };
+
+  xdg.mimeApps.defaultApplications = lib.genAttrs [
+    "text/plain"
+    "text/markdown"
+    "application/json"
+    "application/x-shellscript"
+  ] (_: "dev.zed.Zed.desktop");
 }

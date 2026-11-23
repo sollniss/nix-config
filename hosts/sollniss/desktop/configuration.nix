@@ -1,7 +1,6 @@
 {
   inputs,
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -45,9 +44,13 @@ in
     winetricks
   ];
 
-  services.gnome.gnome-keyring.enable = lib.mkForce false;
-
   services.printing.enable = true;
+
+  # Firmware updates.
+  services.fwupd.enable = true;
+
+  # /tmp in RAM.
+  boot.tmp.useTmpfs = true;
 
   # Syncthing
   # 22000 for the sync protocol (TCP) and QUIC (UDP)
@@ -72,7 +75,12 @@ in
       "x-systemd.automount" # mount on first access, not at boot
       "noauto" # so a missing pi never holds up boot
       "_netdev" # it is a network filesystem
-      "x-gvfs-show" # list it in the file manager sidebar
+      # Media and documents only.
+      "nosuid"
+      "nodev"
+      "noexec"
+      # List it in the file manager sidebar.
+      "x-gvfs-show"
       "x-gvfs-name=NAS"
     ];
   };

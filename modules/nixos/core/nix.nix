@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   # Flakes only
   nix.channel.enable = false;
@@ -24,6 +24,14 @@
     accept-flake-config = false;
     sandbox = true;
     use-xdg-base-directories = true;
+
+    # Only wheel may talk to the nix daemon.
+    # mkDefault so a host can narrow it further.
+    allowed-users = lib.mkDefault [ "@wheel" ];
+
+    # The 64 MiB default fills up on large substitutions and stalls them with
+    # "download buffer is full".
+    download-buffer-size = 512 * 1024 * 1024;
 
     # cache
     substituters = [

@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   osConfig ? null,
   ...
 }:
@@ -348,5 +349,13 @@ in
     };
   };
 
-  home.sessionVariables.MOZ_ENABLE_WAYLAND = "1";
+  xdg.mimeApps.defaultApplications = lib.genAttrs [
+    "text/html"
+    "application/xhtml+xml"
+    "application/pdf"
+    "x-scheme-handler/http"
+    "x-scheme-handler/https"
+    "x-scheme-handler/about"
+    "x-scheme-handler/unknown"
+  ] (_: "firefox.desktop");
 }

@@ -31,6 +31,7 @@ in
 {
   programs.helix = {
     enable = true;
+    defaultEditor = true;
     extraPackages = with pkgs; [
       # Common stuff
       bash-language-server

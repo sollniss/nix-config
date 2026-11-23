@@ -35,6 +35,9 @@ let
   # untracked and gitignored.
   # builtins.pathExists on an absolute path returns false in pure mode.
   secretModule = /home/sollniss/nix-config/hosts/sollniss/desktop/secret.nix;
+
+  # GitHub auth and commit signing key.
+  githubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHnxLOVT5SkxM5LmQ26ZOfQVyttI0K++U0DD1BzLnsV2";
 in
 {
   imports =
@@ -60,14 +63,22 @@ in
 
   # SSH public keys.
   home.file = {
-    ".ssh/github.pub".text =
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHnxLOVT5SkxM5LmQ26ZOfQVyttI0K++U0DD1BzLnsV2\n";
+    ".ssh/github.pub".text = "${githubKey}\n";
     ".ssh/infra.pub".text = "${config.prefs.network.hosts.nixos.userPubKey}\n";
   };
 
+  # Lets git and jj verify the commits and tags signed with the key above
+  # (git log --show-signature), instead of reporting them as unverifiable.
+  programs.git.signing.allowedSigners = ''${config.prefs.user.email} namespaces="git" ${githubKey}'';
+  programs.jujutsu.settings.signing.backends.ssh.allowed-signers =
+    "${config.xdg.configHome}/git/allowed_signers";
+
   home.sessionVariables = {
-    EDITOR = "hx";
-    VISUAL = "zeditor";
+    # EDITOR comes from programs.helix.defaultEditor, which also sets VISUAL;
+    # on the desktop the graphical editor wins.
+    # --wait: callers (fish's Alt+E, sudoedit, less's v) read the file back
+    # once the editor exits, which zeditor otherwise does immediately.
+    VISUAL = lib.mkForce "zeditor --wait";
 
     KOOHA_EXPERIMENTAL = "window-recording";
   };

@@ -30,6 +30,11 @@ in
         ]
         ++ lib.optional (config.prefs.user.name != null) config.prefs.user.name;
         ListenAddress = if self != null then self.ip else "0.0.0.0";
+
+        # Never relay a client's ssh-agent (ssh -A) into this host.
+        AllowAgentForwarding = false;
+        # No Unix socket forwarding (ssh -L/-R with a socket path).
+        AllowStreamLocalForwarding = "no";
       };
     };
 

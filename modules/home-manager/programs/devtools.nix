@@ -66,4 +66,8 @@
     enable = true;
     enableMcpIntegration = true;
   };
+
+  # Claude Code writes this desktop entry itself but can no longer register it in the
+  # Home Manager owned mimeapps.list, so declare the association here.
+  xdg.mimeApps.defaultApplications."x-scheme-handler/claude-cli" = "claude-code-url-handler.desktop";
 }

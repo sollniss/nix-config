@@ -1,5 +1,4 @@
 {
-  lib,
   pkgs,
   ...
 }:
@@ -8,9 +7,6 @@
     gdm.enable = true;
   };
   services.desktopManager.gnome.enable = true;
-
-  # Disable Gnome keyring to be able to use KeePassXC.
-  services.gnome.gnome-keyring.enable = lib.mkForce false;
 
   environment.gnome.excludePackages = with pkgs; [
     #baobab      # disk usage analyzer
