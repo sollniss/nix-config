@@ -105,6 +105,10 @@ in
         }
       ];
 
+      # gpui's Wayland backend has no primary display (primary_display() is
+      # always None), so the default "primary_screen" popup never appears.
+      # "all_screens" iterates the actual outputs instead.
+      agent.notify_when_agent_waiting = "all_screens";
       agent.sandbox_permissions.network_hosts = agentDocsHosts;
       agent.tool_permissions = {
         default = "confirm";

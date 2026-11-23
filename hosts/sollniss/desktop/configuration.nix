@@ -37,9 +37,12 @@ in
   environment.systemPackages = with pkgs; [
     lutris
     gamemode
-    wineWow64Packages.stable
+    # Development branch: 11.3 added EnableMouseInPointer, without which
+    # Unity 6 games (new Input System) get no mouse input. Every variant from
+    # base up has both the Wayland and X11 drivers (waylandFull drops X11).
+    # Switch to stableFull once 12.0 lands.
+    wineWow64Packages.unstableFull
     winetricks
-    wineWow64Packages.waylandFull
   ];
 
   services.gnome.gnome-keyring.enable = lib.mkForce false;
