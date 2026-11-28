@@ -49,9 +49,26 @@ in
       set -g fish_cursor_default block
       set -g fish_cursor_insert line
       set -g fish_cursor_visual block
+
+      # Transient prompt (fish >= 4.1): on Enter, fish redraws the prompt with
+      # --final-rendering, which starship's prompt functions route to the
+      # starship_transient_*_func functions below.
+      set -g fish_transient_prompt 1
     '';
 
     functions = {
+      # Keep the full prompt in the scrollback.
+      starship_transient_prompt_func = {
+        body = "starship prompt $argv";
+      };
+      # Stamp the time the command was started on the right of its line.
+      starship_transient_rprompt_func = {
+        body = ''
+          set_color $fish_color_comment
+          printf %s (date +%H:%M:%S)
+          set_color --reset
+        '';
+      };
       # Alt+E edits the command line in the terminal editor ($EDITOR), Alt+V in
       # the graphical one ($VISUAL, falling back to $EDITOR where unset).
       # Defined here so the bindings survive switching vi/emacs key bindings.
