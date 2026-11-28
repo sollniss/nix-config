@@ -13,6 +13,7 @@
         config.front_end = "WebGpu"
         config.window_close_confirmation = 'NeverPrompt'
         config.use_ime = true
+        config.enable_kitty_keyboard = true
         return config
       '')
     ];

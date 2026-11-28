@@ -1,18 +1,68 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
+let
+  # Helix-style key bindings for the command line (not in nixpkgs).
+  # rnwst's fork: a fish 4 rewrite of sshilovsky/fish-helix that covers far
+  # more of helix (x/X, J, mm, r, case, /, Space clipboard, motions over
+  # autosuggestions) and fixes fish >= 4.8 printing the shared bindings on
+  # every new shell. Upstream is a drop-in fallback: same functions layout.
+  fish-helix = pkgs.applyPatches {
+    name = "fish-helix";
+    src = pkgs.fetchFromGitHub {
+      owner = "rnwst";
+      repo = "fish-helix";
+      rev = "b923103a3f3e70ba41b3f59a394d76ae09ae8802";
+      hash = "sha256-IBzj/c0mdjopK2fuJmG/3ot9+uKIUuVD/c/iC+gD+gw=";
+    };
+    postPatch = ''
+      # Its functions call perl, which is not on PATH; fail if any call is
+      # left unpatched (e.g. a new invocation form after a bump).
+      sed -i -E 's#(^|[[:space:](|])perl -#\1${lib.getExe pkgs.perl} -#g' functions/*.fish
+      if grep -nE '(^|[[:space:](|])perl( |$)' functions/*.fish; then
+        echo "fish-helix: unpatched perl call" >&2
+        exit 1
+      fi
+    '';
+  };
+in
 {
   programs.fish = {
     enable = true;
 
-    # Disable greeting
+    plugins = [
+      {
+        name = "fish-helix";
+        src = fish-helix;
+      }
+    ];
+
     interactiveShellInit = ''
+      # Disable greeting
       set fish_greeting
+
+      set -g fish_key_bindings fish_helix_key_bindings
+      # Cursor per mode, like helix: line in insert, block in normal/select.
+      set -g fish_cursor_default block
+      set -g fish_cursor_insert line
+      set -g fish_cursor_visual block
     '';
 
     functions = {
+      # Alt+E edits the command line in the terminal editor ($EDITOR), Alt+V in
+      # the graphical one ($VISUAL, falling back to $EDITOR where unset).
+      # Defined here so the bindings survive switching vi/emacs key bindings.
+      fish_user_key_bindings = {
+        body = ''
+          for mode in default insert visual
+              bind -M $mode alt-e 'VISUAL=$EDITOR edit_command_buffer'
+              bind -M $mode alt-v edit_command_buffer
+          end
+        '';
+      };
       where = {
         argumentNames = [ "cmd" ];
         body = ''
