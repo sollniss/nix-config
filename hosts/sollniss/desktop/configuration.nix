@@ -73,6 +73,8 @@ in
     options = [
       "nfsvers=4.2"
       "x-systemd.automount" # mount on first access, not at boot
+      "x-systemd.mount-timeout=10s" # don't hang forever
+      "x-systemd.idle-timeout=10min"
       "noauto" # so a missing pi never holds up boot
       "_netdev" # it is a network filesystem
       # Media and documents only.
