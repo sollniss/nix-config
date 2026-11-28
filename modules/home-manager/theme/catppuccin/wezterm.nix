@@ -1,7 +1,7 @@
 { config, lib, ... }:
-# WezTerm: use the builtin catppuccin color scheme (the catppuccin tab styling
-# doesn't work on Cosmic) plus a custom tab bar. Colors are pulled from the live
-# palette so they follow `catppuccin.flavor`/`catppuccin.accent`.
+# WezTerm: use the catppuccin color scheme (not the full catppuccin integration:
+# its tab styling doesn't work on Cosmic) plus a custom tab bar. Colors are
+# pulled from the live palette so they follow `catppuccin.flavor`/`catppuccin.accent`.
 let
   inherit (config.catppuccin) accent;
   palette = config.theme.palette;
@@ -10,6 +10,7 @@ in
 {
   catppuccin.wezterm.enable = false;
   programs.wezterm.extraConfig = ''
+    config.color_scheme_dirs = { "${config.catppuccin.sources.wezterm}/dist" }
     config.color_scheme = "Catppuccin ${lib.toSentenceCase config.catppuccin.flavor}"
     function tab_title(tab_info)
       local title = tab_info.tab_title

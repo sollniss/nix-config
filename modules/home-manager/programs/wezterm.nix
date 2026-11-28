@@ -3,8 +3,10 @@
   programs.wezterm = {
     enable = true;
     extraConfig = lib.mkMerge [
+      # local config = wezterm.config_builder()
+      # validates every assigment on every startup, which we don't need.
       (lib.mkBefore ''
-        local config = wezterm.config_builder()
+        local config = {}
       '')
       (lib.mkAfter ''
         config.initial_cols = 120

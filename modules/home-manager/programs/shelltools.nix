@@ -12,7 +12,26 @@
 
   programs.starship = {
     enable = true;
+    # Replaced below with an init script generated at build time.
+    enableFishIntegration = false;
   };
+  # Home Manager's integration runs `starship init fish | source`, which starts
+  # starship twice per shell (a loader, then the full script; ~10 ms). Generate
+  # the full script once instead. Same TERM guard as Home Manager's.
+  programs.fish.interactiveShellInit =
+    lib.mkIf config.programs.fish.enable
+      (
+        let
+          init = pkgs.runCommand "starship-init.fish" { } ''
+            ${lib.getExe config.programs.starship.package} init fish --print-full-init > $out
+          '';
+        in
+        ''
+          if test "$TERM" != dumb -a "$TERM" != linux
+            source ${init}
+          end
+        ''
+      );
 
   # ls alternative
   programs.eza = {

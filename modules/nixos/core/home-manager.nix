@@ -23,6 +23,7 @@
 
         # Link fish vendor completions and functions of system packages.
         programs.fish.enable = lib.mkIf (anyUser (u: u.programs.fish.enable)) true;
+        programs.fish.useBabelfish = true;
       }
     )
     {
